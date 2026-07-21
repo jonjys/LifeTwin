@@ -1,56 +1,87 @@
 "use client";
 
-import { Flame, HeartPulse, Smile, Wallet, Zap } from "lucide-react";
-import { StatBar } from "@/components/shared/stat-bar";
+import { memo } from "react";
+import { motion } from "framer-motion";
+import {
+  Flame,
+  HeartPulse,
+  MoveRight,
+  Smile,
+  Wallet,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import { Card, CardTitle } from "@/components/ui/card";
+import { EASE } from "@/lib/motion";
 import type { PathMetrics } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
-const DIMENSIONS = [
+const NEUTRAL = "#8A8AA0";
+
+const DIMENSIONS: ReadonlyArray<{
+  key: keyof PathMetrics;
+  label: string;
+  icon: LucideIcon;
+}> = [
   { key: "health", label: "Health", icon: HeartPulse },
   { key: "money", label: "Money", icon: Wallet },
   { key: "mood", label: "Mood", icon: Smile },
   { key: "confidence", label: "Confidence", icon: Flame },
   { key: "productivity", label: "Productivity", icon: Zap },
-] as const;
+];
 
-function PathCard({
-  title,
-  caption,
-  metrics,
-  tone,
+/**
+ * One shared track per dimension: the gray segment is today,
+ * the cyan segment beyond it is the unclaimed future.
+ */
+function ComparisonRow({
+  icon: Icon,
+  label,
+  current,
+  future,
+  delay,
 }: {
-  title: string;
-  caption: string;
-  metrics: PathMetrics;
-  tone: "primary" | "neutral";
+  icon: LucideIcon;
+  label: string;
+  current: number;
+  future: number;
+  delay: number;
 }) {
   return (
-    <Card
-      className={cn(
-        "flex flex-col gap-6",
-        tone === "primary" && "border-primary/20 shadow-glow-sm"
-      )}
-    >
-      <div className="flex items-baseline justify-between gap-3">
-        <CardTitle className={cn(tone === "primary" && "text-primary")}>
-          {title}
-        </CardTitle>
-        <span className="text-xs text-ink-muted">{caption}</span>
+    <div className="flex items-center gap-4 sm:gap-6">
+      <div className="flex w-40 shrink-0 items-center gap-3.5">
+        <div className="flex size-9 items-center justify-center rounded-xl border border-border bg-surface-2 text-ink-secondary">
+          <Icon className="size-4" />
+        </div>
+        <span className="text-sm font-medium text-ink-secondary">{label}</span>
       </div>
-      <div className="flex flex-col gap-5">
-        {DIMENSIONS.map((dim, i) => (
-          <StatBar
-            key={dim.key}
-            icon={dim.icon}
-            label={dim.label}
-            value={metrics[dim.key]}
-            tone={tone}
-            delay={0.1 + i * 0.08}
-          />
-        ))}
+
+      <div className="relative h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+        {/* The future: full potential in cyan */}
+        <motion.div
+          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary/60 to-primary shadow-glow-sm"
+          initial={{ width: 0 }}
+          animate={{ width: `${future}%` }}
+          transition={{ duration: 1.3, delay, ease: EASE }}
+        />
+        {/* Today: the gray segment layered on top, with a 2px surface spacer */}
+        <motion.div
+          className="absolute inset-y-0 left-0 rounded-l-full border-r-2 border-background"
+          style={{ background: NEUTRAL }}
+          initial={{ width: 0 }}
+          animate={{ width: `${current}%` }}
+          transition={{ duration: 1.1, delay: delay + 0.1, ease: EASE }}
+        />
       </div>
-    </Card>
+
+      <div className="flex w-32 shrink-0 items-center justify-end gap-2 font-mono text-sm tabular-nums">
+        <span className="text-ink-muted">{current}</span>
+        <MoveRight className="size-3.5 text-ink-muted" />
+        <span className="font-semibold text-ink">{future}</span>
+        <span className="rounded-md bg-success/10 px-1.5 py-0.5 text-xs font-semibold text-success">
+          +{future - current}
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -59,21 +90,41 @@ type FuturePathsProps = {
   futurePath: PathMetrics;
 };
 
-export function FuturePaths({ currentPath, futurePath }: FuturePathsProps) {
+export const FuturePaths = memo(function FuturePaths({
+  currentPath,
+  futurePath,
+}: FuturePathsProps) {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <PathCard
-        title="Current Path"
-        caption="If nothing changes"
-        metrics={currentPath}
-        tone="neutral"
-      />
-      <PathCard
-        title="LifeTwin Path"
-        caption="Who you're becoming"
-        metrics={futurePath}
-        tone="primary"
-      />
-    </div>
+    <Card className="flex flex-col gap-8">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <CardTitle>Future Paths</CardTitle>
+        <div className="flex items-center gap-6 text-xs">
+          <span className="flex items-center gap-2 text-ink-secondary">
+            <span
+              className="size-2 rounded-full"
+              style={{ background: NEUTRAL }}
+            />
+            This is where I am
+          </span>
+          <span className="flex items-center gap-2 text-ink">
+            <span className="size-2 rounded-full bg-primary" />
+            This is where I could be
+          </span>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        {DIMENSIONS.map((dim, i) => (
+          <ComparisonRow
+            key={dim.key}
+            icon={dim.icon}
+            label={dim.label}
+            current={currentPath[dim.key]}
+            future={futurePath[dim.key]}
+            delay={0.15 + i * 0.08}
+          />
+        ))}
+      </div>
+    </Card>
   );
-}
+});

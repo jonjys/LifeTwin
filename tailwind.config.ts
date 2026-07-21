@@ -42,7 +42,7 @@ const config: Config = {
         glow: "0 0 40px -8px rgba(0, 232, 255, 0.45)",
         "glow-sm": "0 0 24px -6px rgba(0, 232, 255, 0.35)",
         "glow-success": "0 0 40px -8px rgba(0, 255, 136, 0.4)",
-        card: "0 8px 40px -12px rgba(0, 0, 0, 0.7)",
+        card: "0 8px 40px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
       },
       animation: {
         "pulse-slow": "pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
