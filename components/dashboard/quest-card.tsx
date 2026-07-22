@@ -9,6 +9,8 @@ import { EASE } from "@/lib/motion";
 
 type QuestCardProps = {
   quest: string;
+  /** Why today's quest was chosen, e.g. "Counters procrastination". */
+  focus?: string;
   done: boolean;
   justCompleted: boolean;
   onComplete: () => void;
@@ -17,6 +19,7 @@ type QuestCardProps = {
 /** The heart of the product: one action, one big button, one better future. */
 export const QuestCard = memo(function QuestCard({
   quest,
+  focus,
   done,
   justCompleted,
   onComplete,
@@ -50,11 +53,16 @@ export const QuestCard = memo(function QuestCard({
           className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full bg-primary/[0.08] blur-3xl"
         />
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
             <Target className="size-4" />
             Today&apos;s Future Quest
           </span>
+          {focus && (
+            <span className="glass rounded-full px-3 py-1 text-[11px] font-medium text-ink-secondary">
+              {focus}
+            </span>
+          )}
         </div>
 
         <div>

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EASE } from "@/lib/motion";
+import { averageOf } from "@/lib/ai/simulation";
 import type { PathMetrics } from "@/lib/types";
 
 const NEUTRAL = "#8A8AA0";
@@ -94,21 +95,31 @@ export const FuturePaths = memo(function FuturePaths({
   currentPath,
   futurePath,
 }: FuturePathsProps) {
+  const gap = Math.round(averageOf(futurePath) - averageOf(currentPath));
+
   return (
     <Card className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <CardTitle>Future Paths</CardTitle>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <CardTitle>Future Paths</CardTitle>
+          <p className="mt-2 max-w-md text-sm text-ink-secondary">
+            You&apos;re living{" "}
+            <span className="font-semibold text-ink">{gap} points</span>{" "}
+            below the future you could be building — that gap is the cost
+            of an ordinary day, not a lack of potential.
+          </p>
+        </div>
         <div className="flex items-center gap-6 text-xs">
           <span className="flex items-center gap-2 text-ink-secondary">
             <span
               className="size-2 rounded-full"
               style={{ background: NEUTRAL }}
             />
-            This is where I am
+            Where you are
           </span>
           <span className="flex items-center gap-2 text-ink">
             <span className="size-2 rounded-full bg-primary" />
-            This is where I could be
+            Where you could be
           </span>
         </div>
       </div>

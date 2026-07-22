@@ -14,6 +14,8 @@ export type FutureSimulation = {
   currentPath: PathMetrics;
   futurePath: PathMetrics;
   quest: string;
+  /** Why today's quest was chosen (e.g. "Counters procrastination"). */
+  questFocus?: string;
   insight: string;
 };
 

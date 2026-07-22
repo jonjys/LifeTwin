@@ -13,16 +13,13 @@ import {
 } from "recharts";
 import { Card, CardTitle } from "@/components/ui/card";
 import { TIMELINE_MILESTONES } from "@/lib/constants";
+import { detectGoalTheme, TIMELINE_STORIES } from "@/lib/ai/themes";
+import { averageOf } from "@/lib/ai/simulation";
 import type { PathMetrics } from "@/lib/types";
 
 const TWIN_COLOR = "#00E8FF";
 const TWIN_COLOR_END = "#00FF88";
 const CURRENT_COLOR = "#8A8AA0";
-
-function average(metrics: PathMetrics): number {
-  const values = Object.values(metrics);
-  return values.reduce((sum, v) => sum + v, 0) / values.length;
-}
 
 type TimelinePoint = {
   month: number;
@@ -34,8 +31,8 @@ function buildProjection(
   currentPath: PathMetrics,
   futurePath: PathMetrics
 ): TimelinePoint[] {
-  const start = average(currentPath);
-  const twinEnd = average(futurePath);
+  const start = averageOf(currentPath);
+  const twinEnd = averageOf(futurePath);
   const currentEnd = start + 6;
 
   return Array.from({ length: 13 }, (_, month) => {
@@ -101,6 +98,8 @@ function TimelineTooltip({
 type TimelineProps = {
   currentPath: PathMetrics;
   futurePath: PathMetrics;
+  /** Shapes which story the 3/6/12-month captions tell. */
+  goal: string;
   /** Bump to replay the chart animation (e.g. after completing a quest). */
   animationKey: number;
 };
@@ -108,6 +107,7 @@ type TimelineProps = {
 export const Timeline = memo(function Timeline({
   currentPath,
   futurePath,
+  goal,
   animationKey,
 }: TimelineProps) {
   const data = useMemo(
@@ -116,6 +116,7 @@ export const Timeline = memo(function Timeline({
   );
   const last = data[data.length - 1];
   const gain = last.twin - last.current;
+  const story = TIMELINE_STORIES[detectGoalTheme(goal)];
 
   return (
     <Card>
@@ -254,6 +255,18 @@ export const Timeline = memo(function Timeline({
             />
           </AreaChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* The story, not just the numbers */}
+      <div className="mt-2 grid grid-cols-3 gap-4 border-t border-white/5 pt-5">
+        {story.map((line, i) => (
+          <div key={line} className="text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+              {TIMELINE_MILESTONES[i + 1].label}
+            </p>
+            <p className="mt-1.5 text-sm text-ink-secondary">{line}</p>
+          </div>
+        ))}
       </div>
     </Card>
   );

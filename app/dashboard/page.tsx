@@ -99,11 +99,14 @@ export default function DashboardPage() {
               score={sim.futureScore}
               delta={scoreDelta}
               justImproved={justCompleted}
+              history={state.history}
+              createdAt={state.profile.createdAt}
             />
           </motion.div>
           <motion.div {...fadeUp(0.12)} className="lg:col-span-8">
             <QuestCard
               quest={sim.quest}
+              focus={sim.questFocus}
               done={questDone}
               justCompleted={justCompleted}
               onComplete={completeQuest}
@@ -113,7 +116,7 @@ export default function DashboardPage() {
 
         {/* Twin sync */}
         <motion.section {...fadeUp(0.19)} className="mt-6">
-          <TwinSyncCard sync={sim.twinSync} />
+          <TwinSyncCard sync={sim.twinSync} justImproved={justCompleted} />
         </motion.section>
 
         {/* Future paths */}
@@ -129,6 +132,7 @@ export default function DashboardPage() {
           <Timeline
             currentPath={sim.currentPath}
             futurePath={sim.futurePath}
+            goal={state.profile.goal}
             animationKey={state.completions}
           />
         </motion.section>
