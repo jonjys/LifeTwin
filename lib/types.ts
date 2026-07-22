@@ -1,4 +1,18 @@
-/** The five life dimensions LifeTwin simulates. */
+import type {
+  FutureEvent,
+  FutureOpportunity,
+  FutureRisk,
+  NarrativeProjections,
+} from "@/lib/engine/types";
+
+export type {
+  FutureEvent,
+  FutureOpportunity,
+  FutureRisk,
+  NarrativeProjections,
+};
+
+/** The five life dimensions the dashboard visualizes side by side. */
 export type PathMetrics = {
   health: number;
   money: number;
@@ -14,7 +28,14 @@ export type FutureSimulation = {
   currentPath: PathMetrics;
   futurePath: PathMetrics;
   quest: string;
+  /** Why today's quest was chosen (e.g. "Counters procrastination"). */
+  questFocus?: string;
   insight: string;
+  /** The Life Engine's concrete, believable projections. */
+  projections: NarrativeProjections;
+  events: FutureEvent[];
+  risks: FutureRisk[];
+  opportunities: FutureOpportunity[];
 };
 
 /** What the user told us during onboarding. */

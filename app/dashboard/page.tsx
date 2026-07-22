@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
@@ -10,26 +10,36 @@ import { TwinSyncCard } from "@/components/dashboard/twin-sync-card";
 import { QuestCard } from "@/components/dashboard/quest-card";
 import { FuturePaths } from "@/components/dashboard/future-paths";
 import { Timeline } from "@/components/dashboard/timeline";
+import { LifeEngineCard } from "@/components/dashboard/life-engine-card";
+import { FutureEvents } from "@/components/dashboard/future-events";
+import { FutureOutlook } from "@/components/dashboard/future-outlook";
 import { InsightCard } from "@/components/dashboard/insight-card";
 import { useLifeTwin } from "@/hooks/use-life-twin";
-
-const sectionMotion = (delay: number) => ({
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] as const },
-});
+import { fadeUp } from "@/lib/motion";
 
 export default function DashboardPage() {
   const router = useRouter();
   const {
     state,
     sim,
+    previousSim,
     loading,
     questDone,
     scoreDelta,
     justCompleted,
     completeQuest,
   } = useLifeTwin();
+  const [today, setToday] = useState("");
+
+  useEffect(() => {
+    setToday(
+      new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      })
+    );
+  }, []);
 
   useEffect(() => {
     if (!loading && !state) router.replace("/onboarding");
@@ -51,13 +61,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="relative min-h-screen px-5 pb-20 pt-8 sm:px-8">
+    <main className="relative min-h-screen px-5 pb-24 pt-8 sm:px-8">
       <AmbientBackground />
 
       <div className="mx-auto w-full max-w-6xl">
         {/* Header */}
         <motion.header
-          {...sectionMotion(0)}
+          {...fadeUp(0)}
           className="mb-10 flex items-center justify-between"
         >
           <div className="flex items-center gap-3">
@@ -66,9 +76,12 @@ export default function DashboardPage() {
                 LT
               </span>
             </div>
-            <span className="text-lg font-semibold tracking-tight">
-              LifeTwin
-            </span>
+            <div>
+              <span className="block text-lg font-semibold leading-tight tracking-tight">
+                LifeTwin
+              </span>
+              <span className="block text-xs text-ink-muted">{today}</span>
+            </div>
           </div>
           {state.completions > 0 && (
             <div className="glass flex items-center gap-2 rounded-full px-4 py-2">
@@ -83,17 +96,21 @@ export default function DashboardPage() {
           )}
         </motion.header>
 
-        {/* Hero row: score, sync, quest */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          <motion.div {...sectionMotion(0.05)}>
-            <FutureScoreCard score={sim.futureScore} delta={scoreDelta} />
+        {/* Hero: the score, and today's quest — impossible to miss */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <motion.div {...fadeUp(0.05)} className="lg:col-span-4">
+            <FutureScoreCard
+              score={sim.futureScore}
+              delta={scoreDelta}
+              justImproved={justCompleted}
+              history={state.history}
+              createdAt={state.profile.createdAt}
+            />
           </motion.div>
-          <motion.div {...sectionMotion(0.12)}>
-            <TwinSyncCard sync={sim.twinSync} />
-          </motion.div>
-          <motion.div {...sectionMotion(0.19)}>
+          <motion.div {...fadeUp(0.12)} className="lg:col-span-8">
             <QuestCard
               quest={sim.quest}
+              focus={sim.questFocus}
               done={questDone}
               justCompleted={justCompleted}
               onComplete={completeQuest}
@@ -101,8 +118,22 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
+        {/* Life Engine: the future recalculating in concrete terms */}
+        <motion.section {...fadeUp(0.19)} className="mt-6">
+          <LifeEngineCard
+            projections={sim.projections}
+            previousProjections={previousSim?.projections ?? null}
+            justCompleted={justCompleted}
+          />
+        </motion.section>
+
+        {/* Twin sync */}
+        <motion.section {...fadeUp(0.24)} className="mt-6">
+          <TwinSyncCard sync={sim.twinSync} justImproved={justCompleted} />
+        </motion.section>
+
         {/* Future paths */}
-        <motion.section {...sectionMotion(0.26)} className="mt-6">
+        <motion.section {...fadeUp(0.29)} className="mt-6">
           <FuturePaths
             currentPath={sim.currentPath}
             futurePath={sim.futurePath}
@@ -110,16 +141,23 @@ export default function DashboardPage() {
         </motion.section>
 
         {/* Timeline */}
-        <motion.section {...sectionMotion(0.33)} className="mt-6">
+        <motion.section {...fadeUp(0.34)} className="mt-6">
           <Timeline
             currentPath={sim.currentPath}
             futurePath={sim.futurePath}
+            goal={state.profile.goal}
             animationKey={state.completions}
           />
         </motion.section>
 
+        {/* Future events + trajectory */}
+        <motion.section {...fadeUp(0.39)} className="mt-6 grid gap-6 lg:grid-cols-2">
+          <FutureEvents events={sim.events} />
+          <FutureOutlook opportunities={sim.opportunities} risks={sim.risks} />
+        </motion.section>
+
         {/* AI insight */}
-        <motion.section {...sectionMotion(0.4)} className="mt-6">
+        <motion.section {...fadeUp(0.44)} className="mt-6">
           <InsightCard insight={sim.insight} />
         </motion.section>
       </div>

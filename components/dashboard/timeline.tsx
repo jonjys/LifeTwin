@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
+import { TrendingUp } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -12,15 +13,13 @@ import {
 } from "recharts";
 import { Card, CardTitle } from "@/components/ui/card";
 import { TIMELINE_MILESTONES } from "@/lib/constants";
+import { detectGoalTheme, TIMELINE_STORIES } from "@/lib/ai/themes";
+import { averageOf } from "@/lib/ai/path-metrics";
 import type { PathMetrics } from "@/lib/types";
 
 const TWIN_COLOR = "#00E8FF";
+const TWIN_COLOR_END = "#00FF88";
 const CURRENT_COLOR = "#8A8AA0";
-
-function average(metrics: PathMetrics): number {
-  const values = Object.values(metrics);
-  return values.reduce((sum, v) => sum + v, 0) / values.length;
-}
 
 type TimelinePoint = {
   month: number;
@@ -32,8 +31,8 @@ function buildProjection(
   currentPath: PathMetrics,
   futurePath: PathMetrics
 ): TimelinePoint[] {
-  const start = average(currentPath);
-  const twinEnd = average(futurePath);
+  const start = averageOf(currentPath);
+  const twinEnd = averageOf(futurePath);
   const currentEnd = start + 6;
 
   return Array.from({ length: 13 }, (_, month) => {
@@ -64,7 +63,7 @@ function TimelineTooltip({
   const twin = payload.find((p) => p.dataKey === "twin");
   const current = payload.find((p) => p.dataKey === "current");
   return (
-    <div className="glass-strong rounded-2xl px-4 py-3 text-sm shadow-card">
+    <div className="glass-strong min-w-44 rounded-2xl px-4 py-3 text-sm shadow-card">
       <p className="mb-2 font-medium text-ink">
         {label === 0 ? "Today" : `Month ${label}`}
       </p>
@@ -99,13 +98,16 @@ function TimelineTooltip({
 type TimelineProps = {
   currentPath: PathMetrics;
   futurePath: PathMetrics;
+  /** Shapes which story the 3/6/12-month captions tell. */
+  goal: string;
   /** Bump to replay the chart animation (e.g. after completing a quest). */
   animationKey: number;
 };
 
-export function Timeline({
+export const Timeline = memo(function Timeline({
   currentPath,
   futurePath,
+  goal,
   animationKey,
 }: TimelineProps) {
   const data = useMemo(
@@ -113,17 +115,27 @@ export function Timeline({
     [currentPath, futurePath]
   );
   const last = data[data.length - 1];
+  const gain = last.twin - last.current;
+  const story = TIMELINE_STORIES[detectGoalTheme(goal)];
 
   return (
     <Card>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <CardTitle>Timeline</CardTitle>
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <CardTitle>Timeline</CardTitle>
+          <span className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-success">
+            <TrendingUp className="size-3.5" />
+            +{gain} pts in 12 months
+          </span>
+        </div>
         {/* Legend — identity is never color-alone */}
         <div className="flex items-center gap-5 text-xs text-ink-secondary">
           <span className="flex items-center gap-2">
             <span
               className="h-0.5 w-4 rounded-full"
-              style={{ background: TWIN_COLOR }}
+              style={{
+                background: `linear-gradient(90deg, ${TWIN_COLOR}, ${TWIN_COLOR_END})`,
+              }}
             />
             LifeTwin Path
           </span>
@@ -141,12 +153,16 @@ export function Timeline({
         <ResponsiveContainer key={animationKey} width="100%" height="100%">
           <AreaChart
             data={data}
-            margin={{ top: 20, right: 92, bottom: 4, left: 28 }}
+            margin={{ top: 20, right: 96, bottom: 4, left: 28 }}
           >
             <defs>
               <linearGradient id="twin-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={TWIN_COLOR} stopOpacity={0.22} />
+                <stop offset="0%" stopColor={TWIN_COLOR} stopOpacity={0.24} />
                 <stop offset="100%" stopColor={TWIN_COLOR} stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="twin-stroke" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={TWIN_COLOR} />
+                <stop offset="100%" stopColor={TWIN_COLOR_END} />
               </linearGradient>
             </defs>
             <XAxis
@@ -156,7 +172,7 @@ export function Timeline({
               tick={{ fill: "#6E6E80", fontSize: 12 }}
               axisLine={{ stroke: "#1F1F29" }}
               tickLine={false}
-              tickMargin={10}
+              tickMargin={12}
             />
             <YAxis domain={[0, 100]} hide />
             <Tooltip
@@ -178,8 +194,8 @@ export function Timeline({
             <Area
               type="monotone"
               dataKey="twin"
-              stroke={TWIN_COLOR}
-              strokeWidth={2}
+              stroke="url(#twin-stroke)"
+              strokeWidth={2.5}
               fill="url(#twin-fill)"
               dot={false}
               activeDot={{
@@ -190,6 +206,16 @@ export function Timeline({
               }}
               animationDuration={1600}
               animationEasing="ease-out"
+            />
+            {/* "You are here" — a soft halo around today */}
+            <ReferenceDot
+              x={0}
+              y={data[0].twin}
+              r={9}
+              fill="none"
+              stroke={TWIN_COLOR}
+              strokeOpacity={0.35}
+              strokeWidth={2}
             />
             {/* Milestone markers on the LifeTwin path */}
             {TIMELINE_MILESTONES.map((m) => (
@@ -211,7 +237,7 @@ export function Timeline({
               label={{
                 value: `LifeTwin ${last.twin}`,
                 position: "right",
-                fill: TWIN_COLOR,
+                fill: TWIN_COLOR_END,
                 fontSize: 12,
                 fontWeight: 600,
               }}
@@ -230,6 +256,18 @@ export function Timeline({
           </AreaChart>
         </ResponsiveContainer>
       </div>
+
+      {/* The story, not just the numbers */}
+      <div className="mt-2 grid grid-cols-3 gap-4 border-t border-white/5 pt-5">
+        {story.map((line, i) => (
+          <div key={line} className="text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+              {TIMELINE_MILESTONES[i + 1].label}
+            </p>
+            <p className="mt-1.5 text-sm text-ink-secondary">{line}</p>
+          </div>
+        ))}
+      </div>
     </Card>
   );
-}
+});

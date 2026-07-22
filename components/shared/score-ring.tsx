@@ -1,12 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { EASE } from "@/lib/motion";
 
 type ScoreRingProps = {
   /** 0–100 */
   value: number;
   size?: number;
   strokeWidth?: number;
+  /** Breathing ambient glow behind the ring (dashboard hero only). */
+  glow?: boolean;
   children?: React.ReactNode;
 };
 
@@ -15,6 +18,7 @@ export function ScoreRing({
   value,
   size = 220,
   strokeWidth = 10,
+  glow = false,
   children,
 }: ScoreRingProps) {
   const radius = (size - strokeWidth) / 2;
@@ -22,7 +26,13 @@ export function ScoreRing({
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
+      {glow && (
+        <div
+          aria-hidden
+          className="absolute inset-6 animate-pulse-slow rounded-full bg-primary/15 blur-2xl"
+        />
+      )}
+      <svg width={size} height={size} className="relative -rotate-90">
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -44,7 +54,7 @@ export function ScoreRing({
           animate={{
             strokeDashoffset: circumference * (1 - value / 100),
           }}
-          transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 1.6, ease: EASE }}
           style={{ filter: "drop-shadow(0 0 12px rgba(0, 232, 255, 0.5))" }}
         />
         <defs>

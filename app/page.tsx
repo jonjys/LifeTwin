@@ -8,12 +8,8 @@ import { AmbientBackground } from "@/components/shared/ambient-background";
 import { ScoreRing } from "@/components/shared/score-ring";
 import { AnimatedNumber } from "@/components/shared/animated-number";
 import { Button } from "@/components/ui/button";
+import { fadeUp, EASE } from "@/lib/motion";
 import { loadState } from "@/lib/storage";
-
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
-};
 
 export default function LandingPage() {
   const router = useRouter();
@@ -28,8 +24,7 @@ export default function LandingPage() {
       <AmbientBackground />
 
       <motion.div
-        {...fadeUp}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        {...fadeUp(0)}
         className="glass mb-10 flex items-center gap-2 rounded-full px-4 py-2"
       >
         <Sparkles className="size-3.5 text-primary" />
@@ -39,8 +34,7 @@ export default function LandingPage() {
       </motion.div>
 
       <motion.h1
-        {...fadeUp}
-        transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        {...fadeUp(0.1)}
         className="max-w-3xl text-balance text-center text-5xl font-bold leading-[1.05] tracking-tight sm:text-7xl"
       >
         Your future changes{" "}
@@ -48,31 +42,35 @@ export default function LandingPage() {
       </motion.h1>
 
       <motion.p
-        {...fadeUp}
-        transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        {...fadeUp(0.2)}
         className="mt-6 max-w-md text-balance text-center text-lg text-ink-secondary"
       >
         LifeTwin visualizes who you&apos;re becoming.
       </motion.p>
 
-      <motion.div
-        {...fadeUp}
-        transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-12"
-      >
-        <Button
-          size="xl"
-          onClick={() => router.push(hasTwin ? "/dashboard" : "/onboarding")}
+      <motion.div {...fadeUp(0.3)} className="mt-12 flex flex-col items-center gap-4">
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.2, ease: EASE }}
         >
-          {hasTwin ? "Open my LifeTwin" : "Create my LifeTwin"}
-          <ArrowRight />
-        </Button>
+          <Button
+            size="xl"
+            onClick={() => router.push(hasTwin ? "/dashboard" : "/onboarding")}
+          >
+            {hasTwin ? "Open my LifeTwin" : "Create my LifeTwin"}
+            <ArrowRight />
+          </Button>
+        </motion.div>
+        <span className="text-xs text-ink-muted">
+          No account&ensp;·&ensp;Private&ensp;·&ensp;Runs on your device
+        </span>
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.9, delay: 0.55, ease: EASE }}
         className="glass-strong mt-20 flex items-center gap-8 rounded-4xl px-10 py-8 shadow-card"
       >
         <ScoreRing value={81} size={120} strokeWidth={7}>

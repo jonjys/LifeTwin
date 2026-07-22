@@ -8,6 +8,7 @@ import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { BLOCKER_SUGGESTIONS, GOAL_SUGGESTIONS } from "@/lib/constants";
+import { EASE } from "@/lib/motion";
 import { createState } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +22,7 @@ const stepMotion = {
   initial: { opacity: 0, x: 48 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -48 },
-  transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
+  transition: { duration: 0.45, ease: EASE },
 };
 
 function SuggestionChips({
@@ -36,21 +37,36 @@ function SuggestionChips({
   return (
     <div className="flex flex-wrap justify-center gap-3">
       {options.map((option) => (
-        <button
+        <motion.button
           key={option}
           type="button"
           onClick={() => onSelect(option)}
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.2, ease: EASE }}
           className={cn(
-            "rounded-2xl border px-5 py-3.5 text-sm font-medium transition-all duration-200",
+            "rounded-2xl border px-6 py-4 text-sm font-medium transition-colors duration-200",
             value === option
               ? "border-primary/60 bg-primary/10 text-primary shadow-glow-sm"
               : "glass text-ink-secondary hover:border-white/20 hover:text-ink"
           )}
         >
           {option}
-        </button>
+        </motion.button>
       ))}
     </div>
+  );
+}
+
+function StepEyebrow({ n, of, label }: { n: number; of: number; label: string }) {
+  return (
+    <p className="mb-6 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-ink-muted">
+      {String(n).padStart(2, "0")}
+      <span className="mx-1.5 text-border">/</span>
+      {String(of).padStart(2, "0")}
+      <span className="mx-3 text-border">—</span>
+      <span className="text-primary">{label}</span>
+    </p>
   );
 }
 
@@ -62,6 +78,8 @@ export default function OnboardingPage() {
   const [situation, setSituation] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatingStep, setGeneratingStep] = useState(0);
+
+  const canGenerate = situation.trim().length >= 3;
 
   useEffect(() => {
     if (!generating) return;
@@ -115,7 +133,7 @@ export default function OnboardingPage() {
                 className="h-full rounded-full bg-primary"
                 initial={false}
                 animate={{ width: step >= i ? "100%" : "0%" }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.5, ease: EASE }}
               />
             </div>
           ))}
@@ -157,6 +175,7 @@ export default function OnboardingPage() {
               {...stepMotion}
               className="w-full max-w-2xl text-center"
             >
+              <StepEyebrow n={1} of={3} label="Your goal" />
               <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-5xl">
                 What do you want to achieve within one year?
               </h1>
@@ -174,6 +193,7 @@ export default function OnboardingPage() {
               {...stepMotion}
               className="w-full max-w-2xl text-center"
             >
+              <StepEyebrow n={2} of={3} label="Your blocker" />
               <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-5xl">
                 What currently holds you back?
               </h1>
@@ -191,6 +211,7 @@ export default function OnboardingPage() {
               {...stepMotion}
               className="w-full max-w-xl text-center"
             >
+              <StepEyebrow n={3} of={3} label="Your starting point" />
               <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-5xl">
                 Describe your current situation.
               </h1>
@@ -198,19 +219,30 @@ export default function OnboardingPage() {
                 <Textarea
                   value={situation}
                   onChange={(e) => setSituation(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canGenerate) {
+                      setGenerating(true);
+                    }
+                  }}
                   placeholder="A few honest sentences about where you are right now…"
                   autoFocus
                 />
               </div>
-              <Button
-                size="xl"
-                className="mt-8"
-                disabled={situation.trim().length < 3}
-                onClick={() => setGenerating(true)}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.2, ease: EASE }}
+                className="mt-8 inline-block"
               >
-                Generate My Future
-                <ArrowRight />
-              </Button>
+                <Button
+                  size="xl"
+                  disabled={!canGenerate}
+                  onClick={() => setGenerating(true)}
+                >
+                  Generate My Future
+                  <ArrowRight />
+                </Button>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -1,21 +1,25 @@
 "use client";
 
-import { useRef } from "react";
+import { memo, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Target } from "lucide-react";
 import { celebrate } from "@/components/shared/confetti";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { EASE } from "@/lib/motion";
 
 type QuestCardProps = {
   quest: string;
+  /** Why today's quest was chosen, e.g. "Counters procrastination". */
+  focus?: string;
   done: boolean;
   justCompleted: boolean;
   onComplete: () => void;
 };
 
-export function QuestCard({
+/** The heart of the product: one action, one big button, one better future. */
+export const QuestCard = memo(function QuestCard({
   quest,
+  focus,
   done,
   justCompleted,
   onComplete,
@@ -36,52 +40,84 @@ export function QuestCard({
   };
 
   return (
-    <Card className="relative flex h-full flex-col justify-between gap-6 overflow-hidden border-primary/25">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-primary/10 blur-3xl"
-      />
-      <div className="flex items-center justify-between">
-        <CardTitle className="text-primary">
-          Today&apos;s Future Quest
-        </CardTitle>
-        <Target className="size-4 text-primary" />
-      </div>
+    <div
+      className={`h-full rounded-3xl bg-gradient-to-br p-px shadow-card transition-shadow duration-700 ${
+        done
+          ? "from-success/40 via-white/10 to-success/20 shadow-glow-success"
+          : "from-primary/40 via-white/10 to-success/25 shadow-glow-sm"
+      }`}
+    >
+      <div className="relative flex h-full flex-col justify-between gap-8 overflow-hidden rounded-[calc(1.75rem-1px)] bg-[#0A0A10]/95 p-6 backdrop-blur-xl sm:p-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full bg-primary/[0.08] blur-3xl"
+        />
 
-      <p className="text-balance text-2xl font-semibold leading-snug tracking-tight sm:text-3xl">
-        {quest}
-      </p>
-
-      <div className="flex flex-col gap-4">
-        <AnimatePresence>
-          {justCompleted && (
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-sm font-medium text-success"
-            >
-              Your future just improved.
-            </motion.p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            <Target className="size-4" />
+            Today&apos;s Future Quest
+          </span>
+          {focus && (
+            <span className="glass rounded-full px-3 py-1 text-[11px] font-medium text-ink-secondary">
+              {focus}
+            </span>
           )}
-        </AnimatePresence>
+        </div>
 
-        {done ? (
-          <Button size="lg" variant="success" disabled className="w-full">
-            <Check />
-            Completed
-          </Button>
-        ) : (
-          <Button
-            ref={buttonRef}
-            size="lg"
-            className="w-full"
-            onClick={handleComplete}
-          >
-            Complete Quest
-          </Button>
-        )}
+        <div>
+          <p className="max-w-xl text-balance text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
+            {quest}
+          </p>
+          <p className="mt-4 text-sm text-ink-muted sm:text-base">
+            One small action today. A different you in 12 months.
+          </p>
+        </div>
+
+        <div className="relative">
+          <AnimatePresence>
+            {justCompleted && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.25, ease: EASE }}
+                className="mb-4 text-sm font-semibold text-success"
+              >
+                Your future just improved.
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          {done ? (
+            <motion.div
+              initial={justCompleted ? { scale: 0.92 } : false}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 260, damping: 18 }}
+            >
+              <Button size="xl" variant="success" disabled className="w-full sm:w-auto sm:min-w-72">
+                <Check strokeWidth={3} />
+                Completed
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.2, ease: EASE }}
+              className="w-full sm:w-fit"
+            >
+              <Button
+                ref={buttonRef}
+                size="xl"
+                className="w-full sm:w-auto sm:min-w-72"
+                onClick={handleComplete}
+              >
+                Complete Quest
+              </Button>
+            </motion.div>
+          )}
+        </div>
       </div>
-    </Card>
+    </div>
   );
-}
+});
