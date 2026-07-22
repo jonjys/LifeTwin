@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EASE } from "@/lib/motion";
-import { averageOf } from "@/lib/ai/simulation";
+import { averageOf } from "@/lib/ai/path-metrics";
 import type { PathMetrics } from "@/lib/types";
 
 const NEUTRAL = "#8A8AA0";

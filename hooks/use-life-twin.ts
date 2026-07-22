@@ -10,6 +10,10 @@ type LifeTwin = {
   /** null while loading; stays null if the user has no profile yet. */
   state: TwinState | null;
   sim: FutureSimulation | null;
+  /** The simulation as it stood the moment before the last completed
+   *  quest — null until a quest is completed this session. Lets the UI
+   *  show "your future changed" as a before/after, not just a number. */
+  previousSim: FutureSimulation | null;
   loading: boolean;
   questDone: boolean;
   /** Change in Future Score vs. the previous recorded day. */
@@ -39,6 +43,7 @@ function deltaFrom(state: TwinState, score: number): number {
 export function useLifeTwin(): LifeTwin {
   const [state, setState] = useState<TwinState | null>(null);
   const [sim, setSim] = useState<FutureSimulation | null>(null);
+  const [previousSim, setPreviousSim] = useState<FutureSimulation | null>(null);
   const [loading, setLoading] = useState(true);
   const [justCompleted, setJustCompleted] = useState(false);
   const completing = useRef(false);
@@ -66,7 +71,7 @@ export function useLifeTwin(): LifeTwin {
   }, []);
 
   const completeQuest = useCallback(() => {
-    if (!state || completing.current) return;
+    if (!state || !sim || completing.current) return;
     const today = todayKey();
     if (state.lastCompletedDate === today) return;
     completing.current = true;
@@ -90,11 +95,12 @@ export function useLifeTwin(): LifeTwin {
         const next = upsertToday(boosted, result.futureScore);
         saveState(next);
         setState(next);
+        setPreviousSim(sim);
         setSim(result);
         setJustCompleted(true);
         completing.current = false;
       });
-  }, [state]);
+  }, [state, sim]);
 
   const questDone = state?.lastCompletedDate === todayKey();
   const scoreDelta =
@@ -103,6 +109,7 @@ export function useLifeTwin(): LifeTwin {
   return {
     state,
     sim,
+    previousSim,
     loading,
     questDone: Boolean(questDone),
     scoreDelta,

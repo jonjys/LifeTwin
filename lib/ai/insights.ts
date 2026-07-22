@@ -1,7 +1,7 @@
 import type { PathMetrics, UserProfile } from "@/lib/types";
 import { pick } from "@/lib/ai/seeded";
 import { blockerPhrase, goalPhrase } from "@/lib/ai/themes";
-import { weakestDimension } from "@/lib/ai/simulation";
+import { weakestDimension } from "@/lib/ai/path-metrics";
 
 const DIMENSION_LABELS: Record<keyof PathMetrics, string> = {
   health: "health",

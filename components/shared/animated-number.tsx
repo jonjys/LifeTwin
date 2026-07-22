@@ -10,8 +10,10 @@ import {
 
 type AnimatedNumberProps = {
   value: number;
-  /** Appended after the number, e.g. "%". */
+  /** Appended after the number, e.g. "%". Ignored if `format` is set. */
   suffix?: string;
+  /** Custom formatter, e.g. currency: (n) => `${n.toLocaleString()} SEK`. */
+  format?: (rounded: number) => string;
   className?: string;
   duration?: number;
 };
@@ -20,11 +22,14 @@ type AnimatedNumberProps = {
 export function AnimatedNumber({
   value,
   suffix = "",
+  format,
   className,
   duration = 1.4,
 }: AnimatedNumberProps) {
   const motionValue = useMotionValue(0);
-  const rounded = useTransform(motionValue, (v) => `${Math.round(v)}${suffix}`);
+  const rounded = useTransform(motionValue, (v) =>
+    format ? format(Math.round(v)) : `${Math.round(v)}${suffix}`
+  );
 
   useEffect(() => {
     const controls = animate(motionValue, value, {

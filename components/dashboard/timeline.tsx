@@ -14,7 +14,7 @@ import {
 import { Card, CardTitle } from "@/components/ui/card";
 import { TIMELINE_MILESTONES } from "@/lib/constants";
 import { detectGoalTheme, TIMELINE_STORIES } from "@/lib/ai/themes";
-import { averageOf } from "@/lib/ai/simulation";
+import { averageOf } from "@/lib/ai/path-metrics";
 import type { PathMetrics } from "@/lib/types";
 
 const TWIN_COLOR = "#00E8FF";

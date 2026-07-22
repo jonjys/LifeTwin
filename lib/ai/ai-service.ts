@@ -1,8 +1,9 @@
 import type { FutureSimulation, UserProfile } from "@/lib/types";
 import { clamp } from "@/lib/utils";
-import { averageOf, derivePaths } from "@/lib/ai/simulation";
+import { averageOf } from "@/lib/ai/path-metrics";
 import { pickInsight } from "@/lib/ai/insights";
 import { pickQuest } from "@/lib/ai/quests";
+import { runLifeEngine, toPathMetrics } from "@/lib/engine";
 
 /**
  * Everything a simulation needs beyond the static profile:
@@ -24,9 +25,9 @@ export type SimulationContext = {
  *
  * LifeTwin talks to this interface only — never to a provider directly.
  * To plug in a real model (Claude, OpenAI, Grok), implement this interface
- * (e.g. `ClaudeAIService`), build a prompt from the profile + context,
- * parse the model output into a `FutureSimulation`, and swap the
- * implementation returned by `getAIService()`.
+ * (e.g. `ClaudeAIService`), have it call `runLifeEngine` for grounded
+ * numbers, generate the prose (quest/insight/events/risks/opportunities)
+ * with the model, and swap the implementation returned by `getAIService()`.
  */
 export interface AIService {
   simulate(
@@ -36,21 +37,27 @@ export interface AIService {
 }
 
 /**
- * Deterministic local simulation. The same profile on the same day always
- * produces the same result — while the blocker shapes today's weaknesses,
- * the goal shapes the future's strengths, quests counter the blocker,
- * insights cite the user's own numbers, and every completed quest bends
- * the current path toward the LifeTwin path.
+ * Deterministic local simulation, built entirely on top of the Life
+ * Engine (`lib/engine`). The engine produces the numbers — ten
+ * interdependent life categories, projections, events, risks,
+ * opportunities — and this layer only adds the two things that still
+ * need a "voice": which quest to show, and which sentence to say.
  */
 export class MockAIService implements AIService {
   async simulate(
     profile: UserProfile,
     context: SimulationContext
   ): Promise<FutureSimulation> {
-    const { currentPath, futurePath } = derivePaths(
-      profile,
-      context.completions
-    );
+    const engine = runLifeEngine({
+      goal: profile.goal,
+      blocker: profile.blocker,
+      situation: profile.situation,
+      completions: context.completions,
+      dateKey: context.dateKey,
+    });
+
+    const currentPath = toPathMetrics(engine.metrics);
+    const futurePath = toPathMetrics(engine.ceiling);
     const avgCurrent = averageOf(currentPath);
     const avgFuture = averageOf(futurePath);
 
@@ -84,6 +91,10 @@ export class MockAIService implements AIService {
         completions: context.completions,
         dateKey: context.dateKey,
       }),
+      projections: engine.projections,
+      events: engine.events,
+      risks: engine.risks,
+      opportunities: engine.opportunities,
     };
   }
 }
