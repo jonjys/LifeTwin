@@ -1,61 +1,74 @@
-# LifeTwin
+# SmartCart AI
 
-**Your future changes every day.**
+**Handla smartare, automatiskt.**
 
-LifeTwin is a visual AI that simulates a person's future. It is not a chatbot,
-not a habit tracker, and not an assistant — it shows you where your life is
-heading, and lets you improve it a little every day.
+SmartCart AI är inte en prisjämförelsesida. Du skriver vad du behöver — SmartCart
+jämför butiker, byter till billigare varor och märken, hittar kampanjer, och
+bygger om din matkasse innan du ens ser den. Målet: du ska aldrig behöva öppna
+ICA-appen igen.
 
-## The experience
+## Upplevelsen
 
-1. **Landing** — one headline, one call to action.
-2. **Onboarding** — three fullscreen questions: your one-year goal, what holds
-   you back, and your current situation.
-3. **Future Dashboard** — the product:
-   - **Future Score** — a large animated percentage with day-over-day delta.
-   - **Twin Sync** — how closely you currently live like your future self.
-   - **Future Paths** — Current Path vs. LifeTwin Path across Health, Money,
-     Mood, Confidence and Productivity.
-   - **Timeline** — an animated 12-month projection (Today → 3 → 6 → 12 months).
-   - **Today's Future Quest** — one simple daily action. Completing it raises
-     your Future Score and Twin Sync, replays the timeline, and celebrates.
-   - **AI Insight** — one sentence. Never a conversation.
+1. **Landing** — en rubrik, en knapp: "Jag ska storhandla".
+2. **Bygg lista** (`/build`) — lägg till varor en i taget (chips, snabbval,
+   och "Dina vanliga varor" från AI Memory).
+3. **Matkasse** (`/cart`) — produkten:
+   - **Din matkasse** — varje vara SmartCart bytte, med förklaring
+     (märkesbyte, storleksbyte, kampanj eller billigare butik) och exakt
+     hur många kronor du sparade.
+   - **Smart Checkout** — tre alternativ (Billigast / Snabbast hem / Minst
+     antal butiker), det billigaste markeras automatiskt.
+   - **Pengar sparade** — denna månad / i år / sedan appen installerades.
+   - **AI Memory** — varor som återkommer i dina listor, tillagda utan att
+     fråga igen.
+   - **Bevakning** — en liten feed av "riktiga pengar"-notiser (prisfall,
+     vänta-tips, kampanjstart).
+   - **AI Pantry** och **AI Meal Planner** — tydligt märkta "Kommer snart".
 
 ## Tech
 
 - Next.js 15 (App Router) + TypeScript
-- TailwindCSS with shadcn-style UI primitives
-- Framer Motion, Lucide Icons, Recharts
-- All state in `localStorage` — no backend, no auth, fully local
-- Deploy-ready for Vercel
+- TailwindCSS med shadcn-liknande UI-primitiver
+- Framer Motion, Lucide Icons
+- Allt state i `localStorage` — ingen backend, ingen inloggning, ingen databas
+- Deploy-klar för Vercel
 
-## Getting started
+## Kom igång
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000.
+Öppna http://localhost:3000.
 
-## Architecture
+## Arkitektur
 
 ```
-app/                  Routes: landing, onboarding, dashboard
+app/                    Routes: landing, /build, /cart
 components/
-  dashboard/          Dashboard sections (score, sync, paths, timeline, quest, insight)
-  shared/             Reusable visuals (score ring, stat bar, animated number, confetti)
-  ui/                 shadcn-style primitives (button, card, textarea)
-hooks/use-life-twin.ts  All product state: load, simulate, complete quest
+  cart/                 Matkasse-UI (swap-kort, checkout, sparande, AI memory, bevakning)
+  shared/               Återanvändbara visuella delar (animated number, confetti, ambient bg)
+  ui/                   shadcn-liknande primitiver (button, card)
+hooks/use-smart-cart.ts  Allt state: bygg matkasse, checkout, sparande
 lib/
-  ai/ai-service.ts    AIService abstraction + deterministic mock
-  storage.ts          localStorage persistence
-  types.ts            Shared domain types (FutureSimulation, TwinState, …)
+  cart-engine/          Motorn: butiker, katalog, prisoptimering, checkout, notiser
+  seeded.ts             Deterministisk pseudo-slump (samma lista + dag = samma resultat)
+  storage.ts            localStorage-persistens + AI Memory-räkning
+  types.ts              Delade domäntyper (CartResult, OptimizedItem, Store, …)
 ```
 
-### Plugging in a real AI
+### Viktigt att veta
 
-The app only ever talks to the `AIService` interface
-(`lib/ai/ai-service.ts`). To use Claude, OpenAI or Grok, implement
-`AIService.simulate()` against the provider of your choice and swap the
-implementation returned by `getAIService()`. The rest of the app is untouched.
+Det finns ingen riktig prisdata-API — `lib/cart-engine` genererar troliga,
+deterministiska priser per butik och dag. Tre exakta scenarier (ketchup →
+ICA Basic, 2 mjölk → 1 stor, avokadokampanj) är hårdkodade för att alltid
+visa produktens "wow"-exempel exakt; övriga varor optimeras generiskt.
+"Beställ"-knappen simulerar en order (uppdaterar sparande-dashboarden) —
+den skickar ingen riktig beställning till någon butik.
+
+### Koppla på riktig prisdata
+
+`lib/cart-engine/index.ts` (`buildCart`) är den enda ingången till motorn —
+byt ut `optimize.ts`/`checkout.ts` mot anrop till en riktig pris-API och
+resten av appen är opåverkad, eftersom UI:t bara renderar `CartResult`.
