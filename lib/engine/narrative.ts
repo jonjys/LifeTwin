@@ -1,5 +1,6 @@
 import { between } from "@/lib/ai/seeded";
 import { detectGoalTheme, type GoalTheme } from "@/lib/ai/themes";
+import { addMonths, formatMonthYear } from "@/lib/utils";
 import type { LifeMetrics, NarrativeProjections } from "@/lib/engine/types";
 
 const MILESTONE_LABEL: Record<GoalTheme, string> = {
@@ -13,15 +14,6 @@ const MILESTONE_LABEL: Record<GoalTheme, string> = {
 
 function average(metrics: LifeMetrics, keys: (keyof LifeMetrics)[]): number {
   return keys.reduce((sum, k) => sum + metrics[k], 0) / keys.length;
-}
-
-function addMonths(dateKey: string, months: number): Date {
-  const [y, m, d] = dateKey.split("-").map(Number);
-  return new Date(y, m - 1 + months, d);
-}
-
-function formatMonthYear(date: Date): string {
-  return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
 /**

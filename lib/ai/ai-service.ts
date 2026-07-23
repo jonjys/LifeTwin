@@ -4,6 +4,7 @@ import { averageOf } from "@/lib/ai/path-metrics";
 import { pickInsight } from "@/lib/ai/insights";
 import { pickQuest } from "@/lib/ai/quests";
 import { runLifeEngine, toPathMetrics } from "@/lib/engine";
+import { runFutureEngine } from "@/lib/future-engine";
 
 /**
  * Everything a simulation needs beyond the static profile:
@@ -25,9 +26,10 @@ export type SimulationContext = {
  *
  * LifeTwin talks to this interface only — never to a provider directly.
  * To plug in a real model (Claude, OpenAI, Grok), implement this interface
- * (e.g. `ClaudeAIService`), have it call `runLifeEngine` for grounded
- * numbers, generate the prose (quest/insight/events/risks/opportunities)
- * with the model, and swap the implementation returned by `getAIService()`.
+ * (e.g. `ClaudeAIService`), have it call `runLifeEngine` and
+ * `runFutureEngine` for grounded numbers, generate the prose (quest,
+ * insight, risks, opportunities, memories, story) with the model, and
+ * swap the implementation returned by `getAIService()`.
  */
 export interface AIService {
   simulate(
@@ -37,11 +39,11 @@ export interface AIService {
 }
 
 /**
- * Deterministic local simulation, built entirely on top of the Life
- * Engine (`lib/engine`). The engine produces the numbers — ten
- * interdependent life categories, projections, events, risks,
- * opportunities — and this layer only adds the two things that still
- * need a "voice": which quest to show, and which sentence to say.
+ * Deterministic local simulation, built on the Life Engine (`lib/engine`)
+ * and the Future Engine (`lib/future-engine`). Together they produce
+ * every number and every future moment; this layer only adds the two
+ * things that still need a "voice": which quest to show, and which
+ * tactical sentence to say alongside the story.
  */
 export class MockAIService implements AIService {
   async simulate(
@@ -60,6 +62,19 @@ export class MockAIService implements AIService {
     const futurePath = toPathMetrics(engine.ceiling);
     const avgCurrent = averageOf(currentPath);
     const avgFuture = averageOf(futurePath);
+
+    // Same seed the Life Engine used internally, so the Future Engine's
+    // numbers (e.g. the SEK milestone) never contradict the Life Engine's.
+    const seed = `${profile.goal}|${profile.blocker}|${profile.situation}`;
+    const future = runFutureEngine({
+      goal: profile.goal,
+      blocker: profile.blocker,
+      seed,
+      dateKey: context.dateKey,
+      completions: context.completions,
+      metrics: engine.metrics,
+      ceiling: engine.ceiling,
+    });
 
     // Score grows with the quality of the projected future and with every
     // completed quest; sync is literally how close today is to the future.
@@ -92,9 +107,10 @@ export class MockAIService implements AIService {
         dateKey: context.dateKey,
       }),
       projections: engine.projections,
-      events: engine.events,
       risks: engine.risks,
       opportunities: engine.opportunities,
+      memories: future.memories,
+      story: future.story,
     };
   }
 }

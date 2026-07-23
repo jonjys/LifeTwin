@@ -1,15 +1,16 @@
 import type {
-  FutureEvent,
   FutureOpportunity,
   FutureRisk,
   NarrativeProjections,
 } from "@/lib/engine/types";
+import type { FutureMemory, MemoryCategory } from "@/lib/future-engine/types";
 
 export type {
-  FutureEvent,
   FutureOpportunity,
   FutureRisk,
   NarrativeProjections,
+  FutureMemory,
+  MemoryCategory,
 };
 
 /** The five life dimensions the dashboard visualizes side by side. */
@@ -33,9 +34,12 @@ export type FutureSimulation = {
   insight: string;
   /** The Life Engine's concrete, believable projections. */
   projections: NarrativeProjections;
-  events: FutureEvent[];
   risks: FutureRisk[];
   opportunities: FutureOpportunity[];
+  /** The Future Engine's living moments — the emotional layer. */
+  memories: FutureMemory[];
+  /** One evolving paragraph: life, one year from today. */
+  story: string;
 };
 
 /** What the user told us during onboarding. */

@@ -48,12 +48,6 @@ export type NarrativeProjections = {
   confidence: number;
 };
 
-export type FutureEvent = {
-  /** Months from today. */
-  month: number;
-  text: string;
-};
-
 export type FutureRisk = { text: string };
 export type FutureOpportunity = { text: string };
 
@@ -63,7 +57,6 @@ export type EngineOutput = {
   /** A believable 12-month ceiling for this person — "where they could be". */
   ceiling: LifeMetrics;
   projections: NarrativeProjections;
-  events: FutureEvent[];
   risks: FutureRisk[];
   opportunities: FutureOpportunity[];
 };
