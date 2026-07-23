@@ -6,6 +6,7 @@ export const STORE_IDS = [
   "lidl",
   "citygross",
   "mathem",
+  "matsmart",
 ] as const;
 
 export type StoreId = (typeof STORE_IDS)[number];
@@ -96,11 +97,176 @@ export type OrderRecord = {
   savingsSEK: number;
   totalSEK: number;
   checkoutOptionId: CheckoutOptionId;
+  /** Which fulfillment method was actually used, if the Decision Engine ran. */
+  fulfillmentId?: FulfillmentId;
+  timeSavedMin?: number;
+  carTripAvoided?: boolean;
+  caloriesWalked?: number;
+  co2SavedGrams?: number;
+};
+
+/* ------------------------------------------------------------------ */
+/* Personal Profile — powers the Decision Engine                       */
+/* ------------------------------------------------------------------ */
+
+export const TRANSPORT_MODES = [
+  "car",
+  "ev",
+  "motorcycle",
+  "moped",
+  "bike",
+  "cargo-bike",
+  "walk",
+  "public-transit",
+] as const;
+export type TransportMode = (typeof TRANSPORT_MODES)[number];
+
+export type FuelType = "petrol" | "diesel" | "electric";
+
+export const SHOPPING_PREFERENCES = [
+  "pickup",
+  "delivery",
+  "cheapest",
+  "fastest",
+  "fewest-stops",
+  "avoid-queues",
+  "evenings",
+  "weekends",
+] as const;
+export type ShoppingPreference = (typeof SHOPPING_PREFERENCES)[number];
+
+export const DELIVERY_PREFERENCES = [
+  "home-delivery",
+  "click-collect",
+  "self-pickup",
+  "mixed",
+] as const;
+export type DeliveryPreference = (typeof DELIVERY_PREFERENCES)[number];
+
+export const FOOD_PREFERENCES = [
+  "vegetarian",
+  "vegan",
+  "lchf",
+  "gluten-free",
+  "lactose-free",
+  "halal",
+  "kosher",
+  "organic",
+  "cheapest",
+  "premium",
+] as const;
+export type FoodPreference = (typeof FOOD_PREFERENCES)[number];
+
+export type UserProfile = {
+  homeAddress: string;
+  transportMode: TransportMode;
+  fuelType: FuelType;
+  /** Liter (or kWh for EVs) per mil (10 km) — the Swedish standard unit. */
+  fuelConsumptionPerMil: number;
+  /** SEK per liter/kWh. */
+  fuelPriceSEK: number;
+  /** Wear-and-tear cost per mil, beyond fuel — tires, service, depreciation. */
+  wearCostPerMilSEK: number;
+  /** null = "vet inte" — the engine estimates a reasonable default. */
+  hourlyValueSEK: number | null;
+  shoppingPreferences: ShoppingPreference[];
+  hasKids: boolean;
+  kidsCount: number;
+  hasDog: boolean;
+  hasCat: boolean;
+  hasOtherPets: boolean;
+  foodPreferences: FoodPreference[];
+  favoriteStores: StoreId[];
+  deliveryPreference: DeliveryPreference;
+};
+
+/** A sensible starting point so the Decision Engine works before anyone
+ *  visits /profile — refining it only sharpens the recommendations. */
+export const DEFAULT_PROFILE: UserProfile = {
+  homeAddress: "",
+  transportMode: "car",
+  fuelType: "petrol",
+  fuelConsumptionPerMil: 0.7,
+  fuelPriceSEK: 18,
+  wearCostPerMilSEK: 8,
+  hourlyValueSEK: null,
+  shoppingPreferences: [],
+  hasKids: false,
+  kidsCount: 0,
+  hasDog: false,
+  hasCat: false,
+  hasOtherPets: false,
+  foodPreferences: [],
+  favoriteStores: [],
+  deliveryPreference: "mixed",
+};
+
+/** A reasonable estimate when the user doesn't know their hourly value. */
+export const ESTIMATED_HOURLY_VALUE_SEK = 180;
+
+/* ------------------------------------------------------------------ */
+/* Decision Engine — pickup vs. delivery vs. walk                      */
+/* ------------------------------------------------------------------ */
+
+export const FULFILLMENT_IDS = ["pickup", "delivery", "walk"] as const;
+export type FulfillmentId = (typeof FULFILLMENT_IDS)[number];
+
+export type FulfillmentOption = {
+  id: FulfillmentId;
+  label: string;
+  totalSEK: number;
+  timeMin: number;
+  gasSEK: number;
+  wearCostSEK: number;
+  deliveryFeeSEK: number;
+  steps: number;
+  calories: number;
+  co2Grams: number;
+  storeIds: StoreId[];
+  recommended: boolean;
+};
+
+export type DecisionResult = {
+  options: FulfillmentOption[];
+  recommendedId: FulfillmentId;
+  /** e.g. "Du sparar bara 51 kr genom att köra själv. Din tid är betydligt mer värd." */
+  recommendationText: string;
+};
+
+/* ------------------------------------------------------------------ */
+/* AI Shopping Routes                                                   */
+/* ------------------------------------------------------------------ */
+
+export type RouteStop = {
+  store: StoreId;
+  distanceFromPreviousKm: number;
+  itemNames: string[];
+  stopSavingsSEK: number;
+  skipRecommended: boolean;
+  skipReasonText: string | null;
+};
+
+export type ShoppingRoute = {
+  stops: RouteStop[];
+  totalExtraTimeMin: number;
+  totalSavingsSEK: number;
+};
+
+/* ------------------------------------------------------------------ */
+/* Matsmart deals                                                       */
+/* ------------------------------------------------------------------ */
+
+export type MatsmartDeal = {
+  catalogId: string;
+  displayName: string;
+  discountPct: number;
+  priceSEK: number;
 };
 
 /** Everything SmartCart persists locally. */
 export type SmartCartState = {
   createdAt: string;
+  profile: UserProfile;
   /** Items seen across 2+ past lists — the "AI Memory" of usual purchases. */
   usualItems: string[];
   /** Every raw item the user has ever typed, for building AI Memory. */

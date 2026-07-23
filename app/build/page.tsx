@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Plus, X } from "lucide-react";
+import { ArrowRight, Plus, UserCog, X } from "lucide-react";
+import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { EASE } from "@/lib/motion";
@@ -56,6 +57,14 @@ export default function BuildListPage() {
   return (
     <main className="relative flex min-h-screen flex-col overflow-hidden px-6 py-16">
       <AmbientBackground />
+
+      <Link
+        href="/profile"
+        className="absolute right-6 top-6 z-10 flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
+      >
+        <UserCog className="size-4" />
+        Min profil
+      </Link>
 
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center">
         <motion.div
