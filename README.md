@@ -1,28 +1,39 @@
 # SmartCart AI
 
-**Handla smartare, automatiskt.**
+**Ett AI Commerce OS för inköp — inte en prisjämförelsesida.**
 
-SmartCart AI är inte en prisjämförelsesida. Du skriver vad du behöver — SmartCart
-jämför butiker, byter till billigare varor och märken, hittar kampanjer, och
-bygger om din matkasse innan du ens ser den. Målet: du ska aldrig behöva öppna
-ICA-appen igen.
+Du skriver vad du behöver. SmartCart bygger listan, jämför butiker, byter till
+billigare varor och märken, hittar kampanjer — och fattar sedan ett beslut åt
+dig: hämta själv, hemleverans, eller promenera, räknat i riktiga kronor och
+riktig tid. Målet: du ska aldrig behöva fundera på var eller hur du handlar.
 
 ## Upplevelsen
 
 1. **Landing** — en rubrik, en knapp: "Jag ska storhandla".
-2. **Bygg lista** (`/build`) — lägg till varor en i taget (chips, snabbval,
-   och "Dina vanliga varor" från AI Memory).
-3. **Matkasse** (`/cart`) — produkten:
+2. **Min Profil** (`/profile`) — hemadress, transport (bil/elbil/cykel/går/…),
+   bränsle- och slitagekostnad, tidsvärde (kr/h eller "låt AI uppskatta"),
+   handlings- och matpreferenser, favoritbutiker, leveranspreferenser. Driver
+   Beslutsmotorn — sätts en gång, förfinas när som helst.
+3. **Bygg lista** (`/build`) — lägg till varor en i taget (chips, snabbval,
+   "Dina vanliga varor").
+4. **Matkasse** (`/cart`) — produkten:
    - **Din matkasse** — varje vara SmartCart bytte, med förklaring
      (märkesbyte, storleksbyte, kampanj eller billigare butik) och exakt
      hur många kronor du sparade.
-   - **Smart Checkout** — tre alternativ (Billigast / Snabbast hem / Minst
-     antal butiker), det billigaste markeras automatiskt.
-   - **Pengar sparade** — denna månad / i år / sedan appen installerades.
-   - **AI Memory** — varor som återkommer i dina listor, tillagda utan att
-     fråga igen.
-   - **Bevakning** — en liten feed av "riktiga pengar"-notiser (prisfall,
-     vänta-tips, kampanjstart).
+   - **AI Beslutsmotor** — inte tre priser, tre fullt kostade beslut: Hämta
+     själv (bensin + slitage + tid), Hemleverans (leveransavgift), Promenera
+     (steg + kalorier). AI väljer vinnaren mot ditt eget tidsvärde och säger
+     varför i klartext.
+   - **AI Shopping Route** — när "hämta själv" spänner över flera butiker:
+     ordnad rutt, avstånd, och en tydlig rekommendation att hoppa över ett
+     stopp när besparingen inte är värd omvägen.
+   - **Pengar sparade** — denna månad / i år / sedan installation, plus
+     sparad tid, undvikna bilresor, kalorier promenerade och CO₂ sparad.
+   - **Automatiska inköp** — återkommande varor (AI Memory), optimerade i
+     förväg med en notis och en knapp: "Köp".
+   - **Matsmart fynd** — riktade rean-erbjudanden på varor du redan brukar
+     köpa, aldrig hela katalogen.
+   - **Bevakning** — en liten feed av "riktiga pengar"-notiser.
    - **AI Pantry** och **AI Meal Planner** — tydligt märkta "Kommer snart".
 
 ## Tech
@@ -45,30 +56,42 @@ npm run dev
 ## Arkitektur
 
 ```
-app/                    Routes: landing, /build, /cart
+app/                       Routes: landing, /profile, /build, /cart
 components/
-  cart/                 Matkasse-UI (swap-kort, checkout, sparande, AI memory, bevakning)
-  shared/               Återanvändbara visuella delar (animated number, confetti, ambient bg)
-  ui/                   shadcn-liknande primitiver (button, card)
-hooks/use-smart-cart.ts  Allt state: bygg matkasse, checkout, sparande
+  cart/                    Matkasse-UI (swap-kort, beslutsmotor, rutt, sparande, Matsmart, bevakning)
+  profile/                 Delade formulärkomponenter (chip-grupper, fält)
+  shared/                  Återanvändbara visuella delar (animated number, confetti, ambient bg)
+  ui/                      shadcn-liknande primitiver (button, card)
+hooks/use-smart-cart.ts     Allt state: bygg matkasse, beslutsmotor, rutt, checkout, sparande
 lib/
-  cart-engine/          Motorn: butiker, katalog, prisoptimering, checkout, notiser
-  seeded.ts             Deterministisk pseudo-slump (samma lista + dag = samma resultat)
-  storage.ts            localStorage-persistens + AI Memory-räkning
-  types.ts              Delade domäntyper (CartResult, OptimizedItem, Store, …)
+  cart-engine/             Motorn: butiker, katalog, prisoptimering, checkout, Matsmart, notiser
+  decision-engine/         Hämta själv / hemleverans / promenera + AI Shopping Route
+  seeded.ts                Deterministisk pseudo-slump (samma indata + dag = samma resultat)
+  storage.ts               localStorage-persistens: profil, AI Memory, sparande + impact-historik
+  types.ts                 Delade domäntyper (CartResult, DecisionResult, UserProfile, …)
 ```
 
 ### Viktigt att veta
 
-Det finns ingen riktig prisdata-API — `lib/cart-engine` genererar troliga,
-deterministiska priser per butik och dag. Tre exakta scenarier (ketchup →
-ICA Basic, 2 mjölk → 1 stor, avokadokampanj) är hårdkodade för att alltid
-visa produktens "wow"-exempel exakt; övriga varor optimeras generiskt.
-"Beställ"-knappen simulerar en order (uppdaterar sparande-dashboarden) —
-den skickar ingen riktig beställning till någon butik.
+Det finns ingen riktig prisdata-API, ingen geokodning och ingen ruttplanering —
+`lib/cart-engine` och `lib/decision-engine` genererar troliga, deterministiska
+priser, avstånd och restider per butik och dag, seedade av användarens profil
+så att samma indata alltid ger samma resultat. Tre exakta scenarier (ketchup →
+ICA Basic, 2 mjölk → 1 stor, avokadokampanj) är hårdkodade för att alltid visa
+produktens "wow"-exempel exakt; övriga varor och beslut optimeras generiskt.
+"Köp"-knappen simulerar en order (uppdaterar sparande- och impact-dashboarden)
+— den skickar ingen riktig beställning till någon butik.
 
-### Koppla på riktig prisdata
+### Medvetet inte byggt än
 
-`lib/cart-engine/index.ts` (`buildCart`) är den enda ingången till motorn —
-byt ut `optimize.ts`/`checkout.ts` mot anrop till en riktig pris-API och
-resten av appen är opåverkad, eftersom UI:t bara renderar `CartResult`.
+Framtida kategorier (Bygg altan, Måla huset, Trädgård, Husdjur, Elektronik)
+är arkitektoniskt förberedda men inte implementerade — de är explicit
+framtidsvision, inte MVP. Samma gäller riktiga push-notiser (ingen
+backend/service worker) och AI Pantry/Meal Planner (teasers, inte funktion).
+
+### Koppla på riktig data
+
+`lib/cart-engine/index.ts` (`buildCart`) och `lib/decision-engine/index.ts`
+(`computeFulfillmentOptions`, `buildShoppingRoute`) är de enda ingångarna —
+byt ut deras interna anrop mot riktiga pris-, karta- och trafik-API:er och
+resten av appen är opåverkad, eftersom UI:t bara renderar deras typade output.

@@ -3,13 +3,15 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, UserCog } from "lucide-react";
 import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { OptimizedCart } from "@/components/cart/optimized-cart";
-import { CheckoutOptions } from "@/components/cart/checkout-options";
-import { SavingsDashboard } from "@/components/cart/savings-dashboard";
-import { AiMemory } from "@/components/cart/ai-memory";
+import { DecisionCard } from "@/components/cart/decision-card";
+import { ShoppingRouteCard } from "@/components/cart/shopping-route";
+import { ImpactDashboard } from "@/components/cart/impact-dashboard";
+import { AutoPurchase } from "@/components/cart/auto-purchase";
+import { MatsmartDeals } from "@/components/cart/matsmart-deals";
 import { NotificationsFeed } from "@/components/cart/notifications-feed";
 import { ComingSoon } from "@/components/cart/coming-soon";
 import { useSmartCart } from "@/hooks/use-smart-cart";
@@ -17,14 +19,25 @@ import { fadeUp } from "@/lib/motion";
 
 export default function CartPage() {
   const router = useRouter();
-  const { state, cart, loading, savings, justOrdered, orderedOptionId, checkout } =
-    useSmartCart();
+  const {
+    state,
+    cart,
+    decision,
+    route,
+    matsmartDeals,
+    loading,
+    impact,
+    justOrdered,
+    checkout,
+    quickBuyUsualItems,
+    justQuickBought,
+  } = useSmartCart();
 
   useEffect(() => {
     if (!loading && !cart) router.replace("/build");
   }, [loading, cart, router]);
 
-  if (loading || !state || !cart) {
+  if (loading || !state || !cart || !decision) {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <AmbientBackground />
@@ -54,13 +67,22 @@ export default function CartPage() {
             </div>
             <span className="text-lg font-semibold tracking-tight">SmartCart</span>
           </div>
-          <Link
-            href="/build"
-            className="flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
-          >
-            <ArrowLeft className="size-4" />
-            Ny lista
-          </Link>
+          <div className="flex items-center gap-5">
+            <Link
+              href="/profile"
+              className="flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
+            >
+              <UserCog className="size-4" />
+              Min profil
+            </Link>
+            <Link
+              href="/build"
+              className="flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
+            >
+              <ArrowLeft className="size-4" />
+              Ny lista
+            </Link>
+          </div>
         </motion.header>
 
         <motion.section {...fadeUp(0.05)}>
@@ -68,32 +90,46 @@ export default function CartPage() {
         </motion.section>
 
         <motion.section {...fadeUp(0.12)} className="mt-6">
-          <CheckoutOptions
-            options={cart.checkoutOptions}
+          <DecisionCard
+            decision={decision}
             ordered={justOrdered}
-            orderedOptionId={orderedOptionId}
             savingsSEK={cart.totalSavingsSEK}
             onOrder={checkout}
           />
         </motion.section>
 
-        <motion.section {...fadeUp(0.19)} className="mt-6">
-          <SavingsDashboard month={savings.month} year={savings.year} total={savings.total} />
+        {route && route.stops.length > 0 && (
+          <motion.section {...fadeUp(0.17)} className="mt-6">
+            <ShoppingRouteCard route={route} />
+          </motion.section>
+        )}
+
+        <motion.section {...fadeUp(0.22)} className="mt-6">
+          <ImpactDashboard
+            savingsMonth={impact.savingsMonth}
+            savingsYear={impact.savingsYear}
+            savingsTotal={impact.savingsTotal}
+            timeSavedMin={impact.timeSavedMin}
+            carTripsAvoided={impact.carTripsAvoided}
+            caloriesWalked={impact.caloriesWalked}
+            co2SavedGrams={impact.co2SavedGrams}
+          />
         </motion.section>
 
-        <motion.section
-          {...fadeUp(0.26)}
-          className={
-            state.usualItems.length > 0
-              ? "mt-6 grid gap-6 lg:grid-cols-2"
-              : "mt-6"
-          }
-        >
-          {state.usualItems.length > 0 && <AiMemory usualItems={state.usualItems} />}
+        <motion.section {...fadeUp(0.27)} className="mt-6 grid gap-6 lg:grid-cols-2">
+          <AutoPurchase
+            usualItems={state.usualItems}
+            onQuickBuy={quickBuyUsualItems}
+            justBought={justQuickBought}
+          />
+          <MatsmartDeals deals={matsmartDeals} />
+        </motion.section>
+
+        <motion.section {...fadeUp(0.32)} className="mt-6">
           <NotificationsFeed notifications={cart.notifications} />
         </motion.section>
 
-        <motion.section {...fadeUp(0.33)} className="mt-6">
+        <motion.section {...fadeUp(0.37)} className="mt-6">
           <ComingSoon />
         </motion.section>
       </div>

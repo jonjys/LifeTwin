@@ -1,37 +1,67 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { buildCart } from "@/lib/cart-engine";
+import { usesFuel } from "@/lib/cart-engine/distance";
+import { findMatsmartDeals } from "@/lib/cart-engine/matsmart";
+import { computeFulfillmentOptions, buildShoppingRoute } from "@/lib/decision-engine";
 import {
+  caloriesWalkedSinceInstall,
+  carTripsAvoidedSinceInstall,
+  co2SavedSinceInstallGrams,
   ensureState,
   recordOrder,
   savingsSinceInstall,
   savingsThisMonth,
   savingsThisYear,
+  timeSavedSinceInstallMin,
 } from "@/lib/storage";
-import type { CartResult, CheckoutOptionId, SmartCartState } from "@/lib/types";
+import type {
+  CartResult,
+  DecisionResult,
+  FulfillmentId,
+  MatsmartDeal,
+  ShoppingRoute,
+  SmartCartState,
+} from "@/lib/types";
 import { todayKey } from "@/lib/utils";
 
-type Savings = { month: number; year: number; total: number };
+type ImpactTotals = {
+  savingsMonth: number;
+  savingsYear: number;
+  savingsTotal: number;
+  timeSavedMin: number;
+  carTripsAvoided: number;
+  caloriesWalked: number;
+  co2SavedGrams: number;
+};
 
 type UseSmartCart = {
   /** null while loading; stays null if the user hasn't built a list yet. */
   state: SmartCartState | null;
   cart: CartResult | null;
+  decision: DecisionResult | null;
+  route: ShoppingRoute | null;
+  matsmartDeals: MatsmartDeal[];
   loading: boolean;
-  savings: Savings;
+  impact: ImpactTotals;
   justOrdered: boolean;
-  orderedOptionId: CheckoutOptionId | null;
-  checkout: (optionId: CheckoutOptionId) => void;
+  orderedFulfillmentId: FulfillmentId | null;
+  checkout: (fulfillmentId: FulfillmentId) => void;
+  /** One-tap reorder of AI Memory's recurring items — the "Automatiska
+   *  inköp" flow: builds, decides, and checks out without a detour to /build. */
+  quickBuyUsualItems: () => void;
+  justQuickBought: boolean;
 };
 
-/** Loads the list built on /build and runs it through the Cart Engine. */
+/** Loads the list built on /build and runs it through the Cart + Decision Engines. */
 export function useSmartCart(): UseSmartCart {
   const [state, setState] = useState<SmartCartState | null>(null);
   const [cart, setCart] = useState<CartResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [justOrdered, setJustOrdered] = useState(false);
-  const [orderedOptionId, setOrderedOptionId] = useState<CheckoutOptionId | null>(null);
+  const [orderedFulfillmentId, setOrderedFulfillmentId] = useState<FulfillmentId | null>(null);
+  const [justQuickBought, setJustQuickBought] = useState(false);
 
   useEffect(() => {
     const loaded = ensureState();
@@ -42,31 +72,101 @@ export function useSmartCart(): UseSmartCart {
     setLoading(false);
   }, []);
 
+  const decision = useMemo(
+    () => (cart && state ? computeFulfillmentOptions(cart, state.profile) : null),
+    [cart, state]
+  );
+
+  const route = useMemo(
+    () => (cart && state ? buildShoppingRoute(cart, state.profile) : null),
+    [cart, state]
+  );
+
+  const matsmartDeals = useMemo(
+    () => (state ? findMatsmartDeals(state.usualItems, todayKey()) : []),
+    [state]
+  );
+
   const checkout = useCallback(
-    (optionId: CheckoutOptionId) => {
-      if (!cart) return;
-      const option = cart.checkoutOptions.find((o) => o.id === optionId);
-      if (!option) return;
+    (fulfillmentId: FulfillmentId) => {
+      if (!cart || !decision || !state) return;
+      const chosen = decision.options.find((o) => o.id === fulfillmentId);
+      const pickup = decision.options.find((o) => o.id === "pickup");
+      if (!chosen || !pickup) return;
+
       const next = recordOrder({
         date: new Date().toISOString(),
         savingsSEK: cart.totalSavingsSEK,
-        totalSEK: option.totalSEK,
-        checkoutOptionId: optionId,
+        totalSEK: chosen.totalSEK,
+        checkoutOptionId: "cheapest",
+        fulfillmentId,
+        timeSavedMin: Math.max(0, pickup.timeMin - chosen.timeMin),
+        carTripAvoided: fulfillmentId !== "pickup" && usesFuel(state.profile.transportMode),
+        caloriesWalked: chosen.calories,
+        co2SavedGrams: chosen.co2Grams,
       });
       setState(next);
       setJustOrdered(true);
-      setOrderedOptionId(optionId);
+      setOrderedFulfillmentId(fulfillmentId);
     },
-    [cart]
+    [cart, decision, state]
   );
 
-  const savings: Savings = state
-    ? {
-        month: savingsThisMonth(state),
-        year: savingsThisYear(state),
-        total: savingsSinceInstall(state),
-      }
-    : { month: 0, year: 0, total: 0 };
+  const quickBuyUsualItems = useCallback(() => {
+    if (!state || state.usualItems.length === 0) return;
+    const quickCart = buildCart(state.usualItems, todayKey(), state.usualItems);
+    const quickDecision = computeFulfillmentOptions(quickCart, state.profile);
+    const winner = quickDecision.options.find((o) => o.id === quickDecision.recommendedId);
+    const pickup = quickDecision.options.find((o) => o.id === "pickup");
+    if (!winner || !pickup) return;
 
-  return { state, cart, loading, savings, justOrdered, orderedOptionId, checkout };
+    const next = recordOrder({
+      date: new Date().toISOString(),
+      savingsSEK: quickCart.totalSavingsSEK,
+      totalSEK: winner.totalSEK,
+      checkoutOptionId: "cheapest",
+      fulfillmentId: winner.id,
+      timeSavedMin: Math.max(0, pickup.timeMin - winner.timeMin),
+      carTripAvoided: winner.id !== "pickup" && usesFuel(state.profile.transportMode),
+      caloriesWalked: winner.calories,
+      co2SavedGrams: winner.co2Grams,
+    });
+    setState(next);
+    setJustQuickBought(true);
+  }, [state]);
+
+  const impact: ImpactTotals = state
+    ? {
+        savingsMonth: savingsThisMonth(state),
+        savingsYear: savingsThisYear(state),
+        savingsTotal: savingsSinceInstall(state),
+        timeSavedMin: timeSavedSinceInstallMin(state),
+        carTripsAvoided: carTripsAvoidedSinceInstall(state),
+        caloriesWalked: caloriesWalkedSinceInstall(state),
+        co2SavedGrams: co2SavedSinceInstallGrams(state),
+      }
+    : {
+        savingsMonth: 0,
+        savingsYear: 0,
+        savingsTotal: 0,
+        timeSavedMin: 0,
+        carTripsAvoided: 0,
+        caloriesWalked: 0,
+        co2SavedGrams: 0,
+      };
+
+  return {
+    state,
+    cart,
+    decision,
+    route,
+    matsmartDeals,
+    loading,
+    impact,
+    justOrdered,
+    orderedFulfillmentId,
+    checkout,
+    quickBuyUsualItems,
+    justQuickBought,
+  };
 }

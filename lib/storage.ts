@@ -1,4 +1,5 @@
-import type { OrderRecord, SmartCartState } from "@/lib/types";
+import { DEFAULT_PROFILE } from "@/lib/types";
+import type { OrderRecord, SmartCartState, UserProfile } from "@/lib/types";
 
 const STORAGE_KEY = "smartcart.state.v1";
 const USUAL_ITEM_THRESHOLD = 2;
@@ -10,6 +11,8 @@ export function loadState(): SmartCartState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SmartCartState;
     if (!parsed?.createdAt) return null;
+    // Older sessions won't have a profile yet — backfill the default.
+    if (!parsed.profile) parsed.profile = { ...DEFAULT_PROFILE };
     return parsed;
   } catch {
     return null;
@@ -26,6 +29,7 @@ export function ensureState(): SmartCartState {
   if (existing) return existing;
   const fresh: SmartCartState = {
     createdAt: new Date().toISOString(),
+    profile: { ...DEFAULT_PROFILE },
     usualItems: [],
     itemHistory: [],
     orders: [],
@@ -33,6 +37,13 @@ export function ensureState(): SmartCartState {
   };
   saveState(fresh);
   return fresh;
+}
+
+export function saveProfile(profile: UserProfile): SmartCartState {
+  const state = ensureState();
+  const next: SmartCartState = { ...state, profile };
+  saveState(next);
+  return next;
 }
 
 /** Records a new shopping list, growing AI Memory as items repeat. */
@@ -60,7 +71,7 @@ export function recordList(items: string[]): SmartCartState {
   return next;
 }
 
-/** Records a completed checkout, growing the savings dashboard. */
+/** Records a completed checkout, growing the savings + impact dashboard. */
 export function recordOrder(order: OrderRecord): SmartCartState {
   const state = ensureState();
   const next: SmartCartState = {
@@ -71,23 +82,42 @@ export function recordOrder(order: OrderRecord): SmartCartState {
   return next;
 }
 
+function ordersInPeriod(state: SmartCartState, matches: (d: Date) => boolean): OrderRecord[] {
+  return state.orders.filter((o) => matches(new Date(o.date)));
+}
+
 export function savingsThisMonth(state: SmartCartState): number {
   const now = new Date();
-  return state.orders
-    .filter((o) => {
-      const d = new Date(o.date);
-      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-    })
-    .reduce((sum, o) => sum + o.savingsSEK, 0);
+  return ordersInPeriod(
+    state,
+    (d) => d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+  ).reduce((sum, o) => sum + o.savingsSEK, 0);
 }
 
 export function savingsThisYear(state: SmartCartState): number {
   const now = new Date();
-  return state.orders
-    .filter((o) => new Date(o.date).getFullYear() === now.getFullYear())
-    .reduce((sum, o) => sum + o.savingsSEK, 0);
+  return ordersInPeriod(state, (d) => d.getFullYear() === now.getFullYear()).reduce(
+    (sum, o) => sum + o.savingsSEK,
+    0
+  );
 }
 
 export function savingsSinceInstall(state: SmartCartState): number {
   return state.orders.reduce((sum, o) => sum + o.savingsSEK, 0);
+}
+
+export function timeSavedSinceInstallMin(state: SmartCartState): number {
+  return state.orders.reduce((sum, o) => sum + (o.timeSavedMin ?? 0), 0);
+}
+
+export function carTripsAvoidedSinceInstall(state: SmartCartState): number {
+  return state.orders.filter((o) => o.carTripAvoided).length;
+}
+
+export function caloriesWalkedSinceInstall(state: SmartCartState): number {
+  return state.orders.reduce((sum, o) => sum + (o.caloriesWalked ?? 0), 0);
+}
+
+export function co2SavedSinceInstallGrams(state: SmartCartState): number {
+  return state.orders.reduce((sum, o) => sum + (o.co2SavedGrams ?? 0), 0);
 }

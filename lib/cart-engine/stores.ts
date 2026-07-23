@@ -70,6 +70,18 @@ export const STORES: Record<StoreId, Store & { priceMultiplier: number }> = {
     deliveryEtaMin: 27,
     deliveryFeeSEK: 49,
   },
+  matsmart: {
+    id: "matsmart",
+    name: "Matsmart",
+    tag: "MS",
+    color: "#FFB020",
+    // Not a general price leader — its edge is deep, rotating deals on
+    // specific items (see matsmart.ts), not everyday low prices.
+    priceMultiplier: 1.1,
+    // Matsmart ships pallets every few days, not same-day.
+    deliveryEtaMin: 2880,
+    deliveryFeeSEK: 49,
+  },
 };
 
 export const STORE_LIST = Object.values(STORES);
