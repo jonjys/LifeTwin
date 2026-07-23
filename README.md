@@ -11,7 +11,8 @@ kronor och riktig tid. Inte tolv alternativ. Ett smartast val, och varför.
 ## Upplevelsen
 
 1. **Landing** — en rubrik, en knapp: "Jag ska storhandla".
-2. **Min Profil** (`/profile`) — hemadress, transport (bil/elbil/cykel/går/…),
+2. **Min Profil** (`/profile`) — hemadress (med en live kartförhandsvisning
+   som geokodar adressen på riktigt), transport (bil/elbil/cykel/går/…),
    bränsle- och slitagekostnad, tidsvärde (kr/h eller "låt AI uppskatta"),
    handlings- och matpreferenser, favoritbutiker, leveranspreferenser. Driver
    Beslutsmotorn — sätts en gång, förfinas när som helst.
@@ -25,6 +26,11 @@ kronor och riktig tid. Inte tolv alternativ. Ett smartast val, och varför.
      själv (bensin + slitage + tid), Hemleverans (leveransavgift), Promenera
      (steg + kalorier). AI väljer vinnaren mot ditt eget tidsvärde och säger
      varför i klartext.
+   - **Live karta** — en riktig, interaktiv karta (OpenStreetMap) centrerad
+     på ditt geokodade hem, med varje butik i matkassen utsatt och en rutt
+     (riktiga vägar via OSRM, med en rak linje som reserv) som byter färg
+     och mönster direkt när du växlar mellan Hämta själv / Hemleverans /
+     Promenera — ingen ny hämtning, bara en omedelbar omstil.
    - **AI Shopping Route** — när "hämta själv" spänner över flera butiker:
      ordnad rutt, avstånd, och en tydlig rekommendation att hoppa över ett
      stopp när besparingen inte är värd omvägen.
@@ -59,14 +65,16 @@ npm run dev
 ```
 app/                       Routes: landing, /profile, /build, /cart
 components/
-  cart/                    Matkasse-UI (swap-kort, beslutsmotor, rutt, sparande, Matsmart, bevakning)
-  profile/                 Delade formulärkomponenter (chip-grupper, fält)
+  cart/                    Matkasse-UI (swap-kort, beslutsmotor, live karta, rutt, sparande, Matsmart, bevakning)
+  map/live-map.tsx         Leaflet-kartan (dark tiles, markörer, rutter) — dynamiskt laddad, klient-only
+  profile/                 Delade formulärkomponenter (chip-grupper, fält, adress-kartförhandsvisning)
   shared/                  Återanvändbara visuella delar (animated number, confetti, ambient bg)
   ui/                      shadcn-liknande primitiver (button, card)
 hooks/use-smart-cart.ts     Allt state: bygg matkasse, beslutsmotor, rutt, checkout, sparande
 lib/
   cart-engine/             Motorn: butiker, katalog, prisoptimering, checkout, Matsmart, notiser
   decision-engine/         Hämta själv / hemleverans / promenera + AI Shopping Route
+  geo/                     Geokodning (Nominatim), ruttning (OSRM), koordinat-offset — riktiga tjänster, tidsgränsade
   seeded.ts                Deterministisk pseudo-slump (samma indata + dag = samma resultat)
   storage.ts               localStorage-persistens: profil, AI Memory, sparande + impact-historik
   types.ts                 Delade domäntyper (CartResult, DecisionResult, UserProfile, …)
@@ -74,12 +82,23 @@ lib/
 
 ### Viktigt att veta
 
-Det finns ingen riktig prisdata-API, ingen geokodning och ingen ruttplanering —
-`lib/cart-engine` och `lib/decision-engine` genererar troliga, deterministiska
-priser, avstånd och restider per butik och dag, seedade av användarens profil
-så att samma indata alltid ger samma resultat. Tre exakta scenarier (ketchup →
-ICA Basic, 2 mjölk → 1 stor, avokadokampanj) är hårdkodade för att alltid visa
-produktens "wow"-exempel exakt; övriga varor och beslut optimeras generiskt.
+Det finns ingen riktig prisdata-API och ingen ruttplanerings-backend av vårt
+eget — `lib/cart-engine` och `lib/decision-engine` genererar troliga,
+deterministiska priser, avstånd och restider per butik och dag, seedade av
+användarens profil så att samma indata alltid ger samma resultat. Tre exakta
+scenarier (ketchup → ICA Basic, 2 mjölk → 1 stor, avokadokampanj) är
+hårdkodade för att alltid visa produktens "wow"-exempel exakt; övriga varor
+och beslut optimeras generiskt.
+
+Kartan (`lib/geo/`) är däremot riktig: Nominatim geokodar adressen, OSRM
+ritar riktiga vägar, och butikerna placeras vid de seedade avstånden ovan
+men i en riktig, deterministisk riktning runt din geokodade hempunkt — så
+kartan visar en äkta plats, även om exakt vilken butik som ligger var inte
+är verifierad mot riktiga butiksadresser. Alla tre är delade publika tjänster
+utan API-nyckel (rimlig användning, ingen SLA) — varje anrop har en 6
+sekunders tidsgräns och faller tillbaka till Stockholm/en rak linje om
+tjänsten är långsam eller nere, så kartan aldrig fastnar i "laddar".
+
 "Köp"-knappen simulerar en order (uppdaterar sparande- och impact-dashboarden)
 — den skickar ingen riktig beställning till någon butik.
 

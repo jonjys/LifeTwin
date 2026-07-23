@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useRef, useState } from "react";
+import { memo, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Brain,
@@ -115,6 +115,9 @@ type DecisionCardProps = {
   ordered: boolean;
   savingsSEK: number;
   onOrder: (fulfillmentId: FulfillmentId) => void;
+  /** Controlled so other UI (the live map) can react to the same selection. */
+  selectedId: FulfillmentId;
+  onSelectedIdChange: (id: FulfillmentId) => void;
 };
 
 /** Not a price table — a decision. The AI picks a winner and says why. */
@@ -123,8 +126,9 @@ export const DecisionCard = memo(function DecisionCard({
   ordered,
   savingsSEK,
   onOrder,
+  selectedId,
+  onSelectedIdChange,
 }: DecisionCardProps) {
-  const [selectedId, setSelectedId] = useState<FulfillmentId>(decision.recommendedId);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleOrder = () => {
@@ -159,7 +163,7 @@ export const DecisionCard = memo(function DecisionCard({
             key={option.id}
             option={option}
             selected={!ordered && selectedId === option.id}
-            onSelect={() => !ordered && setSelectedId(option.id)}
+            onSelect={() => !ordered && onSelectedIdChange(option.id)}
           />
         ))}
       </div>

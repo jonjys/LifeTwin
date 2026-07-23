@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check } from "lucide-react";
 import { AmbientBackground } from "@/components/shared/ambient-background";
+import { AddressMapPreview } from "@/components/profile/address-map-preview";
 import {
   FieldLabel,
   MultiChipGroup,
@@ -135,8 +136,10 @@ export default function ProfilePage() {
                 onChange={(v) => update("homeAddress", v)}
                 placeholder="t.ex. Storgatan 12, Stockholm"
               />
+              <AddressMapPreview address={profile.homeAddress} />
               <p className="text-xs text-ink-muted">
-                Används för att uppskatta avstånd och restid till butiker — ingen karta krävs.
+                Visas på en riktig karta — SmartCart placerar butiker och rutter runt den här
+                punkten när du bygger en matkasse.
               </p>
             </Card>
           </motion.div>

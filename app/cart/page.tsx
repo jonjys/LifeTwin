@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, UserCog } from "lucide-react";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { OptimizedCart } from "@/components/cart/optimized-cart";
 import { DecisionCard } from "@/components/cart/decision-card";
+import { LiveMapCard } from "@/components/cart/live-map-card";
 import { ShoppingRouteCard } from "@/components/cart/shopping-route";
 import { ImpactDashboard } from "@/components/cart/impact-dashboard";
 import { AutoPurchase } from "@/components/cart/auto-purchase";
@@ -16,6 +17,7 @@ import { NotificationsFeed } from "@/components/cart/notifications-feed";
 import { ComingSoon } from "@/components/cart/coming-soon";
 import { useSmartCart } from "@/hooks/use-smart-cart";
 import { fadeUp } from "@/lib/motion";
+import type { FulfillmentId } from "@/lib/types";
 
 export default function CartPage() {
   const router = useRouter();
@@ -32,6 +34,8 @@ export default function CartPage() {
     quickBuyUsualItems,
     justQuickBought,
   } = useSmartCart();
+
+  const [selectedFulfillmentId, setSelectedFulfillmentId] = useState<FulfillmentId | null>(null);
 
   useEffect(() => {
     if (!loading && !cart) router.replace("/build");
@@ -51,6 +55,8 @@ export default function CartPage() {
       </main>
     );
   }
+
+  const activeFulfillmentId = selectedFulfillmentId ?? decision.recommendedId;
 
   return (
     <main className="relative min-h-screen px-5 pb-24 pt-8 sm:px-8">
@@ -95,16 +101,26 @@ export default function CartPage() {
             ordered={justOrdered}
             savingsSEK={cart.totalSavingsSEK}
             onOrder={checkout}
+            selectedId={activeFulfillmentId}
+            onSelectedIdChange={setSelectedFulfillmentId}
+          />
+        </motion.section>
+
+        <motion.section {...fadeUp(0.16)} className="mt-6">
+          <LiveMapCard
+            profile={state.profile}
+            cart={cart}
+            activeFulfillment={activeFulfillmentId}
           />
         </motion.section>
 
         {route && route.stops.length > 0 && (
-          <motion.section {...fadeUp(0.17)} className="mt-6">
+          <motion.section {...fadeUp(0.2)} className="mt-6">
             <ShoppingRouteCard route={route} />
           </motion.section>
         )}
 
-        <motion.section {...fadeUp(0.22)} className="mt-6">
+        <motion.section {...fadeUp(0.24)} className="mt-6">
           <ImpactDashboard
             savingsMonth={impact.savingsMonth}
             savingsYear={impact.savingsYear}
@@ -116,7 +132,7 @@ export default function CartPage() {
           />
         </motion.section>
 
-        <motion.section {...fadeUp(0.27)} className="mt-6 grid gap-6 lg:grid-cols-2">
+        <motion.section {...fadeUp(0.28)} className="mt-6 grid gap-6 lg:grid-cols-2">
           <AutoPurchase
             usualItems={state.usualItems}
             onQuickBuy={quickBuyUsualItems}
@@ -129,7 +145,7 @@ export default function CartPage() {
           <NotificationsFeed notifications={cart.notifications} />
         </motion.section>
 
-        <motion.section {...fadeUp(0.37)} className="mt-6">
+        <motion.section {...fadeUp(0.36)} className="mt-6">
           <ComingSoon />
         </motion.section>
       </div>
