@@ -36,16 +36,16 @@ export default function LandingPage() {
         {...fadeUp(0.1)}
         className="max-w-3xl text-balance text-center text-5xl font-bold leading-[1.05] tracking-tight sm:text-7xl"
       >
-        Sluta leta efter{" "}
-        <span className="text-gradient">billigaste matkassen.</span>
+        Vi jämför inte priser.{" "}
+        <span className="text-gradient">Vi fattar köpbeslut.</span>
       </motion.h1>
 
       <motion.p
         {...fadeUp(0.2)}
         className="mt-6 max-w-md text-balance text-center text-lg text-ink-secondary"
       >
-        SmartCart jämför ICA, Willys, Coop, Lidl och fler — automatiskt.
-        Du skriver bara vad du behöver.
+        SmartCart väger pris mot tid, bensin och besvär — och säger exakt vad
+        du ska göra. Du skriver bara vad du behöver.
       </motion.p>
 
       <motion.div {...fadeUp(0.3)} className="mt-12 flex flex-col items-center gap-4">

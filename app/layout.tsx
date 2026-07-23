@@ -4,9 +4,9 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SmartCart AI — Handla smartare, automatiskt",
+  title: "SmartCart AI — Vi fattar köpbeslut",
   description:
-    "SmartCart AI jämför ICA, Willys, Coop, Lidl och fler i realtid, byter till billigare varor automatiskt och bygger om din matkasse så du alltid handlar smartast.",
+    "SmartCart AI väger pris mot tid, bensin och besvär över ICA, Willys, Coop, Lidl och fler, och säger exakt vad du ska göra — hämta själv, hemleverans eller vänta. Inte fler priser. Ett beslut.",
 };
 
 export const viewport: Viewport = {

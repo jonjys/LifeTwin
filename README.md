@@ -1,11 +1,12 @@
 # SmartCart AI
 
-**Ett AI Commerce OS för inköp — inte en prisjämförelsesida.**
+**Vi jämför inte priser. Vi fattar köpbeslut.**
 
-Du skriver vad du behöver. SmartCart bygger listan, jämför butiker, byter till
-billigare varor och märken, hittar kampanjer — och fattar sedan ett beslut åt
-dig: hämta själv, hemleverans, eller promenera, räknat i riktiga kronor och
-riktig tid. Målet: du ska aldrig behöva fundera på var eller hur du handlar.
+Ingen bryr sig om fler priser — alla bryr sig om att slippa tänka. Du skriver
+vad du behöver. SmartCart bygger listan, väger butiker mot varandra, byter
+till billigare varor och märken, hittar kampanjer — och fattar sedan ett
+beslut åt dig: hämta själv, hemleverans, eller promenera, räknat i riktiga
+kronor och riktig tid. Inte tolv alternativ. Ett smartast val, och varför.
 
 ## Upplevelsen
 
