@@ -5,18 +5,17 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { AmbientBackground } from "@/components/shared/ambient-background";
-import { ScoreRing } from "@/components/shared/score-ring";
-import { AnimatedNumber } from "@/components/shared/animated-number";
 import { Button } from "@/components/ui/button";
 import { fadeUp, EASE } from "@/lib/motion";
 import { loadState } from "@/lib/storage";
+import { formatSEK } from "@/lib/utils";
 
 export default function LandingPage() {
   const router = useRouter();
-  const [hasTwin, setHasTwin] = useState(false);
+  const [hasList, setHasList] = useState(false);
 
   useEffect(() => {
-    setHasTwin(Boolean(loadState()));
+    setHasList(Boolean(loadState()?.currentItems.length));
   }, []);
 
   return (
@@ -29,7 +28,7 @@ export default function LandingPage() {
       >
         <Sparkles className="size-3.5 text-primary" />
         <span className="text-xs font-medium tracking-wide text-ink-secondary">
-          The future, visualized
+          SmartCart AI
         </span>
       </motion.div>
 
@@ -37,15 +36,16 @@ export default function LandingPage() {
         {...fadeUp(0.1)}
         className="max-w-3xl text-balance text-center text-5xl font-bold leading-[1.05] tracking-tight sm:text-7xl"
       >
-        Your future changes{" "}
-        <span className="text-gradient">every day.</span>
+        Sluta leta efter{" "}
+        <span className="text-gradient">billigaste matkassen.</span>
       </motion.h1>
 
       <motion.p
         {...fadeUp(0.2)}
         className="mt-6 max-w-md text-balance text-center text-lg text-ink-secondary"
       >
-        LifeTwin visualizes who you&apos;re becoming.
+        SmartCart jämför ICA, Willys, Coop, Lidl och fler — automatiskt.
+        Du skriver bara vad du behöver.
       </motion.p>
 
       <motion.div {...fadeUp(0.3)} className="mt-12 flex flex-col items-center gap-4">
@@ -54,16 +54,13 @@ export default function LandingPage() {
           whileTap={{ scale: 0.97 }}
           transition={{ duration: 0.2, ease: EASE }}
         >
-          <Button
-            size="xl"
-            onClick={() => router.push(hasTwin ? "/dashboard" : "/onboarding")}
-          >
-            {hasTwin ? "Open my LifeTwin" : "Create my LifeTwin"}
+          <Button size="xl" onClick={() => router.push(hasList ? "/cart" : "/build")}>
+            {hasList ? "Visa min matkasse" : "Jag ska storhandla"}
             <ArrowRight />
           </Button>
         </motion.div>
         <span className="text-xs text-ink-muted">
-          No account&ensp;·&ensp;Private&ensp;·&ensp;Runs on your device
+          Ingen inloggning&ensp;·&ensp;Privat&ensp;·&ensp;Körs i din webbläsare
         </span>
       </motion.div>
 
@@ -73,17 +70,18 @@ export default function LandingPage() {
         transition={{ duration: 0.9, delay: 0.55, ease: EASE }}
         className="glass-strong mt-20 flex items-center gap-8 rounded-4xl px-10 py-8 shadow-card"
       >
-        <ScoreRing value={81} size={120} strokeWidth={7}>
-          <span className="font-mono text-2xl font-bold tabular-nums">
-            <AnimatedNumber value={81} suffix="%" duration={2} />
-          </span>
-        </ScoreRing>
+        <div className="flex size-16 items-center justify-center rounded-full border border-primary/30 bg-primary/10 shadow-glow-sm">
+          <span className="font-mono text-lg font-bold text-primary">AI</span>
+        </div>
         <div className="text-left">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-muted">
-            Future Score
+            Sparat i år
           </p>
-          <p className="mt-1.5 max-w-[180px] text-sm leading-relaxed text-ink-secondary">
-            One glance every morning. One small win every day.
+          <p className="mt-1.5 font-mono text-3xl font-bold tracking-tight">
+            {formatSEK(8412)}
+          </p>
+          <p className="mt-1 max-w-[220px] text-sm leading-relaxed text-ink-secondary">
+            Så mycket kan en vanlig hushållskasse spara på ett år.
           </p>
         </div>
       </motion.div>

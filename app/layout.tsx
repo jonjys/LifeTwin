@@ -4,9 +4,9 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LifeTwin — Your future changes every day",
+  title: "SmartCart AI — Handla smartare, automatiskt",
   description:
-    "LifeTwin is a visual AI that simulates your future. See who you're becoming — and improve it a little every day.",
+    "SmartCart AI jämför ICA, Willys, Coop, Lidl och fler i realtid, byter till billigare varor automatiskt och bygger om din matkasse så du alltid handlar smartast.",
 };
 
 export const viewport: Viewport = {
@@ -17,7 +17,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="sv" className="dark">
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}
       >

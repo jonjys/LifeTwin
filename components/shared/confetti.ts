@@ -2,7 +2,7 @@ import confetti from "canvas-confetti";
 
 const BRAND_COLORS = ["#00E8FF", "#00FF88", "#FFFFFF", "#4D5AFF"];
 
-/** Celebration burst fired when the user completes a quest. */
+/** Celebration burst fired on a rewarding user action. */
 export function celebrate(origin?: { x: number; y: number }) {
   const base = {
     colors: BRAND_COLORS,

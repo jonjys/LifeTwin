@@ -1,6 +1,8 @@
 /**
- * Deterministic pseudo-randomness for the mock simulation.
- * Same seed → same result, so the product feels stable, not random.
+ * Deterministic pseudo-randomness. Same seed → same result, so the same
+ * shopping list on the same day always produces the same optimized cart —
+ * prices don't jitter on every re-render, only when the day or the list
+ * actually changes.
  */
 
 /** Small deterministic string hash (FNV-1a). */
@@ -18,9 +20,14 @@ export function unit(seed: string): number {
   return hash(seed) / 0xffffffff;
 }
 
-/** Deterministic integer in [min, max] derived from a seed string. */
+/** Deterministic number in [min, max] derived from a seed string. */
 export function between(seed: string, min: number, max: number): number {
-  return Math.round(min + unit(seed) * (max - min));
+  return min + unit(seed) * (max - min);
+}
+
+/** Deterministic boolean, true with roughly `probability` chance. */
+export function chance(seed: string, probability: number): boolean {
+  return unit(seed) < probability;
 }
 
 /** Deterministic pick from a pool. */
