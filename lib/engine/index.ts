@@ -1,6 +1,5 @@
 import { computeMetrics } from "@/lib/engine/metrics";
 import { computeProjections } from "@/lib/engine/narrative";
-import { generateEvents } from "@/lib/engine/events";
 import { generateOpportunities, generateRisks } from "@/lib/engine/outlook";
 import type { EngineInput, EngineOutput, LifeMetrics } from "@/lib/engine/types";
 import type { PathMetrics } from "@/lib/types";
@@ -10,7 +9,6 @@ export type {
   EngineOutput,
   LifeCategory,
   LifeMetrics,
-  FutureEvent,
   FutureRisk,
   FutureOpportunity,
   NarrativeProjections,
@@ -20,8 +18,8 @@ export type {
  * The Life Engine's single entry point. Pure and synchronous: same input,
  * same output, every time — nothing here knows this is a web app. A real
  * AI integration can call this for grounded numbers and only replace the
- * prose (events/risks/opportunities text) with generated language, since
- * every number it needs is already sitting in `metrics` and `ceiling`.
+ * prose (risks/opportunities text) with generated language, since every
+ * number it needs is already sitting in `metrics` and `ceiling`.
  */
 export function runLifeEngine(input: EngineInput): EngineOutput {
   const seed = `${input.goal}|${input.blocker}|${input.situation}`;
@@ -36,7 +34,6 @@ export function runLifeEngine(input: EngineInput): EngineOutput {
     metrics,
     ceiling,
     projections: computeProjections(input.goal, seed, input.dateKey, metrics),
-    events: generateEvents(input.goal, input.blocker, input.dateKey, input.completions),
     risks: generateRisks(input.goal, metrics, input.completions),
     opportunities: generateOpportunities(input.goal, metrics, input.completions),
   };

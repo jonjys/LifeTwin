@@ -11,7 +11,8 @@ import { QuestCard } from "@/components/dashboard/quest-card";
 import { FuturePaths } from "@/components/dashboard/future-paths";
 import { Timeline } from "@/components/dashboard/timeline";
 import { LifeEngineCard } from "@/components/dashboard/life-engine-card";
-import { FutureEvents } from "@/components/dashboard/future-events";
+import { FutureStory } from "@/components/dashboard/future-story";
+import { FutureMemoryCards } from "@/components/dashboard/future-memory-cards";
 import { FutureOutlook } from "@/components/dashboard/future-outlook";
 import { InsightCard } from "@/components/dashboard/insight-card";
 import { useLifeTwin } from "@/hooks/use-life-twin";
@@ -118,8 +119,16 @@ export default function DashboardPage() {
           </motion.div>
         </div>
 
-        {/* Life Engine: the future recalculating in concrete terms */}
+        {/* Future Story: the emotional headline, right after the act */}
         <motion.section {...fadeUp(0.19)} className="mt-6">
+          <FutureStory
+            story={sim.story}
+            changed={justCompleted && previousSim?.story !== sim.story}
+          />
+        </motion.section>
+
+        {/* Life Engine: the future recalculating in concrete terms */}
+        <motion.section {...fadeUp(0.24)} className="mt-6">
           <LifeEngineCard
             projections={sim.projections}
             previousProjections={previousSim?.projections ?? null}
@@ -128,12 +137,12 @@ export default function DashboardPage() {
         </motion.section>
 
         {/* Twin sync */}
-        <motion.section {...fadeUp(0.24)} className="mt-6">
+        <motion.section {...fadeUp(0.29)} className="mt-6">
           <TwinSyncCard sync={sim.twinSync} justImproved={justCompleted} />
         </motion.section>
 
         {/* Future paths */}
-        <motion.section {...fadeUp(0.29)} className="mt-6">
+        <motion.section {...fadeUp(0.34)} className="mt-6">
           <FuturePaths
             currentPath={sim.currentPath}
             futurePath={sim.futurePath}
@@ -141,7 +150,7 @@ export default function DashboardPage() {
         </motion.section>
 
         {/* Timeline */}
-        <motion.section {...fadeUp(0.34)} className="mt-6">
+        <motion.section {...fadeUp(0.39)} className="mt-6">
           <Timeline
             currentPath={sim.currentPath}
             futurePath={sim.futurePath}
@@ -150,14 +159,21 @@ export default function DashboardPage() {
           />
         </motion.section>
 
-        {/* Future events + trajectory */}
-        <motion.section {...fadeUp(0.39)} className="mt-6 grid gap-6 lg:grid-cols-2">
-          <FutureEvents events={sim.events} />
+        {/* Future memories: dated moments instead of static bullet points */}
+        <motion.section {...fadeUp(0.44)} className="mt-6">
+          <FutureMemoryCards
+            memories={sim.memories}
+            previousMemories={previousSim?.memories ?? null}
+          />
+        </motion.section>
+
+        {/* Trajectory */}
+        <motion.section {...fadeUp(0.49)} className="mt-6">
           <FutureOutlook opportunities={sim.opportunities} risks={sim.risks} />
         </motion.section>
 
         {/* AI insight */}
-        <motion.section {...fadeUp(0.44)} className="mt-6">
+        <motion.section {...fadeUp(0.54)} className="mt-6">
           <InsightCard insight={sim.insight} />
         </motion.section>
       </div>
