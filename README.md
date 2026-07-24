@@ -53,9 +53,12 @@ beroende på vilket projekt du startar.
      matkassen). AI väljer vinnaren mot ditt eget tidsvärde och säger
      varför i klartext.
    - **Live karta** — en riktig, interaktiv karta (OpenStreetMap) centrerad
-     på ditt geokodade hem, med varje butik i inköpet utsatt och en rutt
-     (riktiga vägar via OSRM, med en rak linje som reserv) som byter färg
-     och mönster direkt när du växlar mellan Hämta själv / Hemleverans /
+     på ditt geokodade hem. Varje butik placeras i första hand på sin
+     riktiga, namngivna adress (sökt live via OpenStreetMap/Overpass) —
+     hittas ingen bekräftad butik nära dig faller den tillbaka till en
+     uppskattad plats, tydligt markerad med en streckad ring. En rutt
+     (riktiga vägar via OSRM, med en rak linje som reserv) byter färg och
+     mönster direkt när du växlar mellan Hämta själv / Hemleverans /
      Promenera — ingen ny hämtning, bara en omedelbar omstil.
    - **AI Shopping Route** — när "hämta själv" spänner över flera butiker:
      en kompakt numrerad lista (samma radformat som inköpslistan), avstånd,
@@ -148,13 +151,20 @@ stor, avokadokampanj) är hårdkodade för att alltid visa produktens
 byggmaterialen, som prisas och swapas av precis samma logik.
 
 Kartan (`lib/geo/`) är däremot riktig: Nominatim geokodar adressen, OSRM
-ritar riktiga vägar, och butikerna placeras vid de seedade avstånden ovan
-men i en riktig, deterministisk riktning runt din geokodade hempunkt — så
-kartan visar en äkta plats, även om exakt vilken butik som ligger var inte
-är verifierad mot riktiga butiksadresser. Alla tre är delade publika tjänster
-utan API-nyckel (rimlig användning, ingen SLA) — varje anrop har en 6
-sekunders tidsgräns och faller tillbaka till Stockholm/en rak linje om
-tjänsten är långsam eller nere, så kartan aldrig fastnar i "laddar".
+ritar riktiga vägar, och `lib/geo/places.ts` söker upp en riktig, namngiven
+butik nära dig via Overpass API (samma öppna OpenStreetMap-data, gratis,
+ingen nyckel) för varje kedja som faktiskt har fysiska butiker (ICA,
+Willys, Coop, Hemköp, Lidl, City Gross, Byggmax, Hornbach, Bauhaus, Beijer,
+XL-BYGG — Mathem och Matsmart har inga butiker att hitta och använder alltid
+det uppskattade läget). Hittas ingen bekräftad butik faller platsen tillbaka
+till samma seedade avstånd och riktning som Beslutsmotorns kostnadsberäkning
+redan använder — en riktig karta med en ärlig, tydligt markerad uppskattning
+när det verkliga inte finns, aldrig en tyst gissning som ser exakt ut.
+Alla tre tjänster (Nominatim, OSRM, Overpass) är delade publika API:er utan
+nyckel (rimlig användning, ingen SLA, och Overpass kan vara märkbart
+långsammare eller tillfälligt överbelastat) — varje anrop har en tidsgräns
+och faller tillbaka till Stockholm/en rak linje/en uppskattad butiksplats
+om tjänsten är långsam eller nere, så kartan aldrig fastnar i "laddar".
 
 "Köp"-knappen simulerar en order (uppdaterar sparande- och impact-dashboarden)
 — den skickar ingen riktig beställning till någon butik.

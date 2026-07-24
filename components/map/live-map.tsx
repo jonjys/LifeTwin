@@ -9,7 +9,10 @@ import type { FulfillmentId, StoreId } from "@/lib/types";
 
 type LiveMapProps = {
   homeCoords: LatLng;
-  stores?: { id: StoreId; coords: LatLng }[];
+  /** `label` is the real storefront name when one was found nearby
+   *  (OpenStreetMap), otherwise the generic chain name; `real` flags
+   *  which one it is so the marker can say so honestly. */
+  stores?: { id: StoreId; coords: LatLng; label?: string; real?: boolean }[];
   /** Which fulfillment method is selected right now — restyles the route
    *  live, without refetching it. */
   activeFulfillment?: FulfillmentId;
@@ -26,8 +29,11 @@ function homeIconHtml(): string {
   return `<div style="width:16px;height:16px;border-radius:9999px;background:#00E8FF;box-shadow:0 0 0 6px rgba(0,232,255,0.22);border:2px solid #050508;"></div>`;
 }
 
-function storeIconHtml(tag: string, color: string): string {
-  return `<div style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9999px;background:${color};color:#050508;font-size:10px;font-weight:700;border:2px solid #050508;box-shadow:0 2px 8px rgba(0,0,0,0.5);">${tag}</div>`;
+function storeIconHtml(tag: string, color: string, real: boolean): string {
+  // A dashed outer ring marks an estimated (not confirmed) location, so
+  // the map never quietly claims a fake position is a real address.
+  const ring = real ? "" : `outline:2px dashed ${color};outline-offset:3px;`;
+  return `<div style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9999px;background:${color};color:#050508;font-size:10px;font-weight:700;border:2px solid #050508;box-shadow:0 2px 8px rgba(0,0,0,0.5);${ring}">${tag}</div>`;
 }
 
 /** Tags a Leaflet layer as ours (for cleanup) — all Leaflet interop here
@@ -100,17 +106,22 @@ export function LiveMap({
 
       for (const store of stores) {
         const meta = STORES[store.id];
+        const real = store.real ?? false;
+        const label = store.label ?? meta.name;
         bounds.extend([store.coords.lat, store.coords.lng]);
 
         markOurs(
           L.marker([store.coords.lat, store.coords.lng], {
             icon: L.divIcon({
-              html: storeIconHtml(meta.tag, meta.color),
+              html: storeIconHtml(meta.tag, meta.color, real),
               className: "",
               iconSize: [28, 28],
             }),
           })
-            .bindTooltip(meta.name, { direction: "top", offset: [0, -16] })
+            .bindTooltip(real ? label : `${label} (uppskattad plats)`, {
+              direction: "top",
+              offset: [0, -16],
+            })
             .addTo(map)
         );
 
