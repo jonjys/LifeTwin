@@ -1,3 +1,5 @@
+import type { StoreDomain } from "@/lib/types";
+
 export type CatalogItem = {
   id: string;
   keywords: string[];
@@ -6,18 +8,22 @@ export type CatalogItem = {
   /** A believable "naive" single-unit price, name-brand, no campaign. */
   basePriceSEK: number;
   naiveBrand: string;
-  /** The cheaper store-brand alternative SmartCart swaps toward. */
+  /** The cheaper store-brand alternative ProjektOS swaps toward. */
   smartBrand: string;
   /** Large-pack details, for items where buying bigger is the smarter move. */
   bulkPack?: { naiveUnits: number; bulkPriceSEK: number; bulkLabel: string };
+  /** Which retailer domain prices this item — grocery vs. building, etc. */
+  domain: StoreDomain;
 };
+
+type GroceryItemInput = Omit<CatalogItem, "domain">;
 
 /**
  * A small, believable grocery catalog. Prices are illustrative, not real —
  * there is no live pricing API here, only deterministic mock data seeded
- * per day (see pricing.ts).
+ * per day (see optimize.ts).
  */
-export const CATALOG: CatalogItem[] = [
+const GROCERY_ITEMS: GroceryItemInput[] = [
   {
     id: "mjolk",
     keywords: ["mjölk", "mjolk", "milk"],
@@ -219,17 +225,23 @@ export const CATALOG: CatalogItem[] = [
   },
 ];
 
+export const CATALOG: CatalogItem[] = GROCERY_ITEMS.map((item) => ({
+  ...item,
+  domain: "grocery" as const,
+}));
+
 /** Meals expand into a few grocery items — "tacos" isn't a product. */
 export const MEAL_EXPANSIONS: Record<string, string[]> = {
   tacos: ["tacokrydda", "tortilla", "kottfars", "ost", "salsa"],
   taco: ["tacokrydda", "tortilla", "kottfars", "ost", "salsa"],
 };
 
-/** Fuzzy-matches free text against the catalog's keyword lists. */
-export function matchCatalogItem(raw: string): CatalogItem | null {
+/** Fuzzy-matches free text against a catalog's keyword lists — defaults
+ *  to the grocery catalog, but any project's catalog works the same way. */
+export function matchCatalogItem(raw: string, catalog: CatalogItem[] = CATALOG): CatalogItem | null {
   const needle = raw.trim().toLowerCase();
   if (!needle) return null;
   return (
-    CATALOG.find((item) => item.keywords.some((k) => needle.includes(k))) ?? null
+    catalog.find((item) => item.keywords.some((k) => needle.includes(k))) ?? null
   );
 }

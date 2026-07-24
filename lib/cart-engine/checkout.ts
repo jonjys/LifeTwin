@@ -1,11 +1,17 @@
-import { STORE_LIST, STORES } from "@/lib/cart-engine/stores";
+import { CATALOG, type CatalogItem } from "@/lib/cart-engine/catalog";
+import { STORES, storesForDomain } from "@/lib/cart-engine/stores";
 import { priceForCatalogIdAtStore } from "@/lib/cart-engine/optimize";
-import type { CheckoutOption, OptimizedItem, StoreId } from "@/lib/types";
+import type { CheckoutOption, OptimizedItem, StoreDomain, StoreId } from "@/lib/types";
 
-function totalAtSingleStore(items: OptimizedItem[], storeId: StoreId, dateKey: string): number {
+function totalAtSingleStore(
+  items: OptimizedItem[],
+  storeId: StoreId,
+  dateKey: string,
+  catalog: CatalogItem[]
+): number {
   const itemsTotal = items.reduce((sum, it) => {
     const price = it.catalogId
-      ? priceForCatalogIdAtStore(it.catalogId, storeId, dateKey)
+      ? priceForCatalogIdAtStore(it.catalogId, storeId, dateKey, catalog)
       : it.naive.priceSEK;
     return sum + price;
   }, 0);
@@ -14,26 +20,33 @@ function totalAtSingleStore(items: OptimizedItem[], storeId: StoreId, dateKey: s
 
 /**
  * Three ways to check out: the true cross-store optimum, the single
- * fastest-delivery store, and the cheapest single store. Whichever of
- * the three actually costs least gets marked recommended — consolidating
- * into one store can beat the "optimal" mix once delivery fees stack up,
- * exactly like it would in real life.
+ * fastest-delivery store, and the cheapest single store — always within
+ * one project's own retailer domain. Whichever of the three actually
+ * costs least gets marked recommended — consolidating into one store can
+ * beat the "optimal" mix once delivery fees stack up, exactly like it
+ * would in real life.
  */
-export function buildCheckoutOptions(items: OptimizedItem[], dateKey: string): CheckoutOption[] {
+export function buildCheckoutOptions(
+  items: OptimizedItem[],
+  dateKey: string,
+  catalog: CatalogItem[] = CATALOG,
+  domain: StoreDomain = "grocery"
+): CheckoutOption[] {
   if (items.length === 0) return [];
 
+  const domainStores = storesForDomain(domain);
   const storesUsed = [...new Set(items.map((it) => it.chosen.store))];
   const mixedItemsTotal = items.reduce((sum, it) => sum + it.chosen.priceSEK, 0);
   const mixedDeliveryFees = storesUsed.reduce((sum, id) => sum + STORES[id].deliveryFeeSEK, 0);
   const cheapestTotal = Math.round(mixedItemsTotal) + mixedDeliveryFees;
   const cheapestEta = Math.max(...storesUsed.map((id) => STORES[id].deliveryEtaMin));
 
-  const singleStoreTotals = STORE_LIST.map((s) => ({
+  const singleStoreTotals = domainStores.map((s) => ({
     storeId: s.id,
-    total: totalAtSingleStore(items, s.id, dateKey),
+    total: totalAtSingleStore(items, s.id, dateKey, catalog),
   }));
 
-  const fastestStore = [...STORE_LIST].sort((a, b) => a.deliveryEtaMin - b.deliveryEtaMin)[0];
+  const fastestStore = [...domainStores].sort((a, b) => a.deliveryEtaMin - b.deliveryEtaMin)[0];
   const fastestTotal =
     singleStoreTotals.find((s) => s.storeId === fastestStore.id)?.total ?? cheapestTotal;
 

@@ -12,10 +12,10 @@ import { formatSEK } from "@/lib/utils";
 
 export default function LandingPage() {
   const router = useRouter();
-  const [hasList, setHasList] = useState(false);
+  const [hasProject, setHasProject] = useState(false);
 
   useEffect(() => {
-    setHasList(Boolean(loadState()?.currentItems.length));
+    setHasProject(Boolean(loadState()?.currentItems.length));
   }, []);
 
   return (
@@ -28,7 +28,7 @@ export default function LandingPage() {
       >
         <Sparkles className="size-3.5 text-primary" />
         <span className="text-xs font-medium tracking-wide text-ink-secondary">
-          SmartCart AI
+          ProjektOS
         </span>
       </motion.div>
 
@@ -44,8 +44,9 @@ export default function LandingPage() {
         {...fadeUp(0.2)}
         className="mt-6 max-w-md text-balance text-center text-lg text-ink-secondary"
       >
-        SmartCart väger pris mot tid, bensin och besvär — och säger exakt vad
-        du ska göra. Du skriver bara vad du behöver.
+        Starta ett projekt — matkasse, altan, vad som helst härnäst. Samma AI
+        bryter ner det, väger pris mot tid, bensin och besvär, och säger
+        exakt vad du ska göra.
       </motion.p>
 
       <motion.div {...fadeUp(0.3)} className="mt-12 flex flex-col items-center gap-4">
@@ -54,8 +55,8 @@ export default function LandingPage() {
           whileTap={{ scale: 0.97 }}
           transition={{ duration: 0.2, ease: EASE }}
         >
-          <Button size="xl" onClick={() => router.push(hasList ? "/cart" : "/build")}>
-            {hasList ? "Visa min matkasse" : "Jag ska storhandla"}
+          <Button size="xl" onClick={() => router.push(hasProject ? "/cart" : "/projects")}>
+            {hasProject ? "Visa mitt projekt" : "Starta ett projekt"}
             <ArrowRight />
           </Button>
         </motion.div>

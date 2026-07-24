@@ -139,7 +139,9 @@ export function computeFulfillmentOptions(
     recommended: false,
   };
 
-  const options = [pickup, delivery, walk];
+  // Bulky building materials aren't realistically carried home on foot —
+  // "Promenera" only makes sense for a grocery-domain cart.
+  const options = cart.domain === "building" ? [pickup, delivery] : [pickup, delivery, walk];
   const netCost = (opt: FulfillmentOption) => opt.totalSEK + (opt.timeMin / 60) * hourlyValue;
   const winner = options.reduce((a, b) => (netCost(b) < netCost(a) ? b : a));
   winner.recommended = true;

@@ -138,8 +138,8 @@ export default function ProfilePage() {
               />
               <AddressMapPreview address={profile.homeAddress} />
               <p className="text-xs text-ink-muted">
-                Visas på en riktig karta — SmartCart placerar butiker och rutter runt den här
-                punkten när du bygger en matkasse.
+                Visas på en riktig karta — ProjektOS placerar butiker och rutter runt den här
+                punkten oavsett vilket projekt du startar.
               </p>
             </Card>
           </motion.div>
@@ -304,10 +304,10 @@ export default function ProfilePage() {
             <Card className="flex flex-col gap-4">
               <CardTitle>Favoritbutiker</CardTitle>
               <p className="text-xs text-ink-muted">
-                Klicka i den ordning du föredrar dem — SmartCart väger in det när flera butiker är nästan lika bra.
+                Klicka i den ordning du föredrar dem — ProjektOS väger in det när flera butiker är nästan lika bra.
               </p>
               <div className="flex flex-wrap gap-2">
-                {STORE_LIST.map((store) => {
+                {STORE_LIST.filter((store) => store.domain === "grocery").map((store) => {
                   const idx = favoriteIndex(store.id);
                   return (
                     <button

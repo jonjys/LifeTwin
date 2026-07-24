@@ -1,8 +1,8 @@
 {
-  "name": "smartcart-ai",
+  "name": "projektos",
   "version": "1.0.0",
   "private": true,
-  "description": "SmartCart AI — handla smartare, automatiskt.",
+  "description": "ProjektOS — samma AI, samma beslutsmotor, oavsett vilket projekt du startar.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -12,23 +12,35 @@ type OptimizedCartProps = {
   cart: CartResult;
 };
 
+const CART_LABEL: Record<CartResult["domain"], { title: string; changed: string; unchanged: string }> = {
+  grocery: {
+    title: "Din matkasse",
+    changed: "Jag byggde om din matkasse.",
+    unchanged: "Din matkasse är redan optimerad.",
+  },
+  building: {
+    title: "Ditt inköp",
+    changed: "Jag räknade om var du ska köpa varje sak.",
+    unchanged: "Ditt inköp är redan optimerat.",
+  },
+};
+
 export const OptimizedCart = memo(function OptimizedCart({ cart }: OptimizedCartProps) {
   const swapCount = cart.items.filter((i) => i.swapReason && i.savingsSEK > 0).length;
+  const labels = CART_LABEL[cart.domain];
 
   return (
     <Card className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <CardTitle>Din matkasse</CardTitle>
+          <CardTitle>{labels.title}</CardTitle>
           <motion.h3
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE }}
             className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl"
           >
-            {swapCount > 0
-              ? "Jag byggde om din matkasse."
-              : "Din matkasse är redan optimerad."}
+            {swapCount > 0 ? labels.changed : labels.unchanged}
           </motion.h3>
         </div>
         <div className="text-right">

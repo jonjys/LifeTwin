@@ -8,6 +8,7 @@ import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { OptimizedCart } from "@/components/cart/optimized-cart";
 import { DecisionCard } from "@/components/cart/decision-card";
+import { PurchasePlanCard } from "@/components/cart/purchase-plan-card";
 import { LiveMapCard } from "@/components/cart/live-map-card";
 import { ShoppingRouteCard } from "@/components/cart/shopping-route";
 import { ImpactDashboard } from "@/components/cart/impact-dashboard";
@@ -26,6 +27,7 @@ export default function CartPage() {
     cart,
     decision,
     route,
+    purchasePlanText,
     matsmartDeals,
     loading,
     impact,
@@ -50,11 +52,13 @@ export default function CartPage() {
           transition={{ duration: 1.6, repeat: Infinity }}
           className="text-sm tracking-wide text-ink-muted"
         >
-          Bygger din smarta matkasse…
+          Bygger din smarta plan…
         </motion.div>
       </main>
     );
   }
+
+  const isGrocery = cart.domain === "grocery";
 
   const activeFulfillmentId = selectedFulfillmentId ?? decision.recommendedId;
 
@@ -71,7 +75,7 @@ export default function CartPage() {
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/30">
               <span className="font-mono text-sm font-bold text-primary">AI</span>
             </div>
-            <span className="text-lg font-semibold tracking-tight">SmartCart</span>
+            <span className="text-lg font-semibold tracking-tight">ProjektOS</span>
           </div>
           <div className="flex items-center gap-5">
             <Link
@@ -82,11 +86,11 @@ export default function CartPage() {
               Min profil
             </Link>
             <Link
-              href="/build"
+              href="/projects"
               className="flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
             >
               <ArrowLeft className="size-4" />
-              Ny lista
+              Nytt projekt
             </Link>
           </div>
         </motion.header>
@@ -94,6 +98,12 @@ export default function CartPage() {
         <motion.section {...fadeUp(0.05)}>
           <OptimizedCart cart={cart} />
         </motion.section>
+
+        {purchasePlanText && (
+          <motion.section {...fadeUp(0.08)} className="mt-6">
+            <PurchasePlanCard text={purchasePlanText} />
+          </motion.section>
+        )}
 
         <motion.section {...fadeUp(0.12)} className="mt-6">
           <DecisionCard
@@ -132,22 +142,26 @@ export default function CartPage() {
           />
         </motion.section>
 
-        <motion.section {...fadeUp(0.28)} className="mt-6 grid gap-6 lg:grid-cols-2">
-          <AutoPurchase
-            usualItems={state.usualItems}
-            onQuickBuy={quickBuyUsualItems}
-            justBought={justQuickBought}
-          />
-          <MatsmartDeals deals={matsmartDeals} />
-        </motion.section>
+        {isGrocery && (
+          <>
+            <motion.section {...fadeUp(0.28)} className="mt-6 grid gap-6 lg:grid-cols-2">
+              <AutoPurchase
+                usualItems={state.usualItems}
+                onQuickBuy={quickBuyUsualItems}
+                justBought={justQuickBought}
+              />
+              <MatsmartDeals deals={matsmartDeals} />
+            </motion.section>
 
-        <motion.section {...fadeUp(0.32)} className="mt-6">
-          <NotificationsFeed notifications={cart.notifications} />
-        </motion.section>
+            <motion.section {...fadeUp(0.32)} className="mt-6">
+              <NotificationsFeed notifications={cart.notifications} />
+            </motion.section>
 
-        <motion.section {...fadeUp(0.36)} className="mt-6">
-          <ComingSoon />
-        </motion.section>
+            <motion.section {...fadeUp(0.36)} className="mt-6">
+              <ComingSoon />
+            </motion.section>
+          </>
+        )}
       </div>
     </main>
   );

@@ -7,9 +7,18 @@ export const STORE_IDS = [
   "citygross",
   "mathem",
   "matsmart",
+  "byggmax",
+  "hornbach",
+  "bauhaus",
+  "beijer",
+  "xlbygg",
 ] as const;
 
 export type StoreId = (typeof STORE_IDS)[number];
+
+/** Every project category draws from one retailer domain — a grocery
+ *  store never gets compared against a building-materials store. */
+export type StoreDomain = "grocery" | "building";
 
 export type Store = {
   id: StoreId;
@@ -20,7 +29,15 @@ export type Store = {
   color: string;
   deliveryEtaMin: number;
   deliveryFeeSEK: number;
+  domain: StoreDomain;
 };
+
+/* ------------------------------------------------------------------ */
+/* Projects — the top-level entity everything else hangs off           */
+/* ------------------------------------------------------------------ */
+
+export const PROJECT_CATEGORIES = ["grocery", "deck"] as const;
+export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
 
 /** One line the user asked for, e.g. "mjölk" or "tacos" (a meal, expanded to items). */
 export type RequestedItem = {
@@ -89,6 +106,9 @@ export type CartResult = {
   totalNaiveSEK: number;
   totalOptimizedSEK: number;
   totalSavingsSEK: number;
+  /** Which retailer domain this cart was built from — grocery-only
+   *  features (AI Memory, Matsmart, notifications) only make sense here. */
+  domain: StoreDomain;
 };
 
 /** One completed order, recorded for the savings dashboard. */
@@ -263,15 +283,19 @@ export type MatsmartDeal = {
   priceSEK: number;
 };
 
-/** Everything SmartCart persists locally. */
+/** Everything ProjektOS persists locally. */
 export type SmartCartState = {
   createdAt: string;
   profile: UserProfile;
-  /** Items seen across 2+ past lists — the "AI Memory" of usual purchases. */
+  /** Items seen across 2+ past grocery lists — the "AI Memory" of usual purchases. */
   usualItems: string[];
-  /** Every raw item the user has ever typed, for building AI Memory. */
+  /** Every raw grocery item the user has ever typed, for building AI Memory. */
   itemHistory: string[];
   orders: OrderRecord[];
-  /** The list just built on /build — read by /cart to build the cart. */
+  /** The list just built for the current project — read by /cart. */
   currentItems: string[];
+  /** Which project is currently being planned/shopped for. */
+  currentCategory: ProjectCategory;
+  /** Set when currentCategory is "deck" — the inputs the AI Plan was generated from. */
+  deckDimensions: { widthM: number; depthM: number } | null;
 };
