@@ -6,7 +6,7 @@ import type { OptimizedItem, ProductOffer, RequestedItem, StoreDomain, StoreId, 
 const CAMPAIGN_CHANCE = 0.28;
 const DAY_JITTER = 0.05;
 
-function priceAt(item: CatalogItem, storeId: StoreId, dateKey: string): number {
+export function priceAt(item: CatalogItem, storeId: StoreId, dateKey: string): number {
   const store = STORES[storeId];
   const jitter = 1 + between(`${item.id}:${storeId}:${dateKey}:jitter`, -DAY_JITTER, DAY_JITTER);
   return item.basePriceSEK * store.priceMultiplier * jitter;
@@ -17,8 +17,10 @@ function isOnCampaign(item: CatalogItem, storeId: StoreId, dateKey: string): boo
 }
 
 /** The cheapest store for one catalog item today, campaigns included —
- *  only ever compared against stores in the item's own domain. */
-function cheapestStoreFor(
+ *  only ever compared against stores in the item's own domain. Also the
+ *  scan the week planner uses to find "veckans billigaste" across every
+ *  grocery store at once. */
+export function cheapestStoreFor(
   item: CatalogItem,
   dateKey: string
 ): { storeId: StoreId; priceSEK: number; onCampaign: boolean } {

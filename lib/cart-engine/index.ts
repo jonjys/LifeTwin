@@ -5,7 +5,14 @@ import { generateNotifications } from "@/lib/cart-engine/notifications";
 import type { CartResult, RequestedItem, StoreDomain } from "@/lib/types";
 
 export { STORES, STORE_LIST, storesForDomain, DEFAULT_STORE_BY_DOMAIN } from "@/lib/cart-engine/stores";
-export { CATALOG, MEAL_EXPANSIONS } from "@/lib/cart-engine/catalog";
+export {
+  CATALOG,
+  MEAL_EXPANSIONS,
+  GROCERY_CATEGORIES,
+  groceryItemsByCategory,
+  type GroceryCategory,
+} from "@/lib/cart-engine/catalog";
+export { buildWeeklyPlan, type WeeklyPlanItem } from "@/lib/cart-engine/week-planner";
 
 function expandItems(rawItems: string[]): RequestedItem[] {
   const expanded: string[] = [];
