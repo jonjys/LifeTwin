@@ -25,10 +25,12 @@ beroende på vilket projekt du startar.
    Driver Beslutsmotorn för varje projekt — sätts en gång, förfinas när
    som helst.
 4. **AI Plan** — Flik 2, projektspecifik:
-   - **Storhandla** (`/build`) — lägg till varor en i taget (chips,
-     snabbval, "Dina vanliga varor"), eller bläddra i sju kategorier
-     (Kylvaror, Frys, Skafferi, Frukt & Grönt, Kött & Fisk, Bröd & Bageri,
-     Dryck & Snacks) via en kategori-rullgardin.
+   - **Storhandla** (`/build`) — lägg till varor en i taget (röst eller
+     text — en mikrofonknapp använder webbläsarens Web Speech API, sv-SE,
+     och visas bara där webbläsaren stödjer det), chips, snabbval, "Dina
+     vanliga varor", eller bläddra i sju kategorier (Kylvaror, Frys,
+     Skafferi, Frukt & Grönt, Kött & Fisk, Bröd & Bageri, Dryck & Snacks)
+     via en egen animerad kategoriväljare.
    - **AI Veckoplanering** (`/build/week`) — AI scannar hela
      matkatalogen mot alla åtta butiker för dagens kampanjer och bygger en
      hel veckas matkasse (minst en vara per kategori, resten de hårdaste
@@ -36,9 +38,10 @@ beroende på vilket projekt du startar.
    - **Bygga altan** (`/projects/deck`) — ange bredd och djup; AI räknar
      ut Trall, Reglar, Plintar, Skruv, Betong och Verktyg i rätt mängd.
 5. **Inköp & beslut** (`/cart`) — Flik 3 + 4, samma sida för varje projekt:
-   - **Ditt inköp** — varje vara ProjektOS bytte, med förklaring
-     (märkesbyte, storleksbyte, kampanj eller billigare butik) och exakt
-     hur många kronor du sparade.
+   - **Ditt inköp** — en kompakt inköpslista grupperad per butik, en rad
+     per vara (namn, ev. bytesförklaring, pris, sparat) — inte ett kort
+     per vara, så hela kassen läses på en skärm istället för en lång
+     scroll.
    - **Smartaste beslutet** — inte billigast, smartast, i en mening: "Köp
      Trall på XL-BYGG. Reglar på Byggmax. Betongen från Bauhaus. Hämta
      själv. Du sparar totalt: 3686 kr." Genererad ur samma cart- och
@@ -55,8 +58,9 @@ beroende på vilket projekt du startar.
      och mönster direkt när du växlar mellan Hämta själv / Hemleverans /
      Promenera — ingen ny hämtning, bara en omedelbar omstil.
    - **AI Shopping Route** — när "hämta själv" spänner över flera butiker:
-     ordnad rutt, avstånd, och en tydlig rekommendation att hoppa över ett
-     stopp när besparingen inte är värd omvägen.
+     en kompakt numrerad lista (samma radformat som inköpslistan), avstånd,
+     och en tydlig rekommendation att hoppa över ett stopp när besparingen
+     inte är värd omvägen.
    - **Pengar sparade** — denna månad / i år / sedan installation, plus
      sparad tid, undvikna bilresor, kalorier promenerade och CO₂ sparad.
    - Grocery-specifikt (döljs för andra projekt): **Automatiska inköp**

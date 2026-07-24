@@ -63,13 +63,13 @@ export default function CartPage() {
   const activeFulfillmentId = selectedFulfillmentId ?? decision.recommendedId;
 
   return (
-    <main className="relative min-h-screen px-5 pb-24 pt-8 sm:px-8">
+    <main className="relative min-h-screen px-5 pb-16 pt-6 sm:px-8 sm:pt-8">
       <AmbientBackground />
 
       <div className="mx-auto w-full max-w-6xl">
         <motion.header
           {...fadeUp(0)}
-          className="mb-10 flex items-center justify-between"
+          className="mb-6 flex items-center justify-between"
         >
           <div className="flex items-center gap-3">
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/30">
@@ -100,12 +100,12 @@ export default function CartPage() {
         </motion.section>
 
         {purchasePlanText && (
-          <motion.section {...fadeUp(0.08)} className="mt-6">
+          <motion.section {...fadeUp(0.08)} className="mt-4 sm:mt-5">
             <PurchasePlanCard text={purchasePlanText} />
           </motion.section>
         )}
 
-        <motion.section {...fadeUp(0.12)} className="mt-6">
+        <motion.section {...fadeUp(0.12)} className="mt-4 sm:mt-5">
           <DecisionCard
             decision={decision}
             ordered={justOrdered}
@@ -116,7 +116,7 @@ export default function CartPage() {
           />
         </motion.section>
 
-        <motion.section {...fadeUp(0.16)} className="mt-6">
+        <motion.section {...fadeUp(0.16)} className="mt-4 sm:mt-5">
           <LiveMapCard
             profile={state.profile}
             cart={cart}
@@ -125,12 +125,12 @@ export default function CartPage() {
         </motion.section>
 
         {route && route.stops.length > 0 && (
-          <motion.section {...fadeUp(0.2)} className="mt-6">
+          <motion.section {...fadeUp(0.2)} className="mt-4 sm:mt-5">
             <ShoppingRouteCard route={route} />
           </motion.section>
         )}
 
-        <motion.section {...fadeUp(0.24)} className="mt-6">
+        <motion.section {...fadeUp(0.24)} className="mt-4 sm:mt-5">
           <ImpactDashboard
             savingsMonth={impact.savingsMonth}
             savingsYear={impact.savingsYear}
@@ -144,7 +144,7 @@ export default function CartPage() {
 
         {isGrocery && (
           <>
-            <motion.section {...fadeUp(0.28)} className="mt-6 grid gap-6 lg:grid-cols-2">
+            <motion.section {...fadeUp(0.28)} className="mt-4 grid gap-4 sm:mt-5 lg:grid-cols-2">
               <AutoPurchase
                 usualItems={state.usualItems}
                 onQuickBuy={quickBuyUsualItems}
@@ -153,11 +153,11 @@ export default function CartPage() {
               <MatsmartDeals deals={matsmartDeals} />
             </motion.section>
 
-            <motion.section {...fadeUp(0.32)} className="mt-6">
+            <motion.section {...fadeUp(0.32)} className="mt-4 sm:mt-5">
               <NotificationsFeed notifications={cart.notifications} />
             </motion.section>
 
-            <motion.section {...fadeUp(0.36)} className="mt-6">
+            <motion.section {...fadeUp(0.36)} className="mt-4 sm:mt-5">
               <ComingSoon />
             </motion.section>
           </>

@@ -33,7 +33,7 @@ export default function WeekPlanPage() {
   };
 
   return (
-    <main className="relative flex min-h-screen flex-col overflow-hidden px-6 py-16">
+    <main className="relative flex min-h-screen flex-col overflow-hidden px-6 py-10 sm:py-14">
       <AmbientBackground />
 
       <Link
@@ -46,21 +46,21 @@ export default function WeekPlanPage() {
 
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center">
         <motion.div {...fadeUp(0)} className="text-center">
-          <p className="mb-3 flex items-center justify-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+          <p className="mb-2 flex items-center justify-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
             <CalendarRange className="size-3.5" />
             AI Veckoplanering
           </p>
-          <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="text-balance text-2xl font-bold tracking-tight sm:text-4xl">
             Veckans billigaste
           </h1>
-          <p className="mt-4 text-ink-secondary">
+          <p className="mt-3 text-ink-secondary">
             AI har scannat ICA, Willys, Coop, Lidl och fler efter dagens kampanjer och
             byggt en hel veckas matkasse av det som är billigast just nu.
           </p>
         </motion.div>
 
-        <motion.div {...fadeUp(0.1)} className="mt-10">
-          <Card className="flex flex-col gap-6">
+        <motion.div {...fadeUp(0.1)} className="mt-6">
+          <Card className="flex flex-col gap-5">
             <div className="flex items-end justify-between gap-4">
               <CardTitle>{plan.length} varor för veckan</CardTitle>
               <div className="text-right">
