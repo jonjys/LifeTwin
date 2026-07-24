@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Plus, UserCog, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarRange, ChevronDown, Plus, UserCog, X } from "lucide-react";
 import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
+import { GROCERY_CATEGORIES, groceryItemsByCategory } from "@/lib/cart-engine";
 import { EASE } from "@/lib/motion";
 import { loadState, recordList } from "@/lib/storage";
 import { cn } from "@/lib/utils";
@@ -21,15 +22,25 @@ const QUICK_ADD = [
   "chips",
 ] as const;
 
+const CATEGORY_OPTIONS = ["Snabbval", ...GROCERY_CATEGORIES] as const;
+type CategoryOption = (typeof CATEGORY_OPTIONS)[number];
+
 export default function BuildListPage() {
   const router = useRouter();
   const [items, setItems] = useState<string[]>([]);
   const [draft, setDraft] = useState("");
   const [usualItems, setUsualItems] = useState<string[]>([]);
+  const [category, setCategory] = useState<CategoryOption>("Snabbval");
 
   useEffect(() => {
     setUsualItems(loadState()?.usualItems ?? []);
   }, []);
+
+  const byCategory = useMemo(() => groceryItemsByCategory(), []);
+  const categoryItemNames = useMemo(
+    () => (category === "Snabbval" ? [...QUICK_ADD] : byCategory[category].map((i) => i.displayName)),
+    [category, byCategory]
+  );
 
   const addItem = (raw: string) => {
     const value = raw.trim();
@@ -47,8 +58,8 @@ export default function BuildListPage() {
     router.push("/cart");
   };
 
-  const availableQuickAdd = QUICK_ADD.filter(
-    (q) => !items.some((i) => i.toLowerCase() === q)
+  const availableQuickAdd = categoryItemNames.filter(
+    (q) => !items.some((i) => i.toLowerCase() === q.toLowerCase())
   );
   const availableUsual = usualItems.filter(
     (u) => !items.some((i) => i.toLowerCase() === u) && !QUICK_ADD.includes(u as (typeof QUICK_ADD)[number])
@@ -90,6 +101,13 @@ export default function BuildListPage() {
           <p className="mt-4 text-ink-secondary">
             Skriv en vara i taget. ProjektOS bygger och optimerar listan åt dig.
           </p>
+          <Link
+            href="/build/week"
+            className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80"
+          >
+            <CalendarRange className="size-3.5" />
+            Eller låt AI planera en billig vecka åt dig
+          </Link>
         </motion.div>
 
         <motion.div
@@ -154,11 +172,27 @@ export default function BuildListPage() {
             </AnimatePresence>
           </div>
 
-          {availableQuickAdd.length > 0 && (
-            <div className="mt-6">
-              <p className="mb-3 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
-                Snabbval
+          <div className="mt-6">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
+                Bläddra i kategori
               </p>
+              <div className="relative">
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as CategoryOption)}
+                  className="appearance-none rounded-full border border-border bg-surface-2/60 py-1.5 pl-4 pr-8 text-xs font-medium text-ink-secondary focus:border-primary/40 focus:outline-none"
+                >
+                  {CATEGORY_OPTIONS.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-ink-muted" />
+              </div>
+            </div>
+            {availableQuickAdd.length > 0 ? (
               <div className="flex flex-wrap gap-2.5">
                 {availableQuickAdd.map((suggestion) => (
                   <button
@@ -173,8 +207,10 @@ export default function BuildListPage() {
                   </button>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-ink-muted">Allt i den här kategorin är redan tillagt.</p>
+            )}
+          </div>
 
           {availableUsual.length > 0 && (
             <div className="mt-5">

@@ -1,5 +1,16 @@
 import type { StoreDomain } from "@/lib/types";
 
+export const GROCERY_CATEGORIES = [
+  "Kylvaror",
+  "Frys",
+  "Skafferi",
+  "Frukt & Grönt",
+  "Kött & Fisk",
+  "Bröd & Bageri",
+  "Dryck & Snacks",
+] as const;
+export type GroceryCategory = (typeof GROCERY_CATEGORIES)[number];
+
 export type CatalogItem = {
   id: string;
   keywords: string[];
@@ -14,6 +25,9 @@ export type CatalogItem = {
   bulkPack?: { naiveUnits: number; bulkPriceSEK: number; bulkLabel: string };
   /** Which retailer domain prices this item — grocery vs. building, etc. */
   domain: StoreDomain;
+  /** Grocery-only aisle grouping — "Kylvaror", "Frys", "bunkra upp"… — used
+   *  by the category picker on /build and by the week planner. */
+  category?: GroceryCategory;
 };
 
 type GroceryItemInput = Omit<CatalogItem, "domain">;
@@ -33,6 +47,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     naiveBrand: "Arla",
     smartBrand: "ICA Basic",
     bulkPack: { naiveUnits: 2, bulkPriceSEK: 19, bulkLabel: "1 stor (2L)" },
+    category: "Kylvaror",
   },
   {
     id: "lattmjolk",
@@ -42,6 +57,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 14,
     naiveBrand: "Arla",
     smartBrand: "ICA Basic",
+    category: "Kylvaror",
   },
   {
     id: "kottfars",
@@ -51,6 +67,27 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 79,
     naiveBrand: "Scan",
     smartBrand: "ICA Basic",
+    category: "Kött & Fisk",
+  },
+  {
+    id: "kyckling",
+    keywords: ["kyckling", "kycklingfilé", "kycklingfile"],
+    displayName: "Kycklingfilé",
+    unitLabel: "kg",
+    basePriceSEK: 89,
+    naiveBrand: "Kronfågel",
+    smartBrand: "ICA Basic",
+    category: "Kött & Fisk",
+  },
+  {
+    id: "lax",
+    keywords: ["lax", "laxfilé", "laxfile"],
+    displayName: "Laxfilé",
+    unitLabel: "kg",
+    basePriceSEK: 149,
+    naiveBrand: "",
+    smartBrand: "",
+    category: "Kött & Fisk",
   },
   {
     id: "kaffe",
@@ -60,6 +97,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 59,
     naiveBrand: "Zoégas",
     smartBrand: "Gevalia",
+    category: "Skafferi",
   },
   {
     id: "bananer",
@@ -69,6 +107,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 22,
     naiveBrand: "",
     smartBrand: "",
+    category: "Frukt & Grönt",
   },
   {
     id: "vattenmelon",
@@ -78,6 +117,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 39,
     naiveBrand: "",
     smartBrand: "",
+    category: "Frukt & Grönt",
   },
   {
     id: "chips",
@@ -87,6 +127,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 29,
     naiveBrand: "OLW",
     smartBrand: "ICA Basic",
+    category: "Dryck & Snacks",
   },
   {
     id: "ketchup",
@@ -96,6 +137,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 32,
     naiveBrand: "Felix",
     smartBrand: "ICA Basic",
+    category: "Skafferi",
   },
   {
     id: "avokado",
@@ -105,6 +147,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 14,
     naiveBrand: "",
     smartBrand: "",
+    category: "Frukt & Grönt",
   },
   {
     id: "smor",
@@ -114,6 +157,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 45,
     naiveBrand: "Bregott",
     smartBrand: "ICA Basic",
+    category: "Kylvaror",
   },
   {
     id: "pasta",
@@ -123,6 +167,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 18,
     naiveBrand: "Eldorado",
     smartBrand: "ICA Basic",
+    category: "Skafferi",
   },
   {
     id: "agg",
@@ -132,6 +177,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 39,
     naiveBrand: "",
     smartBrand: "",
+    category: "Kylvaror",
   },
   {
     id: "ost",
@@ -141,6 +187,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 55,
     naiveBrand: "Arla",
     smartBrand: "ICA Basic",
+    category: "Kylvaror",
   },
   {
     id: "tacokrydda",
@@ -150,6 +197,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 15,
     naiveBrand: "Santa Maria",
     smartBrand: "ICA Basic",
+    category: "Skafferi",
   },
   {
     id: "tortilla",
@@ -159,6 +207,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 25,
     naiveBrand: "Santa Maria",
     smartBrand: "ICA Basic",
+    category: "Skafferi",
   },
   {
     id: "salsa",
@@ -168,6 +217,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 22,
     naiveBrand: "Santa Maria",
     smartBrand: "ICA Basic",
+    category: "Skafferi",
   },
   {
     id: "brod",
@@ -177,6 +227,17 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 28,
     naiveBrand: "",
     smartBrand: "",
+    category: "Bröd & Bageri",
+  },
+  {
+    id: "frallor",
+    keywords: ["frallor", "fralla"],
+    displayName: "Frallor",
+    unitLabel: "paket",
+    basePriceSEK: 25,
+    naiveBrand: "",
+    smartBrand: "",
+    category: "Bröd & Bageri",
   },
   {
     id: "yoghurt",
@@ -186,6 +247,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 32,
     naiveBrand: "Arla",
     smartBrand: "ICA Basic",
+    category: "Kylvaror",
   },
   {
     id: "tomater",
@@ -195,6 +257,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 35,
     naiveBrand: "",
     smartBrand: "",
+    category: "Frukt & Grönt",
   },
   {
     id: "gurka",
@@ -204,6 +267,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 12,
     naiveBrand: "",
     smartBrand: "",
+    category: "Frukt & Grönt",
   },
   {
     id: "pepsi",
@@ -213,6 +277,7 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 22,
     naiveBrand: "",
     smartBrand: "",
+    category: "Dryck & Snacks",
   },
   {
     id: "applen",
@@ -222,6 +287,47 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     basePriceSEK: 29,
     naiveBrand: "",
     smartBrand: "",
+    category: "Frukt & Grönt",
+  },
+  {
+    id: "glass",
+    keywords: ["glass"],
+    displayName: "Glass",
+    unitLabel: "liter",
+    basePriceSEK: 49,
+    naiveBrand: "GB Glace",
+    smartBrand: "ICA Basic",
+    category: "Frys",
+  },
+  {
+    id: "frystpizza",
+    keywords: ["fryst pizza", "frysta pizza", "pizza"],
+    displayName: "Fryst pizza",
+    unitLabel: "st",
+    basePriceSEK: 45,
+    naiveBrand: "Grandiosa",
+    smartBrand: "ICA Basic",
+    category: "Frys",
+  },
+  {
+    id: "fiskpinnar",
+    keywords: ["fiskpinnar"],
+    displayName: "Fiskpinnar",
+    unitLabel: "paket",
+    basePriceSEK: 39,
+    naiveBrand: "Findus",
+    smartBrand: "ICA Basic",
+    category: "Frys",
+  },
+  {
+    id: "frystagronsaker",
+    keywords: ["frysta grönsaker", "frysta gronsaker", "fryst grönsaksmix"],
+    displayName: "Frysta grönsaker",
+    unitLabel: "påse",
+    basePriceSEK: 29,
+    naiveBrand: "Findus",
+    smartBrand: "ICA Basic",
+    category: "Frys",
   },
 ];
 
@@ -244,4 +350,17 @@ export function matchCatalogItem(raw: string, catalog: CatalogItem[] = CATALOG):
   return (
     catalog.find((item) => item.keywords.some((k) => needle.includes(k))) ?? null
   );
+}
+
+/** The grocery catalog grouped by aisle, in `GROCERY_CATEGORIES` order —
+ *  what the category picker on /build and the week planner iterate over. */
+export function groceryItemsByCategory(): Record<GroceryCategory, CatalogItem[]> {
+  const grouped = Object.fromEntries(GROCERY_CATEGORIES.map((c) => [c, [] as CatalogItem[]])) as Record<
+    GroceryCategory,
+    CatalogItem[]
+  >;
+  for (const item of CATALOG) {
+    if (item.category) grouped[item.category].push(item);
+  }
+  return grouped;
 }

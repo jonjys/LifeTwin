@@ -26,7 +26,13 @@ beroende på vilket projekt du startar.
    som helst.
 4. **AI Plan** — Flik 2, projektspecifik:
    - **Storhandla** (`/build`) — lägg till varor en i taget (chips,
-     snabbval, "Dina vanliga varor").
+     snabbval, "Dina vanliga varor"), eller bläddra i sju kategorier
+     (Kylvaror, Frys, Skafferi, Frukt & Grönt, Kött & Fisk, Bröd & Bageri,
+     Dryck & Snacks) via en kategori-rullgardin.
+   - **AI Veckoplanering** (`/build/week`) — AI scannar hela
+     matkatalogen mot alla åtta butiker för dagens kampanjer och bygger en
+     hel veckas matkasse (minst en vara per kategori, resten de hårdaste
+     rabatterna) i ett klick.
    - **Bygga altan** (`/projects/deck`) — ange bredd och djup; AI räknar
      ut Trall, Reglar, Plintar, Skruv, Betong och Verktyg i rätt mängd.
 5. **Inköp & beslut** (`/cart`) — Flik 3 + 4, samma sida för varje projekt:
