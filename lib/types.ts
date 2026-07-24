@@ -198,6 +198,9 @@ export type UserProfile = {
   foodPreferences: FoodPreference[];
   favoriteStores: StoreId[];
   deliveryPreference: DeliveryPreference;
+  /** Owns a trailer — relevant for "Stora Köp" like bygga altan, where
+   *  bulky building materials otherwise need a rented one. */
+  hasTrailer: boolean;
 };
 
 /** A sensible starting point so the Decision Engine works before anyone
@@ -219,6 +222,7 @@ export const DEFAULT_PROFILE: UserProfile = {
   foodPreferences: [],
   favoriteStores: [],
   deliveryPreference: "mixed",
+  hasTrailer: false,
 };
 
 /** A reasonable estimate when the user doesn't know their hourly value. */
@@ -244,6 +248,10 @@ export type FulfillmentOption = {
   co2Grams: number;
   storeIds: StoreId[];
   recommended: boolean;
+  /** "Stora Köp": a rented trailer, when the load is bulky and the
+   *  user doesn't own one — folded into totalSEK, shown separately. */
+  extraFeeSEK?: number;
+  extraFeeLabel?: string;
 };
 
 export type DecisionResult = {

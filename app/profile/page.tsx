@@ -78,6 +78,7 @@ const FOOD_PREFERENCE_LABELS: Record<(typeof FOOD_PREFERENCES)[number], string> 
 };
 
 const VEHICLE_MODES = new Set(["car", "ev", "motorcycle", "moped"]);
+const CAN_TOW_TRAILER = new Set(["car", "ev"]);
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -99,6 +100,7 @@ export default function ProfilePage() {
   };
 
   const isVehicle = VEHICLE_MODES.has(profile.transportMode);
+  const canTowTrailer = CAN_TOW_TRAILER.has(profile.transportMode);
   const favoriteIndex = (id: StoreId) => profile.favoriteStores.indexOf(id);
   const toggleFavorite = (id: StoreId) => {
     update(
@@ -193,6 +195,12 @@ export default function ProfilePage() {
                       suffix="kr"
                     />
                   </div>
+                </div>
+              )}
+              {canTowTrailer && (
+                <div>
+                  <FieldLabel>Har du släp? (för stora köp, t.ex. bygga altan)</FieldLabel>
+                  <YesNoToggle value={profile.hasTrailer} onChange={(v) => update("hasTrailer", v)} />
                 </div>
               )}
             </Card>

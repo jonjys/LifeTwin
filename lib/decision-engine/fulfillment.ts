@@ -17,6 +17,11 @@ import {
   type UserProfile,
 } from "@/lib/types";
 
+/** "Stora Köp": bulky building materials don't fit in a normal car —
+ *  renting a trailer costs money and a bit of extra hassle. */
+const TRAILER_RENTAL_SEK = 349;
+const TRAILER_EXTRA_MIN = 25;
+
 function roundTripDistanceKm(homeAddress: string, storeIds: StoreId[]): number {
   // No real routing between stores — a round trip home → each store → home,
   // which is the honest worst case when stores aren't on the way to each other.
@@ -49,7 +54,10 @@ function buildRecommendationText(
   if (recommendedId === "delivery") {
     const moneySaved = pickup.totalSEK - delivery.totalSEK;
     if (moneySaved > 0) {
-      return `Du sparar bara ${moneySaved} kr genom att ${driveModeLabel(profile)}. Din tid är betydligt mer värd.`;
+      const trailerNote = pickup.extraFeeSEK
+        ? ` Du hade även behövt hyra släp för ${pickup.extraFeeSEK} kr.`
+        : "";
+      return `Du sparar bara ${moneySaved} kr genom att ${driveModeLabel(profile)}. Din tid är betydligt mer värd.${trailerNote}`;
     }
     const timeSaved = pickup.timeMin - delivery.timeMin;
     return `Ta hemleverans istället. Du sparar ${timeSaved} minuter.`;
@@ -60,7 +68,10 @@ function buildRecommendationText(
   }
   const moneySaved = delivery.totalSEK - pickup.totalSEK;
   const extraTime = Math.max(0, pickup.timeMin - delivery.timeMin);
-  return `Hämta själv. Du sparar ${moneySaved} kr på ${extraTime} extra minuter.`;
+  const trailerNote = pickup.extraFeeSEK
+    ? ` Inkluderar hyrsläp för ${pickup.extraFeeSEK} kr eftersom du inte har eget.`
+    : "";
+  return `Hämta själv. Du sparar ${moneySaved} kr på ${extraTime} extra minuter.${trailerNote}`;
 }
 
 /**
@@ -93,11 +104,14 @@ export function computeFulfillmentOptions(
     : 0;
   const wearSEK = fuelNeeded ? Math.round((distanceKm / 10) * profile.wearCostPerMilSEK) : 0;
 
+  const needsTrailer = cart.domain === "building" && fuelNeeded && !profile.hasTrailer;
+  const trailerFeeSEK = needsTrailer ? TRAILER_RENTAL_SEK : 0;
+
   const pickup: FulfillmentOption = {
     id: "pickup",
     label: "Hämta själv",
-    totalSEK: itemsOnlySEK + gasSEK + wearSEK,
-    timeMin: pickupTimeMin,
+    totalSEK: itemsOnlySEK + gasSEK + wearSEK + trailerFeeSEK,
+    timeMin: pickupTimeMin + (needsTrailer ? TRAILER_EXTRA_MIN : 0),
     gasSEK,
     wearCostSEK: wearSEK,
     deliveryFeeSEK: 0,
@@ -106,6 +120,7 @@ export function computeFulfillmentOptions(
     co2Grams: 0,
     storeIds,
     recommended: false,
+    ...(needsTrailer ? { extraFeeSEK: trailerFeeSEK, extraFeeLabel: "Hyrsläp" } : {}),
   };
 
   const delivery: FulfillmentOption = {

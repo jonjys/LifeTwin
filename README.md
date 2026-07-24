@@ -16,8 +16,8 @@ beroende på vilket projekt du startar.
 1. **Landing** — en rubrik, en knapp: "Starta ett projekt".
 2. **Projekt** (`/projects`) — Flik 1: välj vad du ska göra. Storhandla
    och Bygga altan är byggda; Renovera badrum, Köpa ny TV, Flytta, Jul,
-   Bröllop och Semester är "Kommer snart" — samma ärliga mönster som AI
-   Pantry/Meal Planner.
+   Bröllop, Semester, Husdjur, Elektronik, Bilservice, Apotek och IKEA är
+   "Kommer snart" — samma ärliga mönster som AI Pantry/Meal Planner.
 3. **Min Profil** (`/profile`) — hemadress (med en live kartförhandsvisning
    som geokodar adressen på riktigt), transport (bil/elbil/cykel/går/…),
    bränsle- och slitagekostnad, tidsvärde (kr/h eller "låt AI uppskatta"),
@@ -38,9 +38,10 @@ beroende på vilket projekt du startar.
      själv. Du sparar totalt: 3686 kr." Genererad ur samma cart- och
      beslutsdata varje annat kort på sidan redan visar.
    - **AI Beslutsmotor** — inte tre priser, tre (eller två, för skrymmande
-     byggvaror) fullt kostade beslut: Hämta själv (bensin + slitage +
-     tid), Hemleverans (leveransavgift), Promenera (steg + kalorier, bara
-     för matkassen). AI väljer vinnaren mot ditt eget tidsvärde och säger
+     byggvaror) fullt kostade beslut: Hämta själv (bensin + slitage + tid
+     + hyrsläp om profilen saknar eget släp och lasten är skrymmande),
+     Hemleverans (leveransavgift), Promenera (steg + kalorier, bara för
+     matkassen). AI väljer vinnaren mot ditt eget tidsvärde och säger
      varför i klartext.
    - **Live karta** — en riktig, interaktiv karta (OpenStreetMap) centrerad
      på ditt geokodade hem, med varje butik i inköpet utsatt och en rutt
@@ -115,6 +116,11 @@ oavsett projekt. Det som byter ut sig är enbart:
 - **Om "Promenera" är rimligt** — `computeFulfillmentOptions` läser
   `cart.domain` och utesluter promenad-alternativet för skrymmande
   byggvaror; matkassen får fortfarande alla tre.
+- **"Stora Köp"** — samma funktion lägger på en hyrsläp-kostnad (349 kr +
+  25 minuter) på Hämta själv när projektet är skrymmande (`domain ===
+  "building"`) och profilens `hasTrailer` är `false`; äger man släp
+  försvinner kostnaden helt. Ett nytt profilfält (`Har du släp?`), synligt
+  bara för bil/elbil under Transport.
 
 Ett nytt projekt (t.ex. husdjur eller elektronik) kräver bara en ny
 katalog-genererande funktion och nya butiker taggade med rätt `domain` —
@@ -145,11 +151,12 @@ tjänsten är långsam eller nere, så kartan aldrig fastnar i "laddar".
 
 ### Medvetet inte byggt än
 
-Renovera badrum, Köpa ny TV, Flytta, Jul, Bröllop och Semester är
-"Kommer snart"-kort på `/projects` — arkitektoniskt förberedda (lägg till
-en katalog + butiker taggade med rätt domän) men inte implementerade;
-explicit framtidsvision, inte MVP. Samma gäller riktiga push-notiser
-(ingen backend/service worker) och AI Pantry/Meal Planner (teasers, inte
+Renovera badrum, Köpa ny TV, Flytta, Jul, Bröllop, Semester, Husdjur,
+Elektronik, Bilservice, Apotek och IKEA är "Kommer snart"-kort på
+`/projects` — arkitektoniskt förberedda (lägg till en katalog + butiker
+taggade med rätt domän) men inte implementerade; explicit
+framtidsvision, inte MVP. Samma gäller riktiga push-notiser (ingen
+backend/service worker) och AI Pantry/Meal Planner (teasers, inte
 funktion).
 
 ### Koppla på riktig data

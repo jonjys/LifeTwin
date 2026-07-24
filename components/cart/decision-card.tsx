@@ -84,6 +84,11 @@ function OptionCard({
             <span className="flex items-center gap-1.5 text-xs text-ink-muted">
               <Wrench className="size-3" /> Slitage {option.wearCostSEK} kr
             </span>
+            {option.extraFeeSEK && (
+              <span className="flex items-center gap-1.5 text-xs text-warning">
+                <Truck className="size-3" /> {option.extraFeeLabel} {option.extraFeeSEK} kr
+              </span>
+            )}
           </>
         )}
         {option.id === "delivery" && (

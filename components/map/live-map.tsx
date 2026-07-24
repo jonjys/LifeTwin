@@ -90,7 +90,9 @@ export function LiveMap({
       markOurs(
         L.marker([homeCoords.lat, homeCoords.lng], {
           icon: L.divIcon({ html: homeIconHtml(), className: "", iconSize: [16, 16] }),
-        }).addTo(map)
+        })
+          .bindTooltip("Hem", { direction: "top", offset: [0, -10] })
+          .addTo(map)
       );
 
       const style = FULFILLMENT_STYLE[activeFulfillment];
