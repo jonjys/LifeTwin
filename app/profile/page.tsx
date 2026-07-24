@@ -112,11 +112,11 @@ export default function ProfilePage() {
   };
 
   return (
-    <main className="relative min-h-screen px-5 pb-24 pt-8 sm:px-8">
+    <main className="relative min-h-screen px-5 pb-16 pt-6 sm:px-8 sm:pt-8">
       <AmbientBackground />
 
       <div className="mx-auto w-full max-w-3xl">
-        <motion.header {...fadeUp(0)} className="mb-8 flex items-center justify-between">
+        <motion.header {...fadeUp(0)} className="mb-5 flex items-center justify-between">
           <button
             type="button"
             onClick={() => router.back()}
@@ -129,7 +129,7 @@ export default function ProfilePage() {
           <div className="w-16" />
         </motion.header>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <motion.div {...fadeUp(0.05)}>
             <Card className="flex flex-col gap-4">
               <CardTitle>Hemadress</CardTitle>

@@ -31,7 +31,7 @@ export default function DeckProjectPage() {
   };
 
   return (
-    <main className="relative flex min-h-screen flex-col overflow-hidden px-6 py-16">
+    <main className="relative flex min-h-screen flex-col overflow-hidden px-6 py-10 sm:py-14">
       <AmbientBackground />
 
       <Link
@@ -44,13 +44,13 @@ export default function DeckProjectPage() {
 
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center">
         <motion.div {...fadeUp(0)} className="text-center">
-          <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+          <p className="mb-2 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
             {planGenerated ? "Flik 2 — AI Plan" : "Flik 1 — Projekt"}
           </p>
-          <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="text-balance text-2xl font-bold tracking-tight sm:text-4xl">
             Bygga altan
           </h1>
-          <p className="mt-4 text-ink-secondary">
+          <p className="mt-3 text-ink-secondary">
             {planGenerated
               ? "AI har brutit ner projektet i vad du faktiskt behöver."
               : "Ange måtten. AI räknar ut exakt vad du behöver."}
@@ -58,8 +58,8 @@ export default function DeckProjectPage() {
         </motion.div>
 
         {!planGenerated ? (
-          <motion.div {...fadeUp(0.1)} className="mt-10">
-            <Card className="flex flex-col gap-6">
+          <motion.div {...fadeUp(0.1)} className="mt-6">
+            <Card className="flex flex-col gap-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
@@ -97,8 +97,8 @@ export default function DeckProjectPage() {
             </Card>
           </motion.div>
         ) : (
-          <motion.div {...fadeUp(0.1)} className="mt-10">
-            <Card className="flex flex-col gap-6">
+          <motion.div {...fadeUp(0.1)} className="mt-6">
+            <Card className="flex flex-col gap-5">
               <div className="flex items-end justify-between gap-4">
                 <CardTitle>
                   Altan {widthM} × {depthM} m

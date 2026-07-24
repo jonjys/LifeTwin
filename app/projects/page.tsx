@@ -115,31 +115,31 @@ export default function ProjectsPage() {
   const router = useRouter();
 
   return (
-    <main className="relative min-h-screen px-5 pb-24 pt-8 sm:px-8">
+    <main className="relative min-h-screen px-5 pb-16 pt-6 sm:px-8 sm:pt-8">
       <AmbientBackground />
 
       <div className="mx-auto w-full max-w-5xl">
-        <motion.header {...fadeUp(0)} className="mb-10 flex items-center gap-3">
+        <motion.header {...fadeUp(0)} className="mb-6 flex items-center gap-3">
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/30">
             <span className="font-mono text-sm font-bold text-primary">AI</span>
           </div>
           <span className="text-lg font-semibold tracking-tight">ProjektOS</span>
         </motion.header>
 
-        <motion.div {...fadeUp(0.05)} className="mb-10">
-          <p className="mb-3 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
+        <motion.div {...fadeUp(0.05)} className="mb-6">
+          <p className="mb-2 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
             Flik 1 — Projekt
           </p>
-          <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-5xl">
+          <h1 className="text-balance text-2xl font-bold tracking-tight sm:text-4xl">
             Vad ska du göra?
           </h1>
-          <p className="mt-4 max-w-xl text-ink-secondary">
+          <p className="mt-3 max-w-xl text-ink-secondary">
             Allt börjar med ett projekt. Samma AI bryter ner det, jämför butiker och
             fattar ett köpbeslut åt dig — oavsett om det är matkassen eller altanen.
           </p>
         </motion.div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           {PROJECT_TILES.map((tile, i) => {
             const Icon = tile.icon;
             const clickable = "href" in tile;
@@ -155,7 +155,7 @@ export default function ProjectsPage() {
                   tabIndex={clickable ? 0 : undefined}
                   onClick={clickable ? () => router.push(tile.href) : undefined}
                   className={cn(
-                    "flex h-full flex-col gap-4 p-6 transition-all duration-200",
+                    "flex h-full flex-col gap-3 p-5 transition-all duration-200",
                     clickable
                       ? "cursor-pointer hover:border-primary/40 hover:shadow-glow-sm"
                       : "border-dashed opacity-70"
