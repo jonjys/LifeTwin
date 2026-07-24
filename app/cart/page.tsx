@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, UserCog } from "lucide-react";
@@ -8,6 +8,8 @@ import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { OptimizedCart } from "@/components/cart/optimized-cart";
 import { DecisionCard } from "@/components/cart/decision-card";
+import { PurchasePlanCard } from "@/components/cart/purchase-plan-card";
+import { LiveMapCard } from "@/components/cart/live-map-card";
 import { ShoppingRouteCard } from "@/components/cart/shopping-route";
 import { ImpactDashboard } from "@/components/cart/impact-dashboard";
 import { AutoPurchase } from "@/components/cart/auto-purchase";
@@ -16,6 +18,7 @@ import { NotificationsFeed } from "@/components/cart/notifications-feed";
 import { ComingSoon } from "@/components/cart/coming-soon";
 import { useSmartCart } from "@/hooks/use-smart-cart";
 import { fadeUp } from "@/lib/motion";
+import type { FulfillmentId } from "@/lib/types";
 
 export default function CartPage() {
   const router = useRouter();
@@ -24,6 +27,7 @@ export default function CartPage() {
     cart,
     decision,
     route,
+    purchasePlanText,
     matsmartDeals,
     loading,
     impact,
@@ -32,6 +36,8 @@ export default function CartPage() {
     quickBuyUsualItems,
     justQuickBought,
   } = useSmartCart();
+
+  const [selectedFulfillmentId, setSelectedFulfillmentId] = useState<FulfillmentId | null>(null);
 
   useEffect(() => {
     if (!loading && !cart) router.replace("/build");
@@ -46,11 +52,15 @@ export default function CartPage() {
           transition={{ duration: 1.6, repeat: Infinity }}
           className="text-sm tracking-wide text-ink-muted"
         >
-          Bygger din smarta matkasse…
+          Bygger din smarta plan…
         </motion.div>
       </main>
     );
   }
+
+  const isGrocery = cart.domain === "grocery";
+
+  const activeFulfillmentId = selectedFulfillmentId ?? decision.recommendedId;
 
   return (
     <main className="relative min-h-screen px-5 pb-24 pt-8 sm:px-8">
@@ -65,7 +75,7 @@ export default function CartPage() {
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/30">
               <span className="font-mono text-sm font-bold text-primary">AI</span>
             </div>
-            <span className="text-lg font-semibold tracking-tight">SmartCart</span>
+            <span className="text-lg font-semibold tracking-tight">ProjektOS</span>
           </div>
           <div className="flex items-center gap-5">
             <Link
@@ -76,11 +86,11 @@ export default function CartPage() {
               Min profil
             </Link>
             <Link
-              href="/build"
+              href="/projects"
               className="flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
             >
               <ArrowLeft className="size-4" />
-              Ny lista
+              Nytt projekt
             </Link>
           </div>
         </motion.header>
@@ -89,22 +99,38 @@ export default function CartPage() {
           <OptimizedCart cart={cart} />
         </motion.section>
 
+        {purchasePlanText && (
+          <motion.section {...fadeUp(0.08)} className="mt-6">
+            <PurchasePlanCard text={purchasePlanText} />
+          </motion.section>
+        )}
+
         <motion.section {...fadeUp(0.12)} className="mt-6">
           <DecisionCard
             decision={decision}
             ordered={justOrdered}
             savingsSEK={cart.totalSavingsSEK}
             onOrder={checkout}
+            selectedId={activeFulfillmentId}
+            onSelectedIdChange={setSelectedFulfillmentId}
+          />
+        </motion.section>
+
+        <motion.section {...fadeUp(0.16)} className="mt-6">
+          <LiveMapCard
+            profile={state.profile}
+            cart={cart}
+            activeFulfillment={activeFulfillmentId}
           />
         </motion.section>
 
         {route && route.stops.length > 0 && (
-          <motion.section {...fadeUp(0.17)} className="mt-6">
+          <motion.section {...fadeUp(0.2)} className="mt-6">
             <ShoppingRouteCard route={route} />
           </motion.section>
         )}
 
-        <motion.section {...fadeUp(0.22)} className="mt-6">
+        <motion.section {...fadeUp(0.24)} className="mt-6">
           <ImpactDashboard
             savingsMonth={impact.savingsMonth}
             savingsYear={impact.savingsYear}
@@ -116,22 +142,26 @@ export default function CartPage() {
           />
         </motion.section>
 
-        <motion.section {...fadeUp(0.27)} className="mt-6 grid gap-6 lg:grid-cols-2">
-          <AutoPurchase
-            usualItems={state.usualItems}
-            onQuickBuy={quickBuyUsualItems}
-            justBought={justQuickBought}
-          />
-          <MatsmartDeals deals={matsmartDeals} />
-        </motion.section>
+        {isGrocery && (
+          <>
+            <motion.section {...fadeUp(0.28)} className="mt-6 grid gap-6 lg:grid-cols-2">
+              <AutoPurchase
+                usualItems={state.usualItems}
+                onQuickBuy={quickBuyUsualItems}
+                justBought={justQuickBought}
+              />
+              <MatsmartDeals deals={matsmartDeals} />
+            </motion.section>
 
-        <motion.section {...fadeUp(0.32)} className="mt-6">
-          <NotificationsFeed notifications={cart.notifications} />
-        </motion.section>
+            <motion.section {...fadeUp(0.32)} className="mt-6">
+              <NotificationsFeed notifications={cart.notifications} />
+            </motion.section>
 
-        <motion.section {...fadeUp(0.37)} className="mt-6">
-          <ComingSoon />
-        </motion.section>
+            <motion.section {...fadeUp(0.36)} className="mt-6">
+              <ComingSoon />
+            </motion.section>
+          </>
+        )}
       </div>
     </main>
   );

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Plus, UserCog, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, UserCog, X } from "lucide-react";
 import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,14 @@ export default function BuildListPage() {
       <AmbientBackground />
 
       <Link
+        href="/projects"
+        className="absolute left-6 top-6 z-10 flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
+      >
+        <ArrowLeft className="size-4" />
+        Alla projekt
+      </Link>
+
+      <Link
         href="/profile"
         className="absolute right-6 top-6 z-10 flex items-center gap-1.5 text-sm text-ink-muted transition-colors hover:text-ink"
       >
@@ -80,7 +88,7 @@ export default function BuildListPage() {
             Vad behöver du?
           </h1>
           <p className="mt-4 text-ink-secondary">
-            Skriv en vara i taget. SmartCart bygger och optimerar listan åt dig.
+            Skriv en vara i taget. ProjektOS bygger och optimerar listan åt dig.
           </p>
         </motion.div>
 

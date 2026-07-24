@@ -38,7 +38,7 @@ export const ComingSoon = memo(function ComingSoon() {
       <ComingSoonTile
         icon={Camera}
         title="AI Pantry"
-        description="Fotografera kylskåpet. SmartCart ser vad du saknar och lägger bara till det."
+        description="Fotografera kylskåpet. ProjektOS ser vad du saknar och lägger bara till det."
       />
       <ComingSoonTile
         icon={ChefHat}

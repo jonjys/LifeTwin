@@ -4,9 +4,9 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SmartCart AI — Vi fattar köpbeslut",
+  title: "ProjektOS — Vi fattar köpbeslut",
   description:
-    "SmartCart AI väger pris mot tid, bensin och besvär över ICA, Willys, Coop, Lidl och fler, och säger exakt vad du ska göra — hämta själv, hemleverans eller vänta. Inte fler priser. Ett beslut.",
+    "ProjektOS bryter ner projektet du startar — matkasse, altan, eller vad som helst härnäst — jämför rätt butiker och säger exakt vad du ska göra. Inte fler priser. Ett beslut.",
 };
 
 export const viewport: Viewport = {

@@ -1,3 +1,4 @@
+import { DECK_ITEM_IDS } from "@/lib/cart-engine/materials-catalog";
 import { DEFAULT_PROFILE } from "@/lib/types";
 import type { OrderRecord, SmartCartState, UserProfile } from "@/lib/types";
 
@@ -11,8 +12,10 @@ export function loadState(): SmartCartState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as SmartCartState;
     if (!parsed?.createdAt) return null;
-    // Older sessions won't have a profile yet — backfill the default.
+    // Older sessions won't have these fields yet — backfill defaults.
     if (!parsed.profile) parsed.profile = { ...DEFAULT_PROFILE };
+    if (!parsed.currentCategory) parsed.currentCategory = "grocery";
+    if (parsed.deckDimensions === undefined) parsed.deckDimensions = null;
     return parsed;
   } catch {
     return null;
@@ -34,6 +37,8 @@ export function ensureState(): SmartCartState {
     itemHistory: [],
     orders: [],
     currentItems: [],
+    currentCategory: "grocery",
+    deckDimensions: null,
   };
   saveState(fresh);
   return fresh;
@@ -66,6 +71,23 @@ export function recordList(items: string[]): SmartCartState {
     itemHistory: history.slice(-200),
     usualItems,
     currentItems: items,
+    currentCategory: "grocery",
+    deckDimensions: null,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts a "Bygga altan" project — the AI Plan's fixed material list,
+ *  scaled by the confirmed deck dimensions. Doesn't touch grocery AI
+ *  Memory; that's a separate project's history. */
+export function startDeckProject(widthM: number, depthM: number): SmartCartState {
+  const state = ensureState();
+  const next: SmartCartState = {
+    ...state,
+    currentItems: DECK_ITEM_IDS,
+    currentCategory: "deck",
+    deckDimensions: { widthM, depthM },
   };
   saveState(next);
   return next;

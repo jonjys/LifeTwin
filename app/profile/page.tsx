@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check } from "lucide-react";
 import { AmbientBackground } from "@/components/shared/ambient-background";
+import { AddressMapPreview } from "@/components/profile/address-map-preview";
 import {
   FieldLabel,
   MultiChipGroup,
@@ -77,6 +78,7 @@ const FOOD_PREFERENCE_LABELS: Record<(typeof FOOD_PREFERENCES)[number], string> 
 };
 
 const VEHICLE_MODES = new Set(["car", "ev", "motorcycle", "moped"]);
+const CAN_TOW_TRAILER = new Set(["car", "ev"]);
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -98,6 +100,7 @@ export default function ProfilePage() {
   };
 
   const isVehicle = VEHICLE_MODES.has(profile.transportMode);
+  const canTowTrailer = CAN_TOW_TRAILER.has(profile.transportMode);
   const favoriteIndex = (id: StoreId) => profile.favoriteStores.indexOf(id);
   const toggleFavorite = (id: StoreId) => {
     update(
@@ -135,8 +138,10 @@ export default function ProfilePage() {
                 onChange={(v) => update("homeAddress", v)}
                 placeholder="t.ex. Storgatan 12, Stockholm"
               />
+              <AddressMapPreview address={profile.homeAddress} />
               <p className="text-xs text-ink-muted">
-                Används för att uppskatta avstånd och restid till butiker — ingen karta krävs.
+                Visas på en riktig karta — ProjektOS placerar butiker och rutter runt den här
+                punkten oavsett vilket projekt du startar.
               </p>
             </Card>
           </motion.div>
@@ -190,6 +195,12 @@ export default function ProfilePage() {
                       suffix="kr"
                     />
                   </div>
+                </div>
+              )}
+              {canTowTrailer && (
+                <div>
+                  <FieldLabel>Har du släp? (för stora köp, t.ex. bygga altan)</FieldLabel>
+                  <YesNoToggle value={profile.hasTrailer} onChange={(v) => update("hasTrailer", v)} />
                 </div>
               )}
             </Card>
@@ -301,10 +312,10 @@ export default function ProfilePage() {
             <Card className="flex flex-col gap-4">
               <CardTitle>Favoritbutiker</CardTitle>
               <p className="text-xs text-ink-muted">
-                Klicka i den ordning du föredrar dem — SmartCart väger in det när flera butiker är nästan lika bra.
+                Klicka i den ordning du föredrar dem — ProjektOS väger in det när flera butiker är nästan lika bra.
               </p>
               <div className="flex flex-wrap gap-2">
-                {STORE_LIST.map((store) => {
+                {STORE_LIST.filter((store) => store.domain === "grocery").map((store) => {
                   const idx = favoriteIndex(store.id);
                   return (
                     <button

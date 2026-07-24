@@ -1,10 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { buildCart } from "@/lib/cart-engine";
+import { buildCart, CATALOG } from "@/lib/cart-engine";
 import { usesFuel } from "@/lib/cart-engine/distance";
 import { findMatsmartDeals } from "@/lib/cart-engine/matsmart";
-import { computeFulfillmentOptions, buildShoppingRoute } from "@/lib/decision-engine";
+import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
+import {
+  computeFulfillmentOptions,
+  buildShoppingRoute,
+  summarizePurchasePlan,
+} from "@/lib/decision-engine";
+import type { CatalogItem } from "@/lib/cart-engine/catalog";
 import {
   caloriesWalkedSinceInstall,
   carTripsAvoidedSinceInstall,
@@ -42,6 +48,7 @@ type UseSmartCart = {
   cart: CartResult | null;
   decision: DecisionResult | null;
   route: ShoppingRoute | null;
+  purchasePlanText: string | null;
   matsmartDeals: MatsmartDeal[];
   loading: boolean;
   impact: ImpactTotals;
@@ -67,7 +74,11 @@ export function useSmartCart(): UseSmartCart {
     const loaded = ensureState();
     setState(loaded);
     if (loaded.currentItems.length > 0) {
-      setCart(buildCart(loaded.currentItems, todayKey(), loaded.usualItems));
+      const catalog: CatalogItem[] =
+        loaded.currentCategory === "deck" && loaded.deckDimensions
+          ? generateDeckMaterialsCatalog(loaded.deckDimensions.widthM, loaded.deckDimensions.depthM)
+          : CATALOG;
+      setCart(buildCart(loaded.currentItems, todayKey(), loaded.usualItems, catalog));
     }
     setLoading(false);
   }, []);
@@ -80,6 +91,11 @@ export function useSmartCart(): UseSmartCart {
   const route = useMemo(
     () => (cart && state ? buildShoppingRoute(cart, state.profile) : null),
     [cart, state]
+  );
+
+  const purchasePlanText = useMemo(
+    () => (cart && decision ? summarizePurchasePlan(cart, decision) : null),
+    [cart, decision]
   );
 
   const matsmartDeals = useMemo(
@@ -160,6 +176,7 @@ export function useSmartCart(): UseSmartCart {
     cart,
     decision,
     route,
+    purchasePlanText,
     matsmartDeals,
     loading,
     impact,

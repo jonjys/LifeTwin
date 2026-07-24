@@ -1,7 +1,7 @@
 import { between, chance } from "@/lib/seeded";
 import { CATALOG, matchCatalogItem, type CatalogItem } from "@/lib/cart-engine/catalog";
-import { STORES, STORE_LIST } from "@/lib/cart-engine/stores";
-import type { OptimizedItem, ProductOffer, RequestedItem, StoreId, SwapReason } from "@/lib/types";
+import { DEFAULT_STORE_BY_DOMAIN, STORES, storesForDomain } from "@/lib/cart-engine/stores";
+import type { OptimizedItem, ProductOffer, RequestedItem, StoreDomain, StoreId, SwapReason } from "@/lib/types";
 
 const CAMPAIGN_CHANCE = 0.28;
 const DAY_JITTER = 0.05;
@@ -16,13 +16,14 @@ function isOnCampaign(item: CatalogItem, storeId: StoreId, dateKey: string): boo
   return chance(`${item.id}:${storeId}:${dateKey}:campaign`, CAMPAIGN_CHANCE);
 }
 
-/** The cheapest store for one catalog item today, campaigns included. */
+/** The cheapest store for one catalog item today, campaigns included —
+ *  only ever compared against stores in the item's own domain. */
 function cheapestStoreFor(
   item: CatalogItem,
   dateKey: string
 ): { storeId: StoreId; priceSEK: number; onCampaign: boolean } {
   let best: { storeId: StoreId; priceSEK: number; onCampaign: boolean } | null = null;
-  for (const store of STORE_LIST) {
+  for (const store of storesForDomain(item.domain)) {
     const onCampaign = isOnCampaign(item, store.id, dateKey);
     const discount = onCampaign
       ? between(`${item.id}:${store.id}:${dateKey}:disc`, 0.18, 0.4)
@@ -51,8 +52,8 @@ function offer(
 
 /**
  * The three moments the product pitch describes verbatim — always these
- * exact numbers, so the first three items anyone tries produce the
- * flagship "wow" swaps rather than a random mock number.
+ * exact numbers, so the first three grocery items anyone tries produce
+ * the flagship "wow" swaps rather than a random mock number.
  */
 function scriptedSwap(item: CatalogItem, requested: RequestedItem): OptimizedItem | null {
   if (item.id === "ketchup") {
@@ -102,9 +103,10 @@ function optimizeCatalogItem(
   const scripted = scriptedSwap(item, requested);
   if (scripted) return scripted;
 
-  const naivePriceSEK = Math.round(priceAt(item, "ica", dateKey));
+  const defaultStore = DEFAULT_STORE_BY_DOMAIN[item.domain];
+  const naivePriceSEK = Math.round(priceAt(item, defaultStore, dateKey));
   const naiveName = brandedName(item.naiveBrand, item.displayName);
-  const naive = offer("ica", naiveName, naivePriceSEK, item.unitLabel, false);
+  const naive = offer(defaultStore, naiveName, naivePriceSEK, item.unitLabel, false);
 
   type Candidate = { offer: ProductOffer; savings: number; reason: SwapReason; note: string | null };
   const candidates: Candidate[] = [];
@@ -113,7 +115,7 @@ function optimizeCatalogItem(
     const discount = between(`${item.id}:${dateKey}:brand-disc`, 0.15, 0.32);
     const price = Math.round(naivePriceSEK * (1 - discount));
     candidates.push({
-      offer: offer("ica", brandedName(item.smartBrand, item.displayName), price, item.unitLabel, false),
+      offer: offer(defaultStore, brandedName(item.smartBrand, item.displayName), price, item.unitLabel, false),
       savings: naivePriceSEK - price,
       reason: "brand",
       note: null,
@@ -160,11 +162,11 @@ function optimizeCatalogItem(
 }
 
 /** For free text that matched nothing — still usable, just not swappable. */
-function unmatchedItem(requested: RequestedItem, dateKey: string): OptimizedItem {
+function unmatchedItem(requested: RequestedItem, dateKey: string, domain: StoreDomain): OptimizedItem {
   const priceSEK = Math.round(between(`${requested.raw}:${dateKey}:unknown`, 18, 55));
   const label = requested.raw.trim();
   const displayName = label.charAt(0).toUpperCase() + label.slice(1);
-  const naive = offer("ica", displayName, priceSEK, "st", false);
+  const naive = offer(DEFAULT_STORE_BY_DOMAIN[domain], displayName, priceSEK, "st", false);
   return {
     requested,
     catalogId: null,
@@ -177,9 +179,14 @@ function unmatchedItem(requested: RequestedItem, dateKey: string): OptimizedItem
   };
 }
 
-export function optimizeItem(requested: RequestedItem, dateKey: string): OptimizedItem {
-  const item = matchCatalogItem(requested.raw);
-  if (!item) return unmatchedItem(requested, dateKey);
+export function optimizeItem(
+  requested: RequestedItem,
+  dateKey: string,
+  catalog: CatalogItem[] = CATALOG,
+  domain: StoreDomain = "grocery"
+): OptimizedItem {
+  const item = matchCatalogItem(requested.raw, catalog);
+  if (!item) return unmatchedItem(requested, dateKey, domain);
   return optimizeCatalogItem(item, requested, dateKey);
 }
 
@@ -188,9 +195,10 @@ export function optimizeItem(requested: RequestedItem, dateKey: string): Optimiz
 export function priceForCatalogIdAtStore(
   catalogId: string,
   storeId: StoreId,
-  dateKey: string
+  dateKey: string,
+  catalog: CatalogItem[] = CATALOG
 ): number {
-  const item = CATALOG.find((c) => c.id === catalogId);
+  const item = catalog.find((c) => c.id === catalogId);
   if (!item) return 0;
   return Math.round(priceAt(item, storeId, dateKey));
 }
