@@ -15,12 +15,23 @@ import {
   type FulfillmentOption,
   type StoreId,
   type UserProfile,
+  type WeatherSnapshot,
 } from "@/lib/types";
 
 /** "Stora Köp": bulky building materials don't fit in a normal car —
  *  renting a trailer costs money and a bit of extra hassle. */
 const TRAILER_RENTAL_SEK = 349;
 const TRAILER_EXTRA_MIN = 25;
+
+/** Harsh weather doesn't change what walking actually costs in kr, but it
+ *  very much changes whether you'd want to — priced here as extra
+ *  "effective minutes" at the user's own hourly value, same currency the
+ *  rest of the decision is already made in. */
+const WALK_WEATHER_PENALTY_MIN = 45;
+
+function weatherNoteText(weather: WeatherSnapshot): string {
+  return `${Math.round(weather.tempC)}°C och ${weather.reason} just nu — promenad väger tyngre i beräkningen.`;
+}
 
 function roundTripDistanceKm(homeAddress: string, storeIds: StoreId[]): number {
   // No real routing between stores — a round trip home → each store → home,
@@ -82,7 +93,8 @@ function buildRecommendationText(
  */
 export function computeFulfillmentOptions(
   cart: CartResult,
-  profile: UserProfile
+  profile: UserProfile,
+  weather?: WeatherSnapshot | null
 ): DecisionResult {
   const cheapest =
     cart.checkoutOptions.find((o) => o.id === "cheapest") ?? cart.checkoutOptions[0];
@@ -157,13 +169,19 @@ export function computeFulfillmentOptions(
   // Bulky building materials aren't realistically carried home on foot —
   // "Promenera" only makes sense for a grocery-domain cart.
   const options = cart.domain === "building" ? [pickup, delivery] : [pickup, delivery, walk];
-  const netCost = (opt: FulfillmentOption) => opt.totalSEK + (opt.timeMin / 60) * hourlyValue;
+  const netCost = (opt: FulfillmentOption) => {
+    const weatherPenaltyMin = opt.id === "walk" && weather?.harsh ? WALK_WEATHER_PENALTY_MIN : 0;
+    return opt.totalSEK + ((opt.timeMin + weatherPenaltyMin) / 60) * hourlyValue;
+  };
   const winner = options.reduce((a, b) => (netCost(b) < netCost(a) ? b : a));
   winner.recommended = true;
+
+  const weatherRelevant = weather?.harsh && options.some((o) => o.id === "walk");
 
   return {
     options,
     recommendedId: winner.id,
     recommendationText: buildRecommendationText(pickup, delivery, walk, winner.id, profile),
+    weatherNote: weatherRelevant ? weatherNoteText(weather) : null,
   };
 }

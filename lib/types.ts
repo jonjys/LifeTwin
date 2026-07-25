@@ -259,6 +259,19 @@ export type DecisionResult = {
   recommendedId: FulfillmentId;
   /** e.g. "Du sparar bara 51 kr genom att köra själv. Din tid är betydligt mer värd." */
   recommendationText: string;
+  /** Set when real weather made walking measurably less attractive today. */
+  weatherNote: string | null;
+};
+
+/** Live conditions at the user's home, from lib/geo/weather.ts — a real
+ *  input the Decision Engine can weigh, not a mocked one. */
+export type WeatherSnapshot = {
+  tempC: number;
+  precipitationMm: number;
+  /** Rain, extreme cold, or extreme heat — walking is measurably worse. */
+  harsh: boolean;
+  /** "regn" | "kyla" | "värme" | "" (empty when not harsh). */
+  reason: string;
 };
 
 /* ------------------------------------------------------------------ */
