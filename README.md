@@ -36,7 +36,11 @@ beroende på vilket projekt du startar.
      hel veckas matkasse (minst en vara per kategori, resten de hårdaste
      rabatterna) i ett klick.
    - **Bygga altan** (`/projects/deck`) — ange bredd och djup; AI räknar
-     ut Trall, Reglar, Plintar, Skruv, Betong och Verktyg i rätt mängd.
+     ut Trall, Reglar, Plintar, Skruv, Betong och Verktyg i rätt mängd,
+     scannar sedan synligt (Byggmax, Hornbach, Bauhaus, Beijer, XL-BYGG,
+     en efter en) och visar redan här vilken butik som är billigast per
+     vara idag — samma automatiska cross-store-scan som Veckoplanering,
+     bara för byggvaror.
 5. **Inköp & beslut** (`/cart`) — Flik 3 + 4, samma sida för varje projekt:
    - **Ditt inköp** — en kompakt inköpslista grupperad per butik, en rad
      per vara (namn, ev. bytesförklaring, pris, sparat) — inte ett kort
@@ -137,7 +141,9 @@ oavsett projekt. Det som byter ut sig är enbart:
 
 Ett nytt projekt (t.ex. husdjur eller elektronik) kräver bara en ny
 katalog-genererande funktion och nya butiker taggade med rätt `domain` —
-inte en ny motor.
+inte en ny motor. `lib/cart-engine/deal-scanner.ts` (`scanCatalogForDeals`)
+är samma sak för prisscanning: Veckoplanering (grocery) och Bygga
+altan (building) delar exakt samma scan-funktion, bara katalogen skiljer.
 
 ### Viktigt att veta
 
