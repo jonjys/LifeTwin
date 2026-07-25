@@ -4,6 +4,11 @@ import type { LatLng } from "@/lib/geo/types";
 /** Central Stockholm — used whenever geocoding fails or hasn't run yet. */
 export const DEFAULT_HOME_COORDS: LatLng = { lat: 59.3293, lng: 18.0686 };
 
+/** Session-lifetime cache — more than one component (the live map, the
+ *  weather lookup) geocodes the same home address, so this keeps that to
+ *  one real Nominatim call instead of one per caller. */
+const cache = new Map<string, Promise<LatLng | null>>();
+
 /**
  * Geocodes a free-text address via Nominatim (OpenStreetMap's free
  * geocoder — no API key). This is a real network call to a shared public
@@ -12,19 +17,27 @@ export const DEFAULT_HOME_COORDS: LatLng = { lat: 59.3293, lng: 18.0686 };
  * Falls back to null on any failure so the caller can show a sensible
  * default instead of breaking.
  */
-export async function geocodeAddress(address: string): Promise<LatLng | null> {
+export function geocodeAddress(address: string): Promise<LatLng | null> {
   const query = address.trim();
-  if (!query) return null;
+  if (!query) return Promise.resolve(null);
 
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=se&q=${encodeURIComponent(query)}`;
-    const res = await fetchWithTimeout(url);
-    if (!res || !res.ok) return null;
-    const results = (await res.json()) as Array<{ lat: string; lon: string }>;
-    const first = results[0];
-    if (!first) return null;
-    return { lat: parseFloat(first.lat), lng: parseFloat(first.lon) };
-  } catch {
-    return null;
-  }
+  const cached = cache.get(query);
+  if (cached) return cached;
+
+  const promise = (async (): Promise<LatLng | null> => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=se&q=${encodeURIComponent(query)}`;
+      const res = await fetchWithTimeout(url);
+      if (!res || !res.ok) return null;
+      const results = (await res.json()) as Array<{ lat: string; lon: string }>;
+      const first = results[0];
+      if (!first) return null;
+      return { lat: parseFloat(first.lat), lng: parseFloat(first.lon) };
+    } catch {
+      return null;
+    }
+  })();
+
+  cache.set(query, promise);
+  return promise;
 }

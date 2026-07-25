@@ -11,6 +11,8 @@ import {
   summarizePurchasePlan,
 } from "@/lib/decision-engine";
 import type { CatalogItem } from "@/lib/cart-engine/catalog";
+import { DEFAULT_HOME_COORDS, geocodeAddress } from "@/lib/geo/geocode";
+import { fetchCurrentWeather } from "@/lib/geo/weather";
 import {
   caloriesWalkedSinceInstall,
   carTripsAvoidedSinceInstall,
@@ -29,6 +31,7 @@ import type {
   MatsmartDeal,
   ShoppingRoute,
   SmartCartState,
+  WeatherSnapshot,
 } from "@/lib/types";
 import { todayKey } from "@/lib/utils";
 
@@ -69,6 +72,7 @@ export function useSmartCart(): UseSmartCart {
   const [justOrdered, setJustOrdered] = useState(false);
   const [orderedFulfillmentId, setOrderedFulfillmentId] = useState<FulfillmentId | null>(null);
   const [justQuickBought, setJustQuickBought] = useState(false);
+  const [weather, setWeather] = useState<WeatherSnapshot | null>(null);
 
   useEffect(() => {
     const loaded = ensureState();
@@ -83,9 +87,23 @@ export function useSmartCart(): UseSmartCart {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    const homeAddress = state?.profile.homeAddress;
+    if (!homeAddress) return;
+    let cancelled = false;
+    geocodeAddress(homeAddress)
+      .then((coords) => fetchCurrentWeather(coords ?? DEFAULT_HOME_COORDS))
+      .then((snapshot) => {
+        if (!cancelled) setWeather(snapshot);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [state?.profile.homeAddress]);
+
   const decision = useMemo(
-    () => (cart && state ? computeFulfillmentOptions(cart, state.profile) : null),
-    [cart, state]
+    () => (cart && state ? computeFulfillmentOptions(cart, state.profile, weather) : null),
+    [cart, state, weather]
   );
 
   const route = useMemo(
@@ -131,7 +149,7 @@ export function useSmartCart(): UseSmartCart {
   const quickBuyUsualItems = useCallback(() => {
     if (!state || state.usualItems.length === 0) return;
     const quickCart = buildCart(state.usualItems, todayKey(), state.usualItems);
-    const quickDecision = computeFulfillmentOptions(quickCart, state.profile);
+    const quickDecision = computeFulfillmentOptions(quickCart, state.profile, weather);
     const winner = quickDecision.options.find((o) => o.id === quickDecision.recommendedId);
     const pickup = quickDecision.options.find((o) => o.id === "pickup");
     if (!winner || !pickup) return;
@@ -149,7 +167,7 @@ export function useSmartCart(): UseSmartCart {
     });
     setState(next);
     setJustQuickBought(true);
-  }, [state]);
+  }, [state, weather]);
 
   const impact: ImpactTotals = state
     ? {

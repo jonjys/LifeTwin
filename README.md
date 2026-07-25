@@ -54,8 +54,9 @@ beroende på vilket projekt du startar.
      byggvaror) fullt kostade beslut: Hämta själv (bensin + slitage + tid
      + hyrsläp om profilen saknar eget släp och lasten är skrymmande),
      Hemleverans (leveransavgift), Promenera (steg + kalorier, bara för
-     matkassen). AI väljer vinnaren mot ditt eget tidsvärde och säger
-     varför i klartext.
+     matkassen — och väger tyngre i regn, kyla eller stark värme, enligt
+     riktig live-väderdata vid din adress). AI väljer vinnaren mot ditt
+     eget tidsvärde och säger varför i klartext.
    - **Live karta** — en riktig, interaktiv karta (OpenStreetMap) centrerad
      på ditt geokodade hem. Varje butik placeras i första hand på sin
      riktiga, namngivna adress (sökt live via OpenStreetMap/Overpass) —
@@ -80,6 +81,8 @@ beroende på vilket projekt du startar.
 - TailwindCSS med shadcn-liknande UI-primitiver
 - Framer Motion, Lucide Icons
 - Allt state i `localStorage` — ingen backend, ingen inloggning, ingen databas
+- Installerbar PWA: manifest, genererade ikoner (`next/og`, inga binära
+  assets att underhålla), offline app-shell via en enkel service worker
 - Deploy-klar för Vercel
 
 ## Kom igång
@@ -171,6 +174,13 @@ nyckel (rimlig användning, ingen SLA, och Overpass kan vara märkbart
 långsammare eller tillfälligt överbelastat) — varje anrop har en tidsgräns
 och faller tillbaka till Stockholm/en rak linje/en uppskattad butiksplats
 om tjänsten är långsam eller nere, så kartan aldrig fastnar i "laddar".
+
+Väder (`lib/geo/weather.ts`) är av samma sort: riktig, live data från
+Open-Meteo (gratis, ingen nyckel) vid din geokodade adress. Regn, sträng
+kyla eller stark värme gör "Promenera" mätbart mindre attraktivt i
+Beslutsmotorns egen kostnadsräkning (inte bara en kommentar i texten) —
+motorn är fortfarande en ren, synkron funktion; vädret hämtas asynkront i
+hooken och skickas sedan in som vanlig data, precis som profilen.
 
 "Köp"-knappen simulerar en order (uppdaterar sparande- och impact-dashboarden)
 — den skickar ingen riktig beställning till någon butik.

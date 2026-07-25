@@ -6,6 +6,7 @@ import {
   Brain,
   Car,
   Check,
+  CloudRain,
   Flame,
   Footprints,
   Fuel,
@@ -157,9 +158,17 @@ export const DecisionCard = memo(function DecisionCard({
         <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
           <Brain className="size-4" />
         </div>
-        <p className="text-sm font-medium leading-relaxed text-ink">
-          {decision.recommendationText}
-        </p>
+        <div>
+          <p className="text-sm font-medium leading-relaxed text-ink">
+            {decision.recommendationText}
+          </p>
+          {decision.weatherNote && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-muted">
+              <CloudRain className="size-3" />
+              {decision.weatherNote}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row">
