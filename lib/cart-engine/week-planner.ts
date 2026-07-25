@@ -1,54 +1,28 @@
 import { CATALOG, GROCERY_CATEGORIES, type CatalogItem, type GroceryCategory } from "@/lib/cart-engine/catalog";
-import { cheapestStoreFor, priceAt } from "@/lib/cart-engine/optimize";
-import { DEFAULT_STORE_BY_DOMAIN, STORES } from "@/lib/cart-engine/stores";
-import type { StoreId } from "@/lib/types";
+import { scanCatalogForDeals, type DealScanItem } from "@/lib/cart-engine/deal-scanner";
 
-export type WeeklyPlanItem = {
-  catalogId: string;
-  displayName: string;
-  category: GroceryCategory;
-  storeId: StoreId;
-  storeName: string;
-  priceSEK: number;
-  naivePriceSEK: number;
-  discountPct: number;
-  onCampaign: boolean;
-};
+export type WeeklyPlanItem = DealScanItem & { category: GroceryCategory };
 
 /** One item per aisle guaranteed, then the best remaining deals fill out
  *  a believable week's worth of groceries. */
 const TARGET_TOTAL_ITEMS = 12;
 
 /**
- * "Veckoplanering" — scans every grocery store's price and campaign state
- * for today (the same deterministic scan `optimizeItem` already runs per
- * item, just run across the whole catalog at once) and assembles the
- * week's cheapest believable shopping list: at least one deal per aisle,
- * then whatever else is discounted hardest. Pure and synchronous, same
- * dateKey always returns the same plan.
+ * "Veckoplanering" — runs the same cross-store deal scan every project
+ * uses (lib/cart-engine/deal-scanner.ts) across the whole grocery catalog,
+ * then curates it into a believable week: at least one deal per aisle,
+ * then whatever else is discounted hardest.
  */
 export function buildWeeklyPlan(dateKey: string): WeeklyPlanItem[] {
   const groceryItems = CATALOG.filter(
     (item): item is CatalogItem & { category: GroceryCategory } => item.domain === "grocery" && !!item.category
   );
+  const categoryById = new Map(groceryItems.map((item) => [item.id, item.category]));
 
-  const scored: WeeklyPlanItem[] = groceryItems.map((item) => {
-    const defaultStore = DEFAULT_STORE_BY_DOMAIN[item.domain];
-    const naivePriceSEK = Math.round(priceAt(item, defaultStore, dateKey));
-    const best = cheapestStoreFor(item, dateKey);
-    const discountPct = naivePriceSEK > 0 ? Math.round((1 - best.priceSEK / naivePriceSEK) * 100) : 0;
-    return {
-      catalogId: item.id,
-      displayName: item.displayName,
-      category: item.category,
-      storeId: best.storeId,
-      storeName: STORES[best.storeId].name,
-      priceSEK: best.priceSEK,
-      naivePriceSEK,
-      discountPct,
-      onCampaign: best.onCampaign,
-    };
-  });
+  const scored: WeeklyPlanItem[] = scanCatalogForDeals(groceryItems, dateKey).map((scan) => ({
+    ...scan,
+    category: categoryById.get(scan.catalogId)!,
+  }));
 
   const byCategory = new Map<GroceryCategory, WeeklyPlanItem[]>();
   for (const s of scored) {

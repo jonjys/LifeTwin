@@ -1,29 +1,57 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Hammer, Ruler } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, Hammer, Ruler, Tag } from "lucide-react";
 import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { scanCatalogForDeals, storesForDomain } from "@/lib/cart-engine";
 import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
 import { EASE, fadeUp } from "@/lib/motion";
 import { startDeckProject } from "@/lib/storage";
-import { formatSEK } from "@/lib/utils";
+import { formatSEK, todayKey } from "@/lib/utils";
+
+const BUILDING_STORES = storesForDomain("building");
+/** Purely a pace for the store-by-store reveal below — the scan itself
+ *  is instant and synchronous, this just lets you see it happen. */
+const SCAN_STEP_MS = 220;
 
 export default function DeckProjectPage() {
   const router = useRouter();
   const [widthM, setWidthM] = useState(4);
   const [depthM, setDepthM] = useState(3);
   const [planGenerated, setPlanGenerated] = useState(false);
+  const [scannedCount, setScannedCount] = useState(0);
 
   const materials = useMemo(
     () => (planGenerated ? generateDeckMaterialsCatalog(widthM, depthM) : []),
     [planGenerated, widthM, depthM]
   );
-  const totalSEK = materials.reduce((sum, m) => sum + m.basePriceSEK, 0);
+
+  const deals = useMemo(
+    () => (planGenerated ? scanCatalogForDeals(materials, todayKey()) : []),
+    [planGenerated, materials]
+  );
+
+  const scanning = planGenerated && scannedCount < BUILDING_STORES.length;
+  const totalSEK = deals.reduce((sum, d) => sum + d.priceSEK, 0);
+  const totalNaiveSEK = deals.reduce((sum, d) => sum + d.naivePriceSEK, 0);
+  const totalSavingsSEK = Math.max(0, totalNaiveSEK - totalSEK);
+
+  useEffect(() => {
+    if (!planGenerated) {
+      setScannedCount(0);
+      return;
+    }
+    setScannedCount(0);
+    const timers = BUILDING_STORES.map((_, i) =>
+      setTimeout(() => setScannedCount(i + 1), SCAN_STEP_MS * (i + 1))
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [planGenerated, widthM, depthM]);
 
   const handleContinue = () => {
     startDeckProject(widthM, depthM);
@@ -103,29 +131,83 @@ export default function DeckProjectPage() {
                 <CardTitle>
                   Altan {widthM} × {depthM} m
                 </CardTitle>
-                <span className="font-mono text-2xl font-bold tracking-tight text-ink">
-                  {formatSEK(totalSEK)}
-                </span>
+                {!scanning && (
+                  <div className="text-right">
+                    <span className="font-mono text-2xl font-bold tracking-tight text-ink">
+                      {formatSEK(totalSEK)}
+                    </span>
+                    {totalSavingsSEK > 0 && (
+                      <p className="text-xs font-medium text-success">
+                        Du sparar {formatSEK(totalSavingsSEK)}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div className="flex flex-col gap-3">
-                {materials.map((item, i) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: 0.06 * i, ease: EASE }}
-                    className="flex items-center justify-between gap-4 rounded-xl border border-border bg-surface-2/40 px-4 py-3"
+              <div className="flex flex-wrap gap-1.5">
+                {BUILDING_STORES.map((store, i) => (
+                  <motion.span
+                    key={store.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: i < scannedCount ? 1 : 0.25, scale: 1 }}
+                    transition={{ duration: 0.25, ease: EASE }}
+                    className="rounded-full border border-border bg-surface-2/50 px-2.5 py-1 text-[11px] font-medium text-ink-muted"
                   >
-                    <span className="text-sm font-medium text-ink">{item.displayName}</span>
-                    <span className="font-mono text-sm text-ink-secondary">
-                      {formatSEK(item.basePriceSEK)}
-                    </span>
-                  </motion.div>
+                    {i < scannedCount ? "✓ " : ""}
+                    {store.name}
+                  </motion.span>
                 ))}
               </div>
 
-              <Button size="xl" className="w-full" onClick={handleContinue}>
+              <AnimatePresence mode="wait">
+                {scanning ? (
+                  <motion.p
+                    key="scanning"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-sm text-ink-muted"
+                  >
+                    AI scannar butiker efter dagens priser…
+                  </motion.p>
+                ) : (
+                  <motion.div
+                    key="results"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col gap-2"
+                  >
+                    {deals.map((deal, i) => (
+                      <motion.div
+                        key={deal.catalogId}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.35, delay: 0.05 * i, ease: EASE }}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-2/40 px-4 py-2.5"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-ink">{deal.displayName}</p>
+                          <p className="truncate text-xs text-ink-muted">{deal.storeName}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          {deal.onCampaign && (
+                            <span className="flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5 text-[11px] font-medium text-warning">
+                              <Tag className="size-2.5" />
+                              Kampanj
+                            </span>
+                          )}
+                          <span className="font-mono text-sm text-ink-secondary">
+                            {formatSEK(deal.priceSEK)}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <Button size="xl" className="w-full" onClick={handleContinue} disabled={scanning}>
                 Fortsätt till inköp
                 <ArrowRight />
               </Button>

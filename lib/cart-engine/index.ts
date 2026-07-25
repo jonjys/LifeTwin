@@ -13,6 +13,7 @@ export {
   type GroceryCategory,
 } from "@/lib/cart-engine/catalog";
 export { buildWeeklyPlan, type WeeklyPlanItem } from "@/lib/cart-engine/week-planner";
+export { scanCatalogForDeals, type DealScanItem } from "@/lib/cart-engine/deal-scanner";
 
 function expandItems(rawItems: string[]): RequestedItem[] {
   const expanded: string[] = [];
