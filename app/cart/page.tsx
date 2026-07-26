@@ -14,6 +14,7 @@ import { ShoppingRouteCard } from "@/components/cart/shopping-route";
 import { ImpactDashboard } from "@/components/cart/impact-dashboard";
 import { AutoPurchase } from "@/components/cart/auto-purchase";
 import { MatsmartDeals } from "@/components/cart/matsmart-deals";
+import { RealIcaDeals } from "@/components/cart/real-ica-deals";
 import { NotificationsFeed } from "@/components/cart/notifications-feed";
 import { ComingSoon } from "@/components/cart/coming-soon";
 import { useSmartCart } from "@/hooks/use-smart-cart";
@@ -144,7 +145,11 @@ export default function CartPage() {
 
         {isGrocery && (
           <>
-            <motion.section {...fadeUp(0.28)} className="mt-4 grid gap-4 sm:mt-5 lg:grid-cols-2">
+            <motion.section {...fadeUp(0.28)} className="mt-4 sm:mt-5">
+              <RealIcaDeals />
+            </motion.section>
+
+            <motion.section {...fadeUp(0.3)} className="mt-4 grid gap-4 sm:mt-5 lg:grid-cols-2">
               <AutoPurchase
                 usualItems={state.usualItems}
                 onQuickBuy={quickBuyUsualItems}

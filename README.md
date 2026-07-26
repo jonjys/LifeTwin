@@ -71,6 +71,9 @@ beroende på vilket projekt du startar.
      inte är värd omvägen.
    - **Pengar sparade** — denna månad / i år / sedan installation, plus
      sparad tid, undvikna bilresor, kalorier promenerade och CO₂ sparad.
+   - **Verkliga ICA-erbjudanden** — inte simulerat: en live hämtad lista
+     från ica.se:s publika "veckans erbjudanden"-sida, tydligt märkt som
+     äkta till skillnad från resten av appens kampanjmärkningar.
    - Grocery-specifikt (döljs för andra projekt): **Automatiska inköp**
      (AI Memory-baserad återköp), **Matsmart fynd**, **Bevakning**-feeden,
      samt **AI Pantry**/**AI Meal Planner** ("Kommer snart").
@@ -181,6 +184,21 @@ kyla eller stark värme gör "Promenera" mätbart mindre attraktivt i
 Beslutsmotorns egen kostnadsräkning (inte bara en kommentar i texten) —
 motorn är fortfarande en ren, synkron funktion; vädret hämtas asynkront i
 hooken och skickas sedan in som vanlig data, precis som profilen.
+
+Priserna i övrigt är fortfarande simulerade, med ett uttryckligt undantag:
+`app/api/ica-offers/route.ts` hämtar live, på riktigt, ICA:s egen publika
+"veckans erbjudanden"-sida (samma sida vem som helst ser på ica.se) — inte
+en privat butiks-API, inte inloggade Stammis-priser, inte hela
+produktkatalogen. Servern cachar svaret i 6 timmar (Next.js `revalidate`
++ ett Vercel Cron-jobb som håller cachen varm, se `vercel.json`), så
+riktiga besökare aldrig utlöser en ny hämtning själva. De andra sju
+butikernas erbjudandesidor är byggda som JavaScript-appar där priserna
+laddas via anrop efter sidladdningen — ett enkelt, respektfullt sidhämtande
+skript ser dem inte, och att gå vidare (deras interna API, eller en
+huvudlös webbläsare som kringgår det) är en annan och juridiskt osäkrare
+avvägning som medvetet inte gjorts här. Verkliga ICA-priser blandas heller
+inte in i motorns egna, simulerade priser/kampanjer — de visas i ett eget,
+tydligt märkt kort, så det aldrig är oklart vad som är äkta.
 
 "Köp"-knappen simulerar en order (uppdaterar sparande- och impact-dashboarden)
 — den skickar ingen riktig beställning till någon butik.
