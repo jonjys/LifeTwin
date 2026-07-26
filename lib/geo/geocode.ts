@@ -41,3 +41,43 @@ export function geocodeAddress(address: string): Promise<LatLng | null> {
   cache.set(query, promise);
   return promise;
 }
+
+type NominatimAddress = {
+  road?: string;
+  pedestrian?: string;
+  house_number?: string;
+  city?: string;
+  town?: string;
+  village?: string;
+  municipality?: string;
+};
+
+function formatReverseAddress(displayName: string, address?: NominatimAddress): string {
+  if (!address) return displayName;
+  const street = address.road ?? address.pedestrian;
+  const streetLine = street && address.house_number ? `${street} ${address.house_number}` : street;
+  const city = address.city ?? address.town ?? address.village ?? address.municipality;
+  const parts = [streetLine, city].filter((p): p is string => Boolean(p));
+  return parts.length > 0 ? parts.join(", ") : displayName;
+}
+
+/**
+ * The reverse of geocodeAddress: turns a real coordinate (from the
+ * browser's own Geolocation API) into a human-readable Swedish address,
+ * via the same free Nominatim service. Used for "Använd min plats" on
+ * /profile — the user grants location once, real GPS coordinates come
+ * back, and this turns them into the address string the rest of the app
+ * already runs on. Falls back to null on any failure.
+ */
+export async function reverseGeocode(coords: LatLng): Promise<string | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}`;
+    const res = await fetchWithTimeout(url);
+    if (!res || !res.ok) return null;
+    const data = (await res.json()) as { display_name?: string; address?: NominatimAddress };
+    if (!data.display_name) return null;
+    return formatReverseAddress(data.display_name, data.address);
+  } catch {
+    return null;
+  }
+}
