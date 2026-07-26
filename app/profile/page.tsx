@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, LocateFixed } from "lucide-react";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { AddressMapPreview } from "@/components/profile/address-map-preview";
 import {
@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { STORE_LIST } from "@/lib/cart-engine";
+import { reverseGeocode } from "@/lib/geo/geocode";
 import { fadeUp } from "@/lib/motion";
 import { ensureState, saveProfile } from "@/lib/storage";
 import {
@@ -84,6 +85,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [saved, setSaved] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [locateError, setLocateError] = useState<string | null>(null);
 
   useEffect(() => {
     setProfile(ensureState().profile);
@@ -97,6 +100,34 @@ export default function ProfilePage() {
   const handleSave = () => {
     saveProfile(profile);
     setSaved(true);
+  };
+
+  const handleUseMyLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setLocateError("Din webbläsare stödjer inte platsdelning.");
+      return;
+    }
+    setLocating(true);
+    setLocateError(null);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const address = await reverseGeocode({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocating(false);
+        if (!address) {
+          setLocateError("Hittade ingen adress för din plats — skriv den manuellt istället.");
+          return;
+        }
+        update("homeAddress", address);
+      },
+      () => {
+        setLocating(false);
+        setLocateError("Platsdelning nekades eller misslyckades — skriv adressen manuellt istället.");
+      },
+      { timeout: 10000 }
+    );
   };
 
   const isVehicle = VEHICLE_MODES.has(profile.transportMode);
@@ -133,11 +164,26 @@ export default function ProfilePage() {
           <motion.div {...fadeUp(0.05)}>
             <Card className="flex flex-col gap-4">
               <CardTitle>Hemadress</CardTitle>
-              <TextField
-                value={profile.homeAddress}
-                onChange={(v) => update("homeAddress", v)}
-                placeholder="t.ex. Storgatan 12, Stockholm"
-              />
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="flex-1">
+                  <TextField
+                    value={profile.homeAddress}
+                    onChange={(v) => update("homeAddress", v)}
+                    placeholder="t.ex. Storgatan 12, Stockholm"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleUseMyLocation}
+                  disabled={locating}
+                  className="shrink-0"
+                >
+                  <LocateFixed className={locating ? "animate-pulse" : undefined} />
+                  {locating ? "Hämtar plats…" : "Använd min plats"}
+                </Button>
+              </div>
+              {locateError && <p className="text-xs text-danger">{locateError}</p>}
               <AddressMapPreview address={profile.homeAddress} />
               <p className="text-xs text-ink-muted">
                 Visas på en riktig karta — ProjektOS placerar butiker och rutter runt den här

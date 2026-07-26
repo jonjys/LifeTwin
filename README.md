@@ -18,8 +18,11 @@ beroende på vilket projekt du startar.
    och Bygga altan är byggda; Renovera badrum, Köpa ny TV, Flytta, Jul,
    Bröllop, Semester, Husdjur, Elektronik, Bilservice, Apotek och IKEA är
    "Kommer snart" — samma ärliga mönster som AI Pantry/Meal Planner.
-3. **Min Profil** (`/profile`) — hemadress (med en live kartförhandsvisning
-   som geokodar adressen på riktigt), transport (bil/elbil/cykel/går/…),
+3. **Min Profil** (`/profile`) — hemadress, skriven manuellt eller hämtad
+   på riktigt via "Använd min plats" (webbläsarens Geolocation-API +
+   omvänd geokodning mot Nominatim — godkänn en gång, adressen fylls i
+   automatiskt), med en live kartförhandsvisning som geokodar adressen på
+   riktigt. Transport (bil/elbil/cykel/går/…),
    bränsle- och slitagekostnad, tidsvärde (kr/h eller "låt AI uppskatta"),
    handlings- och matpreferenser, favoritbutiker, leveranspreferenser.
    Driver Beslutsmotorn för varje projekt — sätts en gång, förfinas när
