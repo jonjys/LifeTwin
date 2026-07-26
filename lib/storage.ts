@@ -14,6 +14,7 @@ export function loadState(): SmartCartState | null {
     if (!parsed?.createdAt) return null;
     // Older sessions won't have these fields yet — backfill defaults.
     if (!parsed.profile) parsed.profile = { ...DEFAULT_PROFILE };
+    if (parsed.profile.name === undefined) parsed.profile.name = "";
     if (!parsed.currentCategory) parsed.currentCategory = "grocery";
     if (parsed.deckDimensions === undefined) parsed.deckDimensions = null;
     return parsed;

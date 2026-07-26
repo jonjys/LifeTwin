@@ -13,11 +13,23 @@ beroende på vilket projekt du startar.
 
 ## Upplevelsen
 
-1. **Landing** — en rubrik, en knapp: "Starta ett projekt".
-2. **Projekt** (`/projects`) — Flik 1: välj vad du ska göra. Storhandla
-   och Bygga altan är byggda; Renovera badrum, Köpa ny TV, Flytta, Jul,
-   Bröllop, Semester, Husdjur, Elektronik, Bilservice, Apotek och IKEA är
-   "Kommer snart" — samma ärliga mönster som AI Pantry/Meal Planner.
+1. **Start** (`/`) — inte en landningssida, ett beslutsverktyg: en
+   hälsning, ett stort fält ("Vad behöver du idag?"), exempel-chips
+   (Veckohandling, Tacomiddag, Hundmat, Bygg altan, Ny TV, Semester,
+   Apotek) och en knapp: "Planera åt mig". Skriv fritt eller tryck ett
+   exempel — `lib/home-intent.ts` tolkar det till en matkasse, en
+   veckoplan, eller ett altanprojekt (allt annat är ärligt "inte byggt
+   ännu", inte gissat). En kort, animerad scanning-sekvens (samma motor,
+   bara pausad för effekt) mynnar ut i **ett** AI-rekommendationskort —
+   rekommenderade butiker, totalpris, en kompakt rad (spara/tid/butiker/
+   metod), tre konkreta skäl — med "Visa fullständig plan" till `/cart`
+   eller "Visa alternativ" inline. Allt får plats på en mobilskärm utan
+   scroll, i varje steg.
+2. **Projekt** (`/projects`) — Flik 1 för den som vill välja mer
+   medvetet istället för att skriva fritt: Storhandla och Bygga altan är
+   byggda; Renovera badrum, Köpa ny TV, Flytta, Jul, Bröllop, Semester,
+   Husdjur, Elektronik, Bilservice, Apotek och IKEA är "Kommer snart" —
+   samma ärliga mönster som AI Pantry/Meal Planner.
 3. **Min Profil** (`/profile`) — hemadress, skriven manuellt eller hämtad
    på riktigt via "Använd min plats" (webbläsarens Geolocation-API +
    omvänd geokodning mot Nominatim — godkänn en gång, adressen fylls i

@@ -161,6 +161,18 @@ export default function ProfilePage() {
         </motion.header>
 
         <div className="flex flex-col gap-4">
+          <motion.div {...fadeUp(0.02)}>
+            <Card className="flex flex-col gap-4">
+              <CardTitle>Namn</CardTitle>
+              <TextField
+                value={profile.name}
+                onChange={(v) => update("name", v)}
+                placeholder="t.ex. Alex"
+              />
+              <p className="text-xs text-ink-muted">Valfritt — används bara för hälsningen på startsidan.</p>
+            </Card>
+          </motion.div>
+
           <motion.div {...fadeUp(0.05)}>
             <Card className="flex flex-col gap-4">
               <CardTitle>Hemadress</CardTitle>

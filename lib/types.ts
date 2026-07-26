@@ -178,6 +178,8 @@ export const FOOD_PREFERENCES = [
 export type FoodPreference = (typeof FOOD_PREFERENCES)[number];
 
 export type UserProfile = {
+  /** Optional — used only for the home screen's greeting. */
+  name: string;
   homeAddress: string;
   transportMode: TransportMode;
   fuelType: FuelType;
@@ -206,6 +208,7 @@ export type UserProfile = {
 /** A sensible starting point so the Decision Engine works before anyone
  *  visits /profile — refining it only sharpens the recommendations. */
 export const DEFAULT_PROFILE: UserProfile = {
+  name: "",
   homeAddress: "",
   transportMode: "car",
   fuelType: "petrol",
