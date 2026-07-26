@@ -204,9 +204,10 @@ Priserna i övrigt är fortfarande simulerade, med ett uttryckligt undantag:
 `app/api/ica-offers/route.ts` hämtar live, på riktigt, ICA:s egen publika
 "veckans erbjudanden"-sida (samma sida vem som helst ser på ica.se) — inte
 en privat butiks-API, inte inloggade Stammis-priser, inte hela
-produktkatalogen. Servern cachar svaret i 6 timmar (Next.js `revalidate`
-+ ett Vercel Cron-jobb som håller cachen varm, se `vercel.json`), så
-riktiga besökare aldrig utlöser en ny hämtning själva. De andra sju
+produktkatalogen. Servern cachar svaret i 24 timmar (Next.js `revalidate`
++ ett dagligt Vercel Cron-jobb som håller cachen varm, se `vercel.json` —
+Vercels gratis Hobby-plan tillåter bara schemalagda jobb en gång per dag),
+så riktiga besökare aldrig utlöser en ny hämtning själva. De andra sju
 butikernas erbjudandesidor är byggda som JavaScript-appar där priserna
 laddas via anrop efter sidladdningen — ett enkelt, respektfullt sidhämtande
 skript ser dem inte, och att gå vidare (deras interna API, eller en

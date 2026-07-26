@@ -1,7 +1,11 @@
 import * as cheerio from "cheerio";
 import { NextResponse } from "next/server";
 
-export const revalidate = 21600; // 6 hours — real users never trigger a live scrape
+// 24 hours — matches the Vercel Cron below (Hobby-plan crons only run
+// once a day), so the cache's own freshness window lines up with how
+// often it can actually be proactively refreshed. Real users never
+// trigger a live scrape either way.
+export const revalidate = 86400;
 
 const SOURCE_URL = "https://www.ica.se/erbjudanden/";
 
