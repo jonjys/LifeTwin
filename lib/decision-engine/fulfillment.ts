@@ -166,9 +166,10 @@ export function computeFulfillmentOptions(
     recommended: false,
   };
 
-  // Bulky building materials aren't realistically carried home on foot —
-  // "Promenera" only makes sense for a grocery-domain cart.
-  const options = cart.domain === "building" ? [pickup, delivery] : [pickup, delivery, walk];
+  // Bulky building materials and heavy foder sacks aren't realistically
+  // carried home on foot — "Promenera" only makes sense for groceries.
+  const options =
+    cart.domain === "building" || cart.domain === "pet" ? [pickup, delivery] : [pickup, delivery, walk];
   const netCost = (opt: FulfillmentOption) => {
     const weatherPenaltyMin = opt.id === "walk" && weather?.harsh ? WALK_WEATHER_PENALTY_MIN : 0;
     return opt.totalSEK + ((opt.timeMin + weatherPenaltyMin) / 60) * hourlyValue;

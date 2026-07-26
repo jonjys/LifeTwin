@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { buildCart, buildWeeklyPlan, CATALOG, STORES } from "@/lib/cart-engine";
 import { DECK_ITEM_IDS, generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
+import { ALL_PET_ITEM_IDS, CAT_ITEM_IDS, DOG_ITEM_IDS, generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
 import type { CatalogItem } from "@/lib/cart-engine/catalog";
 import {
   buildRecommendationSummary,
@@ -25,7 +26,7 @@ import {
 } from "@/lib/decision-engine";
 import { interpretHomeQuery, type HomeIntent } from "@/lib/home-intent";
 import { EASE } from "@/lib/motion";
-import { ensureState, recordList, startDeckProject } from "@/lib/storage";
+import { ensureState, recordList, startDeckProject, startPetProject } from "@/lib/storage";
 import { DEFAULT_PROFILE, type CartResult, type ProjectCategory, type UserProfile } from "@/lib/types";
 import { formatSEK, todayKey } from "@/lib/utils";
 
@@ -75,6 +76,15 @@ function runIntent(intent: HomeIntent, profile: UserProfile, usualItems: string[
     items = DECK_ITEM_IDS;
     category = "deck";
     catalog = generateDeckMaterialsCatalog(4, 3);
+  } else if (intent.kind === "pet") {
+    items =
+      intent.hasDog && !intent.hasCat
+        ? DOG_ITEM_IDS
+        : intent.hasCat && !intent.hasDog
+          ? CAT_ITEM_IDS
+          : ALL_PET_ITEM_IDS;
+    category = "pet";
+    catalog = generatePetCatalog(intent.hasDog, intent.hasCat);
   } else if (intent.kind === "grocery") {
     if (intent.items.length === 0) return null;
     items = intent.items;
@@ -150,8 +160,16 @@ export default function HomePage() {
 
   const handleViewFullPlan = () => {
     if (!result) return;
-    if (result.category === "deck") startDeckProject(4, 3);
-    else recordList(result.items);
+    if (result.category === "deck") {
+      startDeckProject(4, 3);
+    } else if (result.category === "pet") {
+      const intent = pendingIntent.current;
+      const hasDog = intent?.kind === "pet" ? intent.hasDog : true;
+      const hasCat = intent?.kind === "pet" ? intent.hasCat : false;
+      startPetProject(hasDog, hasCat);
+    } else {
+      recordList(result.items);
+    }
     router.push("/cart");
   };
 

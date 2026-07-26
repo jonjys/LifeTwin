@@ -5,6 +5,7 @@ import { buildCart, CATALOG } from "@/lib/cart-engine";
 import { usesFuel } from "@/lib/cart-engine/distance";
 import { findMatsmartDeals } from "@/lib/cart-engine/matsmart";
 import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
+import { CAT_ITEM_IDS, DOG_ITEM_IDS, generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
 import {
   computeFulfillmentOptions,
   buildShoppingRoute,
@@ -81,7 +82,12 @@ export function useSmartCart(): UseSmartCart {
       const catalog: CatalogItem[] =
         loaded.currentCategory === "deck" && loaded.deckDimensions
           ? generateDeckMaterialsCatalog(loaded.deckDimensions.widthM, loaded.deckDimensions.depthM)
-          : CATALOG;
+          : loaded.currentCategory === "pet"
+            ? generatePetCatalog(
+                loaded.currentItems.some((id) => DOG_ITEM_IDS.includes(id)),
+                loaded.currentItems.some((id) => CAT_ITEM_IDS.includes(id))
+              )
+            : CATALOG;
       setCart(buildCart(loaded.currentItems, todayKey(), loaded.usualItems, catalog));
     }
     setLoading(false);
@@ -138,6 +144,7 @@ export function useSmartCart(): UseSmartCart {
         carTripAvoided: fulfillmentId !== "pickup" && usesFuel(state.profile.transportMode),
         caloriesWalked: chosen.calories,
         co2SavedGrams: chosen.co2Grams,
+        category: state.currentCategory,
       });
       setState(next);
       setJustOrdered(true);
@@ -164,6 +171,7 @@ export function useSmartCart(): UseSmartCart {
       carTripAvoided: winner.id !== "pickup" && usesFuel(state.profile.transportMode),
       caloriesWalked: winner.calories,
       co2SavedGrams: winner.co2Grams,
+      category: state.currentCategory,
     });
     setState(next);
     setJustQuickBought(true);

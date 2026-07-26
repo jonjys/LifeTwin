@@ -12,13 +12,17 @@ export const STORE_IDS = [
   "bauhaus",
   "beijer",
   "xlbygg",
+  "arkenzoo",
+  "granngarden",
+  "vetzoo",
+  "zooplus",
 ] as const;
 
 export type StoreId = (typeof STORE_IDS)[number];
 
 /** Every project category draws from one retailer domain — a grocery
  *  store never gets compared against a building-materials store. */
-export type StoreDomain = "grocery" | "building";
+export type StoreDomain = "grocery" | "building" | "pet";
 
 export type Store = {
   id: StoreId;
@@ -36,7 +40,7 @@ export type Store = {
 /* Projects — the top-level entity everything else hangs off           */
 /* ------------------------------------------------------------------ */
 
-export const PROJECT_CATEGORIES = ["grocery", "deck"] as const;
+export const PROJECT_CATEGORIES = ["grocery", "deck", "pet"] as const;
 export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
 
 /** One line the user asked for, e.g. "mjölk" or "tacos" (a meal, expanded to items). */
@@ -123,6 +127,8 @@ export type OrderRecord = {
   carTripAvoided?: boolean;
   caloriesWalked?: number;
   co2SavedGrams?: number;
+  /** Which project this order belonged to — shown in order history. */
+  category?: ProjectCategory;
 };
 
 /* ------------------------------------------------------------------ */
