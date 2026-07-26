@@ -2,5 +2,11 @@
   "framework": "nextjs",
   "buildCommand": "next build",
   "installCommand": "npm install",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "crons": [
+    {
+      "path": "/api/ica-offers",
+      "schedule": "0 */6 * * *"
+    }
+  ]
 }
