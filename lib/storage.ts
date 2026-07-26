@@ -1,4 +1,5 @@
 import { DECK_ITEM_IDS } from "@/lib/cart-engine/materials-catalog";
+import { ALL_PET_ITEM_IDS, CAT_ITEM_IDS, DOG_ITEM_IDS } from "@/lib/cart-engine/pet-catalog";
 import { DEFAULT_PROFILE } from "@/lib/types";
 import type { OrderRecord, SmartCartState, UserProfile } from "@/lib/types";
 
@@ -89,6 +90,21 @@ export function startDeckProject(widthM: number, depthM: number): SmartCartState
     currentItems: DECK_ITEM_IDS,
     currentCategory: "deck",
     deckDimensions: { widthM, depthM },
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts a "Husdjur" project — dog and/or cat items, no dimensions to
+ *  set (unlike the deck project), so no extra params to persist. */
+export function startPetProject(hasDog: boolean, hasCat: boolean): SmartCartState {
+  const state = ensureState();
+  const items = hasDog && !hasCat ? DOG_ITEM_IDS : hasCat && !hasDog ? CAT_ITEM_IDS : ALL_PET_ITEM_IDS;
+  const next: SmartCartState = {
+    ...state,
+    currentItems: items,
+    currentCategory: "pet",
+    deckDimensions: null,
   };
   saveState(next);
   return next;

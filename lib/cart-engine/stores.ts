@@ -1,13 +1,14 @@
 import type { Store, StoreDomain, StoreId } from "@/lib/types";
 
 /**
- * Thirteen retailers across two domains — seven Swedish grocery chains
- * plus one deals outlet, and five building-materials chains for the
- * "bygga altan" project. Each has a distinct price personality and
- * delivery profile; multipliers are applied on top of each catalog
- * item's base price, nothing here calls a real pricing API. The same
- * engine (lib/cart-engine, lib/decision-engine) reads this one table
- * for every project — it only ever filters by `domain`, it never forks.
+ * Seventeen retailers across three domains — seven Swedish grocery
+ * chains plus one deals outlet, five building-materials chains for
+ * "bygga altan", and four pet-supply chains for "husdjur". Each has a
+ * distinct price personality and delivery profile; multipliers are
+ * applied on top of each catalog item's base price, nothing here calls a
+ * real pricing API. The same engine (lib/cart-engine, lib/decision-engine)
+ * reads this one table for every project — it only ever filters by
+ * `domain`, it never forks.
  */
 export const STORES: Record<StoreId, Store & { priceMultiplier: number }> = {
   ica: {
@@ -146,6 +147,49 @@ export const STORES: Record<StoreId, Store & { priceMultiplier: number }> = {
     deliveryFeeSEK: 219,
     domain: "building",
   },
+  arkenzoo: {
+    id: "arkenzoo",
+    name: "Arken Zoo",
+    tag: "AZ",
+    color: "#FF4D5A",
+    priceMultiplier: 1.05,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 49,
+    domain: "pet",
+  },
+  granngarden: {
+    id: "granngarden",
+    name: "Granngården",
+    tag: "GG",
+    color: "#00FF88",
+    // Farm-supply roots — strong on bulk foder, weaker on delivery speed.
+    priceMultiplier: 0.92,
+    deliveryEtaMin: 2880,
+    deliveryFeeSEK: 79,
+    domain: "pet",
+  },
+  vetzoo: {
+    id: "vetzoo",
+    name: "Vetzoo",
+    tag: "VZ",
+    color: "#00E8FF",
+    priceMultiplier: 0.88,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 39,
+    domain: "pet",
+  },
+  zooplus: {
+    id: "zooplus",
+    name: "Zooplus",
+    tag: "ZP",
+    color: "#FFB020",
+    // European-scale online retailer — the price leader, but ships from
+    // further away.
+    priceMultiplier: 0.85,
+    deliveryEtaMin: 4320,
+    deliveryFeeSEK: 29,
+    domain: "pet",
+  },
 };
 
 export const STORE_LIST = Object.values(STORES);
@@ -158,4 +202,5 @@ export function storesForDomain(domain: StoreDomain) {
 export const DEFAULT_STORE_BY_DOMAIN: Record<StoreDomain, StoreId> = {
   grocery: "ica",
   building: "byggmax",
+  pet: "arkenzoo",
 };

@@ -82,8 +82,8 @@ const PROJECT_TILES: ProjectTile[] = [
   {
     icon: PawPrint,
     title: "Husdjur",
-    description: "Billigaste hundmaten, återkommande och optimerad per kilo.",
-    comingSoon: true,
+    description: "Billigaste hund- och kattmaten, jämfört över fyra djuraffärer.",
+    href: "/projects/pet",
   },
   {
     icon: Cpu,
