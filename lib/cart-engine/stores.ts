@@ -1,15 +1,16 @@
 import type { Store, StoreDomain, StoreId } from "@/lib/types";
 
 /**
- * Twenty-five retailers across five domains — seven Swedish grocery
+ * Twenty-nine retailers across six domains — seven Swedish grocery
  * chains plus one deals outlet, five building-materials chains for
  * "bygga altan", four pet-supply chains for "husdjur", four electronics
- * chains for "elektronik", and four pharmacy chains for "apotek". Each
- * has a distinct price personality and delivery profile; multipliers are
- * applied on top of each catalog item's base price, nothing here calls a
- * real pricing API. The same engine (lib/cart-engine, lib/decision-engine)
- * reads this one table for every project — it only ever filters by
- * `domain`, it never forks.
+ * chains for "elektronik", four pharmacy chains for "apotek", and four
+ * car-service chains for "bilservice". Each has a distinct price
+ * personality and delivery profile; multipliers are applied on top of
+ * each catalog item's base price, nothing here calls a real pricing API.
+ * The same engine (lib/cart-engine, lib/decision-engine) reads this one
+ * table for every project — it only ever filters by `domain`, it never
+ * forks.
  */
 export const STORES: Record<StoreId, Store & { priceMultiplier: number }> = {
   ica: {
@@ -273,6 +274,48 @@ export const STORES: Record<StoreId, Store & { priceMultiplier: number }> = {
     deliveryFeeSEK: 0,
     domain: "pharmacy",
   },
+  mekonomen: {
+    id: "mekonomen",
+    name: "Mekonomen",
+    tag: "MEK",
+    color: "#FF4D5A",
+    priceMultiplier: 1.0,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 0,
+    domain: "auto",
+  },
+  euromaster: {
+    id: "euromaster",
+    name: "Euromaster",
+    tag: "EM",
+    color: "#00E8FF",
+    priceMultiplier: 1.04,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 0,
+    domain: "auto",
+  },
+  bilia: {
+    id: "bilia",
+    name: "Bilia",
+    tag: "BI",
+    color: "#00FF88",
+    // Dealership-affiliated — premium parts, premium price.
+    priceMultiplier: 1.12,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 0,
+    domain: "auto",
+  },
+  okq8: {
+    id: "okq8",
+    name: "OKQ8",
+    tag: "OK",
+    color: "#FFB020",
+    // Fuel-station-chain scale — usually the price leader on basics.
+    priceMultiplier: 0.9,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 0,
+    domain: "auto",
+  },
 };
 
 export const STORE_LIST = Object.values(STORES);
@@ -288,4 +331,5 @@ export const DEFAULT_STORE_BY_DOMAIN: Record<StoreDomain, StoreId> = {
   pet: "arkenzoo",
   electronics: "elgiganten",
   pharmacy: "apoteket",
+  auto: "mekonomen",
 };

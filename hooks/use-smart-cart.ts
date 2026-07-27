@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { buildCart, CATALOG } from "@/lib/cart-engine";
 import { generateApotekCatalog } from "@/lib/cart-engine/apotek-catalog";
+import { generateAutoCatalog } from "@/lib/cart-engine/auto-catalog";
 import { usesFuel } from "@/lib/cart-engine/distance";
 import { generateElectronicsCatalog } from "@/lib/cart-engine/electronics-catalog";
 import { findMatsmartDeals } from "@/lib/cart-engine/matsmart";
@@ -93,7 +94,9 @@ export function useSmartCart(): UseSmartCart {
               ? generateElectronicsCatalog()
               : loaded.currentCategory === "pharmacy"
                 ? generateApotekCatalog()
-                : CATALOG;
+                : loaded.currentCategory === "auto"
+                  ? generateAutoCatalog()
+                  : CATALOG;
       setCart(buildCart(loaded.currentItems, todayKey(), loaded.usualItems, catalog));
     }
     setLoading(false);

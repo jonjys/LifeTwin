@@ -152,6 +152,20 @@ export function startApotekProject(selectedIds: string[]): SmartCartState {
   return next;
 }
 
+/** Starts a "Bilservice" project — whichever car-service parts the user
+ *  picked on the intake page, from the fixed auto catalog. */
+export function startAutoProject(selectedIds: string[]): SmartCartState {
+  const state = ensureState();
+  const next: SmartCartState = {
+    ...state,
+    currentItems: selectedIds,
+    currentCategory: "auto",
+    deckDimensions: null,
+  };
+  saveState(next);
+  return next;
+}
+
 /** Records a completed checkout, growing the savings + impact dashboard. */
 export function recordOrder(order: OrderRecord): SmartCartState {
   const state = ensureState();

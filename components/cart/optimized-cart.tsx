@@ -39,6 +39,11 @@ const CART_LABEL: Record<CartResult["domain"], { title: string; changed: string;
     changed: "Jag räknade om var du ska köpa varje sak.",
     unchanged: "Ditt inköp är redan optimerat.",
   },
+  auto: {
+    title: "Ditt bilserviceköp",
+    changed: "Jag räknade om var du ska köpa varje sak.",
+    unchanged: "Ditt inköp är redan optimerat.",
+  },
 };
 
 /** Groups in first-seen order — a stable, believable "in order" read

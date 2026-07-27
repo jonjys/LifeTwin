@@ -87,8 +87,8 @@ const PROJECT_TILES: ProjectTile[] = [
   {
     icon: Car,
     title: "Bilservice",
-    description: "Olja, filter och bromsar jämfört över verkstäder.",
-    comingSoon: true,
+    description: "Olja, filter och bromsar jämfört över fyra verkstadskedjor.",
+    href: "/projects/auto",
   },
   {
     icon: Pill,

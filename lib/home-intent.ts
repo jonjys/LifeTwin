@@ -5,6 +5,7 @@ export type HomeIntent =
   | { kind: "pet"; hasDog: boolean; hasCat: boolean }
   | { kind: "electronics" }
   | { kind: "pharmacy" }
+  | { kind: "auto" }
   | { kind: "unsupported"; label: string };
 
 const DECK_KEYWORDS = ["altan", "deck", "trall", "uterum"];
@@ -13,6 +14,7 @@ const DOG_KEYWORDS = ["hundmat", "hund"];
 const CAT_KEYWORDS = ["kattmat", "katt"];
 const ELECTRONICS_KEYWORDS = ["ny tv", "elektronik", "hdmi", "tv "];
 const PHARMACY_KEYWORDS = ["apotek", "medicin", "recept", "smärtstillande", "vitamin"];
+const AUTO_KEYWORDS = ["bilservice", "bilverkstad", "motorolja", "bromsklossar", "bromsar", "bilen"];
 
 /** Categories the app doesn't actually run yet (see /projects "Kommer
  *  snart" tiles) — matched so the home screen can say so honestly
@@ -23,7 +25,6 @@ const UNSUPPORTED_CATEGORIES: { keywords: string[]; label: string }[] = [
   { keywords: [" jul", "julklapp"], label: "Jul" },
   { keywords: ["flytt", "flytta"], label: "Flytt" },
   { keywords: ["badrum", "renovera"], label: "Renovera badrum" },
-  { keywords: ["bilservice", "bilverkstad", "olja", "bromsar"], label: "Bilservice" },
   { keywords: ["ikea"], label: "IKEA" },
 ];
 
@@ -47,6 +48,7 @@ export function interpretHomeQuery(raw: string): HomeIntent {
   if (WEEK_KEYWORDS.some((k) => text.includes(k))) return { kind: "week" };
   if (ELECTRONICS_KEYWORDS.some((k) => text.includes(k))) return { kind: "electronics" };
   if (PHARMACY_KEYWORDS.some((k) => text.includes(k))) return { kind: "pharmacy" };
+  if (AUTO_KEYWORDS.some((k) => text.includes(k))) return { kind: "auto" };
 
   const hasDog = DOG_KEYWORDS.some((k) => text.includes(k));
   const hasCat = CAT_KEYWORDS.some((k) => text.includes(k));

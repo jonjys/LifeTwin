@@ -24,13 +24,17 @@ export const STORE_IDS = [
   "apotekhjartat",
   "kronansapotek",
   "apotea",
+  "mekonomen",
+  "euromaster",
+  "bilia",
+  "okq8",
 ] as const;
 
 export type StoreId = (typeof STORE_IDS)[number];
 
 /** Every project category draws from one retailer domain — a grocery
  *  store never gets compared against a building-materials store. */
-export type StoreDomain = "grocery" | "building" | "pet" | "electronics" | "pharmacy";
+export type StoreDomain = "grocery" | "building" | "pet" | "electronics" | "pharmacy" | "auto";
 
 export type Store = {
   id: StoreId;
@@ -48,7 +52,7 @@ export type Store = {
 /* Projects — the top-level entity everything else hangs off           */
 /* ------------------------------------------------------------------ */
 
-export const PROJECT_CATEGORIES = ["grocery", "deck", "pet", "electronics", "pharmacy"] as const;
+export const PROJECT_CATEGORIES = ["grocery", "deck", "pet", "electronics", "pharmacy", "auto"] as const;
 export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
 
 /** One line the user asked for, e.g. "mjölk" or "tacos" (a meal, expanded to items). */

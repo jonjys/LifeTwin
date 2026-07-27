@@ -167,9 +167,9 @@ export function computeFulfillmentOptions(
     recommended: false,
   };
 
-  // Bulky building materials, heavy foder sacks, and TVs aren't
-  // realistically carried home on foot — "Promenera" only makes sense
-  // for groceries and small pharmacy items.
+  // Bulky building materials, heavy foder sacks, TVs, and car parts
+  // (motor oil, brake pads) aren't realistically carried home on foot —
+  // "Promenera" only makes sense for groceries and small pharmacy items.
   const WALKABLE_DOMAINS: StoreDomain[] = ["grocery", "pharmacy"];
   const options = WALKABLE_DOMAINS.includes(cart.domain) ? [pickup, delivery, walk] : [pickup, delivery];
   const netCost = (opt: FulfillmentOption) => {
