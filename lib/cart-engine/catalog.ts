@@ -39,6 +39,20 @@ type GroceryItemInput = Omit<CatalogItem, "domain">;
  */
 const GROCERY_ITEMS: GroceryItemInput[] = [
   {
+    // Must come before "mjolk" below — its own "lattmjolk" keyword is a
+    // substring of "mjolk"'s keyword match order would otherwise never
+    // let a request for lättmjölk resolve to anything but regular mjölk
+    // (matchCatalogItem is first-array-hit; see catalog.test.ts).
+    id: "lattmjolk",
+    keywords: ["lättmjölk", "lattmjolk"],
+    displayName: "Lättmjölk",
+    unitLabel: "liter",
+    basePriceSEK: 14,
+    naiveBrand: "Arla",
+    smartBrand: "ICA Basic",
+    category: "Kylvaror",
+  },
+  {
     id: "mjolk",
     keywords: ["mjölk", "mjolk", "milk"],
     displayName: "Mjölk",
@@ -47,16 +61,6 @@ const GROCERY_ITEMS: GroceryItemInput[] = [
     naiveBrand: "Arla",
     smartBrand: "ICA Basic",
     bulkPack: { naiveUnits: 2, bulkPriceSEK: 19, bulkLabel: "1 stor (2L)" },
-    category: "Kylvaror",
-  },
-  {
-    id: "lattmjolk",
-    keywords: ["lättmjölk", "lattmjolk"],
-    displayName: "Lättmjölk",
-    unitLabel: "liter",
-    basePriceSEK: 14,
-    naiveBrand: "Arla",
-    smartBrand: "ICA Basic",
     category: "Kylvaror",
   },
   {
