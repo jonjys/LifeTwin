@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -105,8 +105,6 @@ const PROJECT_TILES: ProjectTile[] = [
 ];
 
 export default function ProjectsPage() {
-  const router = useRouter();
-
   return (
     <main className="relative min-h-screen px-5 pb-16 pt-6 sm:px-8 sm:pt-8">
       <AmbientBackground />
@@ -136,6 +134,41 @@ export default function ProjectsPage() {
           {PROJECT_TILES.map((tile, i) => {
             const Icon = tile.icon;
             const clickable = "href" in tile;
+            const card = (
+              <Card
+                className={cn(
+                  "flex h-full flex-col gap-3 p-5 transition-all duration-200",
+                  clickable
+                    ? "cursor-pointer hover:border-primary/40 hover:shadow-glow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    : "border-dashed opacity-70"
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex size-11 items-center justify-center rounded-xl border border-border bg-surface-2 text-ink-secondary">
+                    <Icon className="size-5" />
+                  </div>
+                  {!clickable && (
+                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
+                      Kommer snart
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-semibold normal-case tracking-normal text-ink">
+                    {tile.title}
+                  </CardTitle>
+                  <p className="mt-1.5 text-sm leading-relaxed text-ink-secondary">
+                    {tile.description}
+                  </p>
+                </div>
+                {clickable && (
+                  <span className="mt-auto flex items-center gap-1.5 text-sm font-medium text-primary">
+                    Starta
+                    <ArrowRight className="size-3.5" />
+                  </span>
+                )}
+              </Card>
+            );
             return (
               <motion.div
                 key={tile.title}
@@ -143,42 +176,7 @@ export default function ProjectsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.06 * i, ease: EASE }}
               >
-                <Card
-                  role={clickable ? "button" : undefined}
-                  tabIndex={clickable ? 0 : undefined}
-                  onClick={clickable ? () => router.push(tile.href) : undefined}
-                  className={cn(
-                    "flex h-full flex-col gap-3 p-5 transition-all duration-200",
-                    clickable
-                      ? "cursor-pointer hover:border-primary/40 hover:shadow-glow-sm"
-                      : "border-dashed opacity-70"
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex size-11 items-center justify-center rounded-xl border border-border bg-surface-2 text-ink-secondary">
-                      <Icon className="size-5" />
-                    </div>
-                    {!clickable && (
-                      <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink-muted">
-                        Kommer snart
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <CardTitle className="text-sm font-semibold normal-case tracking-normal text-ink">
-                      {tile.title}
-                    </CardTitle>
-                    <p className="mt-1.5 text-sm leading-relaxed text-ink-secondary">
-                      {tile.description}
-                    </p>
-                  </div>
-                  {clickable && (
-                    <span className="mt-auto flex items-center gap-1.5 text-sm font-medium text-primary">
-                      Starta
-                      <ArrowRight className="size-3.5" />
-                    </span>
-                  )}
-                </Card>
+                {clickable ? <Link href={tile.href}>{card}</Link> : card}
               </motion.div>
             );
           })}

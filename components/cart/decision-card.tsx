@@ -50,6 +50,7 @@ function OptionCard({
     <button
       type="button"
       onClick={onSelect}
+      aria-pressed={selected}
       className={cn(
         "relative flex flex-1 flex-col gap-3 rounded-2xl border p-5 text-left transition-all duration-200",
         selected

@@ -224,9 +224,10 @@ export default function HomePage() {
           </div>
           <Link
             href="/profile"
+            aria-label="Min profil"
             className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface-2/50 text-ink-muted transition-colors hover:text-ink"
           >
-            <UserCog className="size-4" />
+            <UserCog className="size-4" aria-hidden="true" />
           </Link>
         </motion.div>
 
@@ -269,9 +270,9 @@ export default function HomePage() {
                       key={ex.label}
                       type="button"
                       onClick={() => handleExample(ex)}
-                      className="rounded-full border border-border bg-surface-2/50 px-3.5 py-1.5 text-sm text-ink-secondary transition-colors hover:border-white/20 hover:text-ink"
+                      className="rounded-full border border-border bg-surface-2/50 px-3.5 py-1.5 text-sm text-ink-secondary transition-colors hover:border-white/20 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
-                      {ex.emoji} {ex.label}
+                      <span aria-hidden="true">{ex.emoji}</span> {ex.label}
                     </button>
                   ))}
                 </div>

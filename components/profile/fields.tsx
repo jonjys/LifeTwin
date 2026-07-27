@@ -29,8 +29,10 @@ export function SingleChipGroup({
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
+          aria-pressed={value === opt.value}
           className={cn(
             "rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             value === opt.value
               ? "border-primary/50 bg-primary/10 text-primary"
               : "border-border bg-surface-2/50 text-ink-secondary hover:border-white/20 hover:text-ink"
@@ -64,8 +66,10 @@ export function MultiChipGroup({
           key={opt.value}
           type="button"
           onClick={() => toggle(opt.value)}
+          aria-pressed={values.includes(opt.value)}
           className={cn(
             "rounded-full border px-4 py-2 text-sm font-medium transition-colors duration-200",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
             values.includes(opt.value)
               ? "border-primary/50 bg-primary/10 text-primary"
               : "border-border bg-surface-2/50 text-ink-secondary hover:border-white/20 hover:text-ink"
