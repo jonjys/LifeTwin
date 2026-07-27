@@ -35,6 +35,10 @@ describe("interpretHomeQuery", () => {
     expect(interpretHomeQuery("apotek")).toEqual({ kind: "pharmacy" });
   });
 
+  it("recognizes a car-service request", () => {
+    expect(interpretHomeQuery("bilservice")).toEqual({ kind: "auto" });
+  });
+
   it("flags genuinely unsupported categories honestly instead of mis-parsing them", () => {
     expect(interpretHomeQuery("semester i spanien")).toEqual({ kind: "unsupported", label: "Semester" });
     expect(interpretHomeQuery("ikea")).toEqual({ kind: "unsupported", label: "IKEA" });

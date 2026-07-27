@@ -14,6 +14,7 @@ const ROUTES = [
   "/projects/pet",
   "/projects/electronics",
   "/projects/pharmacy",
+  "/projects/auto",
   "/profile",
 ];
 

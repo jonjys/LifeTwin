@@ -4,6 +4,7 @@ import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalo
 import { generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
 import { generateElectronicsCatalog } from "@/lib/cart-engine/electronics-catalog";
 import { generateApotekCatalog } from "@/lib/cart-engine/apotek-catalog";
+import { generateAutoCatalog } from "@/lib/cart-engine/auto-catalog";
 import { computeFulfillmentOptions } from "@/lib/decision-engine";
 import { DEFAULT_PROFILE, type UserProfile } from "@/lib/types";
 
@@ -37,6 +38,12 @@ describe("computeFulfillmentOptions", () => {
 
   it("excludes walk for a TV", () => {
     const cart = buildCart(["tv-65"], DAY, [], generateElectronicsCatalog());
+    const decision = computeFulfillmentOptions(cart, profile);
+    expect(decision.options.map((o) => o.id).sort()).toEqual(["delivery", "pickup"]);
+  });
+
+  it("excludes walk for car-service parts", () => {
+    const cart = buildCart(["motorolja"], DAY, [], generateAutoCatalog());
     const decision = computeFulfillmentOptions(cart, profile);
     expect(decision.options.map((o) => o.id).sort()).toEqual(["delivery", "pickup"]);
   });

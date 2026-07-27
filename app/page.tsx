@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { buildCart, buildWeeklyPlan, CATALOG, STORES } from "@/lib/cart-engine";
 import { APOTEK_ITEM_IDS, generateApotekCatalog } from "@/lib/cart-engine/apotek-catalog";
+import { AUTO_ITEM_IDS, generateAutoCatalog } from "@/lib/cart-engine/auto-catalog";
 import { generateElectronicsCatalog, tvItemId } from "@/lib/cart-engine/electronics-catalog";
 import { DECK_ITEM_IDS, generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
 import { ALL_PET_ITEM_IDS, CAT_ITEM_IDS, DOG_ITEM_IDS, generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
@@ -32,6 +33,7 @@ import {
   ensureState,
   recordList,
   startApotekProject,
+  startAutoProject,
   startDeckProject,
   startElectronicsProject,
   startPetProject,
@@ -49,13 +51,16 @@ const EXAMPLES = [
   { emoji: "📺", label: "Ny TV", query: "ny tv" },
   { emoji: "✈️", label: "Semester", query: "semester" },
   { emoji: "💊", label: "Apotek", query: "apotek" },
+  { emoji: "🔧", label: "Bilservice", query: "bilservice" },
 ] as const;
 
 /** Free-text/chip defaults when the query doesn't say more than
- *  "ny tv" or "apotek" — /projects/electronics and /projects/pharmacy let
- *  you refine size/selection before checkout. */
+ *  "ny tv", "apotek", or "bilservice" — /projects/electronics,
+ *  /projects/pharmacy, and /projects/auto let you refine the selection
+ *  before checkout. */
 const DEFAULT_ELECTRONICS_SIZE = 55 as const;
 const DEFAULT_APOTEK_ITEMS = APOTEK_ITEM_IDS.slice(0, 3);
+const DEFAULT_AUTO_ITEMS = AUTO_ITEM_IDS.slice(0, 2);
 
 const SCAN_STEPS = [
   "Läser vad du behöver…",
@@ -108,6 +113,10 @@ function runIntent(intent: HomeIntent, profile: UserProfile, usualItems: string[
     items = DEFAULT_APOTEK_ITEMS;
     category = "pharmacy";
     catalog = generateApotekCatalog();
+  } else if (intent.kind === "auto") {
+    items = DEFAULT_AUTO_ITEMS;
+    category = "auto";
+    catalog = generateAutoCatalog();
   } else if (intent.kind === "grocery") {
     if (intent.items.length === 0) return null;
     items = intent.items;
@@ -194,6 +203,8 @@ export default function HomePage() {
       startElectronicsProject(DEFAULT_ELECTRONICS_SIZE, false, false);
     } else if (result.category === "pharmacy") {
       startApotekProject(DEFAULT_APOTEK_ITEMS);
+    } else if (result.category === "auto") {
+      startAutoProject(DEFAULT_AUTO_ITEMS);
     } else {
       recordList(result.items);
     }

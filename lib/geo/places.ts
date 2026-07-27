@@ -36,6 +36,10 @@ const BRAND_QUERY: Partial<Record<StoreId, string>> = {
   apoteket: "Apoteket",
   apotekhjartat: "Apotek Hjärtat",
   kronansapotek: "Kronans Apotek",
+  mekonomen: "Mekonomen",
+  euromaster: "Euromaster",
+  bilia: "Bilia",
+  okq8: "OKQ8",
 };
 
 export type RealStoreMatch = { coords: LatLng; name: string };
