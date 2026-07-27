@@ -213,6 +213,7 @@ export default function BuildListPage() {
                 type="button"
                 onClick={toggleListening}
                 aria-label="Lägg till med rösten"
+                aria-pressed={listening}
                 className={cn(
                   "flex size-11 shrink-0 items-center justify-center rounded-xl border transition-colors duration-200",
                   listening
@@ -260,10 +261,11 @@ export default function BuildListPage() {
                       whileHover={{ scale: 1.03 }}
                       transition={{ duration: 0.2, ease: EASE }}
                       onClick={() => removeItem(item)}
+                      aria-label={`Ta bort ${item}`}
                       className="group flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-sm font-medium text-primary"
                     >
                       {item}
-                      <X className="size-3.5 text-primary/60 group-hover:text-primary" />
+                      <X className="size-3.5 text-primary/60 group-hover:text-primary" aria-hidden="true" />
                     </motion.button>
                   ))}
                 </motion.div>
@@ -280,12 +282,15 @@ export default function BuildListPage() {
                 <button
                   type="button"
                   onClick={() => setCategoryOpen((o) => !o)}
-                  className="flex items-center gap-2 rounded-full border border-border bg-surface-2/60 py-1.5 pl-3.5 pr-3 text-xs font-medium text-ink-secondary transition-colors hover:border-primary/30 hover:text-ink"
+                  aria-haspopup="listbox"
+                  aria-expanded={categoryOpen}
+                  className="flex items-center gap-2 rounded-full border border-border bg-surface-2/60 py-1.5 pl-3.5 pr-3 text-xs font-medium text-ink-secondary transition-colors hover:border-primary/30 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  <CategoryIcon className="size-3.5 text-primary" />
+                  <CategoryIcon className="size-3.5 text-primary" aria-hidden="true" />
                   {category}
                   <ChevronDown
                     className={cn("size-3.5 transition-transform duration-200", categoryOpen && "rotate-180")}
+                    aria-hidden="true"
                   />
                 </button>
 
