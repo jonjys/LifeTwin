@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Beef,
   CalendarRange,
+  ChefHat,
   ChevronDown,
   Croissant,
   CupSoda,
@@ -169,13 +170,22 @@ export default function BuildListPage() {
           <p className="mt-3 text-ink-secondary">
             Skriv en vara i taget. ProjektOS bygger och optimerar listan åt dig.
           </p>
-          <Link
-            href="/build/week"
-            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80"
-          >
-            <CalendarRange className="size-3.5" />
-            Eller låt AI planera en billig vecka åt dig
-          </Link>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
+            <Link
+              href="/build/week"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80"
+            >
+              <CalendarRange className="size-3.5" />
+              Eller låt AI planera en billig vecka åt dig
+            </Link>
+            <Link
+              href="/build/meals"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80"
+            >
+              <ChefHat className="size-3.5" />
+              Eller planera veckans måltider
+            </Link>
+          </div>
         </motion.div>
 
         <motion.div
