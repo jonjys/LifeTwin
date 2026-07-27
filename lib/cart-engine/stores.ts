@@ -1,10 +1,11 @@
 import type { Store, StoreDomain, StoreId } from "@/lib/types";
 
 /**
- * Seventeen retailers across three domains — seven Swedish grocery
+ * Twenty-five retailers across five domains — seven Swedish grocery
  * chains plus one deals outlet, five building-materials chains for
- * "bygga altan", and four pet-supply chains for "husdjur". Each has a
- * distinct price personality and delivery profile; multipliers are
+ * "bygga altan", four pet-supply chains for "husdjur", four electronics
+ * chains for "elektronik", and four pharmacy chains for "apotek". Each
+ * has a distinct price personality and delivery profile; multipliers are
  * applied on top of each catalog item's base price, nothing here calls a
  * real pricing API. The same engine (lib/cart-engine, lib/decision-engine)
  * reads this one table for every project — it only ever filters by
@@ -190,6 +191,88 @@ export const STORES: Record<StoreId, Store & { priceMultiplier: number }> = {
     deliveryFeeSEK: 29,
     domain: "pet",
   },
+  elgiganten: {
+    id: "elgiganten",
+    name: "Elgiganten",
+    tag: "EG",
+    color: "#FF4D5A",
+    priceMultiplier: 1.02,
+    deliveryEtaMin: 60,
+    deliveryFeeSEK: 0,
+    domain: "electronics",
+  },
+  mediamarkt: {
+    id: "mediamarkt",
+    name: "Media Markt",
+    tag: "MM",
+    color: "#00E8FF",
+    priceMultiplier: 1.0,
+    deliveryEtaMin: 90,
+    deliveryFeeSEK: 0,
+    domain: "electronics",
+  },
+  netonnet: {
+    id: "netonnet",
+    name: "NetOnNet",
+    tag: "NON",
+    color: "#00FF88",
+    // Online-only, no showroom overhead — usually the price leader.
+    priceMultiplier: 0.9,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 49,
+    domain: "electronics",
+  },
+  webhallen: {
+    id: "webhallen",
+    name: "Webhallen",
+    tag: "WH",
+    color: "#FFB020",
+    priceMultiplier: 0.95,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 39,
+    domain: "electronics",
+  },
+  apoteket: {
+    id: "apoteket",
+    name: "Apoteket",
+    tag: "AP",
+    color: "#00FF88",
+    priceMultiplier: 1.05,
+    deliveryEtaMin: 60,
+    deliveryFeeSEK: 0,
+    domain: "pharmacy",
+  },
+  apotekhjartat: {
+    id: "apotekhjartat",
+    name: "Apotek Hjärtat",
+    tag: "AH",
+    color: "#FF4D5A",
+    priceMultiplier: 1.0,
+    deliveryEtaMin: 60,
+    deliveryFeeSEK: 0,
+    domain: "pharmacy",
+  },
+  kronansapotek: {
+    id: "kronansapotek",
+    name: "Kronans Apotek",
+    tag: "KA",
+    color: "#00E8FF",
+    priceMultiplier: 0.96,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 29,
+    domain: "pharmacy",
+  },
+  apotea: {
+    id: "apotea",
+    name: "Apotea",
+    tag: "APO",
+    color: "#FFB020",
+    // Online-only pharmacy — no store rent, usually the price leader.
+    priceMultiplier: 0.88,
+    deliveryEtaMin: 1440,
+    deliveryFeeSEK: 0,
+    domain: "pharmacy",
+  },
 };
 
 export const STORE_LIST = Object.values(STORES);
@@ -203,4 +286,6 @@ export const DEFAULT_STORE_BY_DOMAIN: Record<StoreDomain, StoreId> = {
   grocery: "ica",
   building: "byggmax",
   pet: "arkenzoo",
+  electronics: "elgiganten",
+  pharmacy: "apoteket",
 };

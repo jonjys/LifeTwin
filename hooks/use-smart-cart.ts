@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { buildCart, CATALOG } from "@/lib/cart-engine";
+import { generateApotekCatalog } from "@/lib/cart-engine/apotek-catalog";
 import { usesFuel } from "@/lib/cart-engine/distance";
+import { generateElectronicsCatalog } from "@/lib/cart-engine/electronics-catalog";
 import { findMatsmartDeals } from "@/lib/cart-engine/matsmart";
 import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
 import { CAT_ITEM_IDS, DOG_ITEM_IDS, generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
@@ -87,7 +89,11 @@ export function useSmartCart(): UseSmartCart {
                 loaded.currentItems.some((id) => DOG_ITEM_IDS.includes(id)),
                 loaded.currentItems.some((id) => CAT_ITEM_IDS.includes(id))
               )
-            : CATALOG;
+            : loaded.currentCategory === "electronics"
+              ? generateElectronicsCatalog()
+              : loaded.currentCategory === "pharmacy"
+                ? generateApotekCatalog()
+                : CATALOG;
       setCart(buildCart(loaded.currentItems, todayKey(), loaded.usualItems, catalog));
     }
     setLoading(false);
