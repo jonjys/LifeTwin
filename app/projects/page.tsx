@@ -6,7 +6,6 @@ import {
   ArrowRight,
   Bath,
   Car,
-  Cpu,
   Gift,
   Hammer,
   Heart,
@@ -50,12 +49,6 @@ const PROJECT_TILES: ProjectTile[] = [
     comingSoon: true,
   },
   {
-    icon: Tv,
-    title: "Köpa ny TV",
-    description: "TV, väggfäste och HDMI-kabel i ett beslut, inte tre.",
-    comingSoon: true,
-  },
-  {
     icon: Truck,
     title: "Flytta",
     description: "Kartonger, släp, flyttfirma och möbeltransport — allt optimerat tillsammans.",
@@ -86,10 +79,10 @@ const PROJECT_TILES: ProjectTile[] = [
     href: "/projects/pet",
   },
   {
-    icon: Cpu,
+    icon: Tv,
     title: "Elektronik",
-    description: "TV, väggfäste och HDMI-kabel — ett köp, inte tre separata.",
-    comingSoon: true,
+    description: "Välj TV-storlek. AI räknar ut väggfäste och HDMI-kabel — och var det är billigast.",
+    href: "/projects/electronics",
   },
   {
     icon: Car,
@@ -100,8 +93,8 @@ const PROJECT_TILES: ProjectTile[] = [
   {
     icon: Pill,
     title: "Apotek",
-    description: "Samma recept, alla apotek jämförda på pris och avstånd.",
-    comingSoon: true,
+    description: "Vardagens hälsobasics, jämförda över fyra apotek.",
+    href: "/projects/pharmacy",
   },
   {
     icon: Sofa,

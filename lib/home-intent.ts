@@ -3,20 +3,22 @@ export type HomeIntent =
   | { kind: "grocery"; items: string[] }
   | { kind: "deck" }
   | { kind: "pet"; hasDog: boolean; hasCat: boolean }
+  | { kind: "electronics" }
+  | { kind: "pharmacy" }
   | { kind: "unsupported"; label: string };
 
 const DECK_KEYWORDS = ["altan", "deck", "trall", "uterum"];
 const WEEK_KEYWORDS = ["veckohandling", "veckans", "hela veckan", "storhandla", "storhandling"];
 const DOG_KEYWORDS = ["hundmat", "hund"];
 const CAT_KEYWORDS = ["kattmat", "katt"];
+const ELECTRONICS_KEYWORDS = ["ny tv", "elektronik", "hdmi", "tv "];
+const PHARMACY_KEYWORDS = ["apotek", "medicin", "recept", "smärtstillande", "vitamin"];
 
 /** Categories the app doesn't actually run yet (see /projects "Kommer
  *  snart" tiles) — matched so the home screen can say so honestly
  *  instead of silently mis-parsing them as grocery items. */
 const UNSUPPORTED_CATEGORIES: { keywords: string[]; label: string }[] = [
-  { keywords: ["ny tv", "elektronik", "hdmi", "tv "], label: "Elektronik" },
   { keywords: ["semester", "resa", "vacation", "flyg"], label: "Semester" },
-  { keywords: ["apotek", "medicin", "pharmacy", "recept"], label: "Apotek" },
   { keywords: ["bröllop"], label: "Bröllop" },
   { keywords: [" jul", "julklapp"], label: "Jul" },
   { keywords: ["flytt", "flytta"], label: "Flytt" },
@@ -43,6 +45,8 @@ export function interpretHomeQuery(raw: string): HomeIntent {
   }
   if (DECK_KEYWORDS.some((k) => text.includes(k))) return { kind: "deck" };
   if (WEEK_KEYWORDS.some((k) => text.includes(k))) return { kind: "week" };
+  if (ELECTRONICS_KEYWORDS.some((k) => text.includes(k))) return { kind: "electronics" };
+  if (PHARMACY_KEYWORDS.some((k) => text.includes(k))) return { kind: "pharmacy" };
 
   const hasDog = DOG_KEYWORDS.some((k) => text.includes(k));
   const hasCat = CAT_KEYWORDS.some((k) => text.includes(k));

@@ -13,6 +13,7 @@ import {
   type CartResult,
   type DecisionResult,
   type FulfillmentOption,
+  type StoreDomain,
   type StoreId,
   type UserProfile,
   type WeatherSnapshot,
@@ -166,10 +167,11 @@ export function computeFulfillmentOptions(
     recommended: false,
   };
 
-  // Bulky building materials and heavy foder sacks aren't realistically
-  // carried home on foot — "Promenera" only makes sense for groceries.
-  const options =
-    cart.domain === "building" || cart.domain === "pet" ? [pickup, delivery] : [pickup, delivery, walk];
+  // Bulky building materials, heavy foder sacks, and TVs aren't
+  // realistically carried home on foot — "Promenera" only makes sense
+  // for groceries and small pharmacy items.
+  const WALKABLE_DOMAINS: StoreDomain[] = ["grocery", "pharmacy"];
+  const options = WALKABLE_DOMAINS.includes(cart.domain) ? [pickup, delivery, walk] : [pickup, delivery];
   const netCost = (opt: FulfillmentOption) => {
     const weatherPenaltyMin = opt.id === "walk" && weather?.harsh ? WALK_WEATHER_PENALTY_MIN : 0;
     return opt.totalSEK + ((opt.timeMin + weatherPenaltyMin) / 60) * hourlyValue;

@@ -18,18 +18,18 @@ beroende på vilket projekt du startar.
    (Veckohandling, Tacomiddag, Hundmat, Bygg altan, Ny TV, Semester,
    Apotek) och en knapp: "Planera åt mig". Skriv fritt eller tryck ett
    exempel — `lib/home-intent.ts` tolkar det till en matkasse, en
-   veckoplan, ett altanprojekt eller ett husdjursinköp (allt annat är
-   ärligt "inte byggt ännu", inte gissat). En kort, animerad scanning-sekvens (samma motor,
+   veckoplan, ett altanprojekt, ett husdjursinköp, en ny TV eller ett
+   apoteksinköp (allt annat är ärligt "inte byggt ännu", inte gissat). En kort, animerad scanning-sekvens (samma motor,
    bara pausad för effekt) mynnar ut i **ett** AI-rekommendationskort —
    rekommenderade butiker, totalpris, en kompakt rad (spara/tid/butiker/
    metod), tre konkreta skäl — med "Visa fullständig plan" till `/cart`
    eller "Visa alternativ" inline. Allt får plats på en mobilskärm utan
    scroll, i varje steg.
 2. **Projekt** (`/projects`) — Flik 1 för den som vill välja mer
-   medvetet istället för att skriva fritt: Storhandla, Bygga altan och
-   Husdjur är byggda; Renovera badrum, Köpa ny TV, Flytta, Jul, Bröllop,
-   Semester, Elektronik, Bilservice, Apotek och IKEA är "Kommer snart" —
-   samma ärliga mönster som AI Pantry/Meal Planner.
+   medvetet istället för att skriva fritt: Storhandla, Bygga altan,
+   Husdjur, Elektronik och Apotek är byggda; Renovera badrum, Flytta, Jul,
+   Bröllop, Semester, Bilservice och IKEA är "Kommer snart" — samma
+   ärliga mönster som AI Pantry/Meal Planner.
 3. **Min Profil** (`/profile`) — hemadress, skriven manuellt eller hämtad
    på riktigt via "Använd min plats" (webbläsarens Geolocation-API +
    omvänd geokodning mot Nominatim — godkänn en gång, adressen fylls i
@@ -60,6 +60,14 @@ beroende på vilket projekt du startar.
      väljer rätt foder/kattsand/godis och scannar synligt över Arken Zoo,
      Granngården, Vetzoo och Zooplus — samma cross-store-scan igen, bara
      för djurartiklar.
+   - **Elektronik** (`/projects/electronics`) — välj skärmstorlek (43-75
+     tum) och om du vill ha soundbar/väggfäste; AI scannar Elgiganten,
+     Media Markt, NetOnNet och Webhallen — samma cross-store-scan, bara
+     för elektronik.
+   - **Apotek** (`/projects/pharmacy`) — kryssa i vilka vardagsbasics du
+     behöver (smärtstillande, vitaminer, plåster, …); AI scannar Apoteket,
+     Apotek Hjärtat, Kronans Apotek och Apotea — samma cross-store-scan,
+     bara för apoteksvaror.
 5. **Inköp & beslut** (`/cart`) — Flik 3 + 4, samma sida för varje projekt:
    - **Ditt inköp** — en kompakt inköpslista grupperad per butik, en rad
      per vara (namn, ev. bytesförklaring, pris, sparat) — inte ett kort
@@ -70,12 +78,13 @@ beroende på vilket projekt du startar.
      själv. Du sparar totalt: 3686 kr." Genererad ur samma cart- och
      beslutsdata varje annat kort på sidan redan visar.
    - **AI Beslutsmotor** — inte tre priser, tre (eller två, för skrymmande
-     byggvaror) fullt kostade beslut: Hämta själv (bensin + slitage + tid
-     + hyrsläp om profilen saknar eget släp och lasten är skrymmande),
-     Hemleverans (leveransavgift), Promenera (steg + kalorier, bara för
-     matkassen — och väger tyngre i regn, kyla eller stark värme, enligt
-     riktig live-väderdata vid din adress). AI väljer vinnaren mot ditt
-     eget tidsvärde och säger varför i klartext.
+     byggvaror, foder och TV-köp) fullt kostade beslut: Hämta själv
+     (bensin + slitage + tid + hyrsläp om profilen saknar eget släp och
+     lasten är skrymmande), Hemleverans (leveransavgift), Promenera (steg
+     + kalorier, bara för matkassen och apoteksvaror — små nog att bära
+     hem — och väger tyngre i regn, kyla eller stark värme, enligt riktig
+     live-väderdata vid din adress). AI väljer vinnaren mot ditt eget
+     tidsvärde och säger varför i klartext.
    - **Live karta** — en riktig, interaktiv karta (OpenStreetMap) centrerad
      på ditt geokodade hem. Varje butik placeras i första hand på sin
      riktiga, namngivna adress (sökt live via OpenStreetMap/Overpass) —
@@ -97,9 +106,9 @@ beroende på vilket projekt du startar.
      (AI Memory-baserad återköp), **Matsmart fynd**, **Bevakning**-feeden,
      samt **AI Pantry**/**AI Meal Planner** ("Kommer snart").
 6. **Mina inköp** (`/orders`) — hela orderhistoriken, senaste först, en
-   rad per köp med projektikon (Storhandla/Bygga altan/Husdjur), datum,
-   hämtningssätt, totalpris och besparing. Nås från `/profile`, inte från
-   huvudflödet på startsidan.
+   rad per köp med projektikon (Storhandla/Bygga altan/Husdjur/Elektronik/
+   Apotek), datum, hämtningssätt, totalpris och besparing. Nås från
+   `/profile`, inte från huvudflödet på startsidan.
 
 ## Tech
 
@@ -125,7 +134,7 @@ npm run dev
 ```
 app/
   page.tsx                 Landing
-  projects/                Flik 1: projekthubb + /projects/deck, /projects/pet (Flik 2 för respektive projekt)
+  projects/                Flik 1: projekthubb + /projects/deck, /projects/pet, /projects/electronics, /projects/pharmacy (Flik 2 för respektive projekt)
   build/                   Flik 2 för storhandla: bygg listan
   cart/                    Flik 3 + 4: inköp + Smartaste beslutet, för alla projekt
   profile/                 Personlig profil — driver Beslutsmotorn
@@ -139,7 +148,7 @@ components/
   ui/                      shadcn-liknande primitiver (button, card)
 hooks/use-smart-cart.ts    Allt state: bygg cart (rätt katalog per projekt), beslutsmotor, rutt, checkout, sparande
 lib/
-  cart-engine/             Motorn: butiker (17, taggade grocery/building/pet), katalog(er), prisoptimering, checkout, Matsmart, notiser
+  cart-engine/             Motorn: butiker (25, taggade grocery/building/pet/electronics/pharmacy), katalog(er), prisoptimering, checkout, Matsmart, notiser
   decision-engine/         Hämta själv / hemleverans / promenera + AI Shopping Route + Smartaste beslutet-narrativet
   geo/                     Geokodning (Nominatim), ruttning (OSRM), koordinat-offset — riktiga tjänster, tidsgränsade
   seeded.ts                Deterministisk pseudo-slump (samma indata + dag = samma resultat)
@@ -156,28 +165,35 @@ oavsett projekt. Det som byter ut sig är enbart:
 - **Katalogen** — `lib/cart-engine/catalog.ts` (grocery),
   `lib/cart-engine/materials-catalog.ts` (`generateDeckMaterialsCatalog`,
   som räknar Trall/Reglar/Plintar/Skruv/Betong/Verktyg utifrån altanens
-  mått) eller `lib/cart-engine/pet-catalog.ts` (`generatePetCatalog`,
-  hund-/kattartiklar utifrån vilka djur profilen har). Varje `CatalogItem`
-  har en `domain: "grocery" | "building" | "pet"`.
-- **Butikerna** som jämförs — `lib/cart-engine/stores.ts` har alla 17
+  mått), `lib/cart-engine/pet-catalog.ts` (`generatePetCatalog`,
+  hund-/kattartiklar utifrån vilka djur profilen har),
+  `lib/cart-engine/electronics-catalog.ts` (`generateElectronicsCatalog`,
+  en fast superset av alla TV-storlekar + tillbehör — vilka som faktiskt
+  hamnar i kassen avgörs helt av intagssidans val, inte av katalogen) eller
+  `lib/cart-engine/apotek-catalog.ts` (`generateApotekCatalog`, en fast
+  lista vardagsbasics). Varje `CatalogItem` har en
+  `domain: "grocery" | "building" | "pet" | "electronics" | "pharmacy"`.
+- **Butikerna** som jämförs — `lib/cart-engine/stores.ts` har alla 25
   butiker taggade med samma `domain`; `optimizeItem`/`buildCheckoutOptions`
   filtrerar alltid på katalogens domän, så en byggvara aldrig jämförs mot
   ICA och en matvara aldrig mot Byggmax eller Arken Zoo.
 - **Om "Promenera" är rimligt** — `computeFulfillmentOptions` läser
   `cart.domain` och utesluter promenad-alternativet för skrymmande
-  byggvaror och tunga foderpåsar; matkassen får fortfarande alla tre.
+  byggvaror, tunga foderpåsar och TV-köp; matkassen och apoteksköp
+  (litet nog att bära hem) får fortfarande alla tre.
 - **"Stora Köp"** — samma funktion lägger på en hyrsläp-kostnad (349 kr +
   25 minuter) på Hämta själv när projektet är skrymmande (`domain ===
   "building"`) och profilens `hasTrailer` är `false`; äger man släp
   försvinner kostnaden helt. Ett nytt profilfält (`Har du släp?`), synligt
   bara för bil/elbil under Transport.
 
-Ett nytt projekt (t.ex. elektronik) kräver bara en ny
+Ett nytt projekt (t.ex. semester) kräver bara en ny
 katalog-genererande funktion och nya butiker taggade med rätt `domain` —
-inte en ny motor, precis som Husdjur bevisade en tredje gång. `lib/cart-engine/deal-scanner.ts` (`scanCatalogForDeals`)
+inte en ny motor, precis som Husdjur, Elektronik och Apotek bevisade om
+och om igen. `lib/cart-engine/deal-scanner.ts` (`scanCatalogForDeals`)
 är samma sak för prisscanning: Veckoplanering (grocery), Bygga altan
-(building) och Husdjur (pet) delar exakt samma scan-funktion, bara
-katalogen skiljer.
+(building), Husdjur (pet), Elektronik och Apotek delar exakt samma
+scan-funktion, bara katalogen skiljer.
 
 ### Viktigt att veta
 
@@ -195,9 +211,11 @@ ritar riktiga vägar, och `lib/geo/places.ts` söker upp en riktig, namngiven
 butik nära dig via Overpass API (samma öppna OpenStreetMap-data, gratis,
 ingen nyckel) för varje kedja som faktiskt har fysiska butiker (ICA,
 Willys, Coop, Hemköp, Lidl, City Gross, Byggmax, Hornbach, Bauhaus, Beijer,
-XL-BYGG, Arken Zoo, Granngården — Mathem, Matsmart, Vetzoo och Zooplus är
-renodlade nätbutiker utan fysiska butiker att hitta och använder alltid
-det uppskattade läget). Hittas ingen bekräftad butik faller platsen tillbaka
+XL-BYGG, Arken Zoo, Granngården, Elgiganten, Media Markt, Apoteket, Apotek
+Hjärtat, Kronans Apotek — Mathem, Matsmart, Vetzoo, Zooplus, NetOnNet,
+Webhallen och Apotea är renodlade nätbutiker utan fysiska butiker att
+hitta och använder alltid det uppskattade läget). Hittas ingen bekräftad
+butik faller platsen tillbaka
 till samma seedade avstånd och riktning som Beslutsmotorns kostnadsberäkning
 redan använder — en riktig karta med en ärlig, tydligt markerad uppskattning
 när det verkliga inte finns, aldrig en tyst gissning som ser exakt ut.
@@ -235,8 +253,8 @@ tydligt märkt kort, så det aldrig är oklart vad som är äkta.
 
 ### Medvetet inte byggt än
 
-Renovera badrum, Köpa ny TV, Flytta, Jul, Bröllop, Semester,
-Elektronik, Bilservice, Apotek och IKEA är "Kommer snart"-kort på
+Renovera badrum, Flytta, Jul, Bröllop, Semester, Bilservice och IKEA
+är "Kommer snart"-kort på
 `/projects` — arkitektoniskt förberedda (lägg till en katalog + butiker
 taggade med rätt domän) men inte implementerade; explicit
 framtidsvision, inte MVP. Samma gäller riktiga push-notiser (ingen

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Hammer, PawPrint, Receipt, ShoppingCart, Truck, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Hammer, PawPrint, Pill, Receipt, ShoppingCart, Truck, Tv, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,8 @@ const CATEGORY_META: Record<ProjectCategory, { label: string; icon: LucideIcon }
   grocery: { label: "Storhandla", icon: ShoppingCart },
   deck: { label: "Bygga altan", icon: Hammer },
   pet: { label: "Husdjur", icon: PawPrint },
+  electronics: { label: "Elektronik", icon: Tv },
+  pharmacy: { label: "Apotek", icon: Pill },
 };
 
 const FULFILLMENT_LABEL: Record<FulfillmentId, string> = {

@@ -13,10 +13,10 @@ const OVERPASS_ENDPOINTS = [
 const SEARCH_RADIUS_M = 25000;
 const QUERY_TIMEOUT_MS = 8000;
 
-/** Real, physical chains only — Mathem, Matsmart, Vetzoo and Zooplus are
- *  delivery/warehouse-only with no public storefront to search for, so
- *  they're intentionally absent and always fall back to the seeded
- *  placement. */
+/** Real, physical chains only — Mathem, Matsmart, Vetzoo, Zooplus,
+ *  NetOnNet, Webhallen and Apotea are delivery/warehouse-only with no
+ *  public storefront to search for, so they're intentionally absent and
+ *  always fall back to the seeded placement. */
 const BRAND_QUERY: Partial<Record<StoreId, string>> = {
   ica: "ICA",
   willys: "Willys",
@@ -31,6 +31,11 @@ const BRAND_QUERY: Partial<Record<StoreId, string>> = {
   xlbygg: "XL-BYGG",
   arkenzoo: "Arken Zoo",
   granngarden: "Granngården",
+  elgiganten: "Elgiganten",
+  mediamarkt: "Media Markt",
+  apoteket: "Apoteket",
+  apotekhjartat: "Apotek Hjärtat",
+  kronansapotek: "Kronans Apotek",
 };
 
 export type RealStoreMatch = { coords: LatLng; name: string };

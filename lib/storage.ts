@@ -1,3 +1,4 @@
+import { tvItemId, type TvSizeInch } from "@/lib/cart-engine/electronics-catalog";
 import { DECK_ITEM_IDS } from "@/lib/cart-engine/materials-catalog";
 import { ALL_PET_ITEM_IDS, CAT_ITEM_IDS, DOG_ITEM_IDS } from "@/lib/cart-engine/pet-catalog";
 import { DEFAULT_PROFILE } from "@/lib/types";
@@ -104,6 +105,47 @@ export function startPetProject(hasDog: boolean, hasCat: boolean): SmartCartStat
     ...state,
     currentItems: items,
     currentCategory: "pet",
+    deckDimensions: null,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts an "Elektronik" project — one TV at the chosen size, HDMI-kabel
+ *  always included, väggfäste/soundbar only if asked for. No dimensions
+ *  to persist (unlike deck): the size is baked into which TV item id
+ *  lands in currentItems, so a reload can rebuild the exact same cart
+ *  from the fixed electronics catalog alone. */
+export function startElectronicsProject(
+  sizeInch: TvSizeInch,
+  wantsSoundbar: boolean,
+  wantsWallMount: boolean
+): SmartCartState {
+  const state = ensureState();
+  const items = [
+    tvItemId(sizeInch),
+    "hdmi-kabel",
+    ...(wantsWallMount ? ["vaggfaste"] : []),
+    ...(wantsSoundbar ? ["soundbar"] : []),
+  ];
+  const next: SmartCartState = {
+    ...state,
+    currentItems: items,
+    currentCategory: "electronics",
+    deckDimensions: null,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts an "Apotek" project — whichever health basics the user picked
+ *  on the intake page, from the fixed pharmacy catalog. */
+export function startApotekProject(selectedIds: string[]): SmartCartState {
+  const state = ensureState();
+  const next: SmartCartState = {
+    ...state,
+    currentItems: selectedIds,
+    currentCategory: "pharmacy",
     deckDimensions: null,
   };
   saveState(next);
