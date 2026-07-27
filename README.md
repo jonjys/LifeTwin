@@ -119,6 +119,10 @@ beroende på vilket projekt du startar.
 - Installerbar PWA: manifest, genererade ikoner (`next/og`, inga binära
   assets att underhålla), offline app-shell via en enkel service worker
 - Deploy-klar för Vercel
+- Vitest (`npm test`) för motorns rena, deterministiska funktioner —
+  `lib/cart-engine`, `lib/decision-engine`, `lib/home-intent` — inklusive
+  regressionstester för den typ av bugg som redan hittats en gång
+  (substrings i `matchCatalogItem` som får fel vara att matcha)
 
 ## Kom igång
 
