@@ -7,8 +7,10 @@ const STORE_NAMES = ["Willys", "ICA", "Coop", "Lidl", "Hemköp"] as const;
 
 /**
  * A small feed of "real money" push-style notices — deterministic per
- * day, not spam. There's no push infrastructure here (no backend to send
- * from); this is the in-app feed that would sit behind one.
+ * day, not spam. `NotificationsFeed` (components/cart/notifications-feed.tsx)
+ * can mirror these as real OS notifications via the browser Notification
+ * API, but only while the tab is loaded — there's no push backend here
+ * to wake a closed one.
  */
 export function generateNotifications(usualItems: string[], dateKey: string): SmartNotification[] {
   const notifications: SmartNotification[] = [];

@@ -108,7 +108,9 @@ beroende på vilket projekt du startar.
      från ica.se:s publika "veckans erbjudanden"-sida, tydligt märkt som
      äkta till skillnad från resten av appens kampanjmärkningar.
    - Grocery-specifikt (döljs för andra projekt): **Automatiska inköp**
-     (AI Memory-baserad återköp), **Matsmart fynd**, **Bevakning**-feeden,
+     (AI Memory-baserad återköp), **Matsmart fynd**, **Bevakning**-feeden
+     (kan speglas som riktiga OS-notiser via webbläsarens Notification API
+     — ett klick på "Aktivera riktiga notiser" frågar om lov, riktigt),
      samt **AI Pantry** ("Kommer snart").
 6. **Mina inköp** (`/orders`) — hela orderhistoriken, senaste först, en
    rad per köp med projektikon (Storhandla/Bygga altan/Husdjur/Elektronik/
@@ -160,6 +162,7 @@ lib/
   cart-engine/             Motorn: butiker (25, taggade grocery/building/pet/electronics/pharmacy), katalog(er), prisoptimering, checkout, Matsmart, notiser
   decision-engine/         Hämta själv / hemleverans / promenera + AI Shopping Route + Smartaste beslutet-narrativet
   geo/                     Geokodning (Nominatim), ruttning (OSRM), koordinat-offset — riktiga tjänster, tidsgränsade
+  notifications/           Riktiga OS-notiser via Notification API — permission, dedupe per dag, foreground-only
   seeded.ts                Deterministisk pseudo-slump (samma indata + dag = samma resultat)
   storage.ts               localStorage-persistens: profil, projekt/kategori, AI Memory, sparande + impact-historik
   types.ts                 Delade domäntyper (CartResult, DecisionResult, UserProfile, ProjectCategory, …)
@@ -266,10 +269,10 @@ Renovera badrum, Flytta, Jul, Bröllop, Semester, Bilservice och IKEA
 är "Kommer snart"-kort på
 `/projects` — arkitektoniskt förberedda (lägg till en katalog + butiker
 taggade med rätt domän) men inte implementerade; explicit
-framtidsvision, inte MVP. Samma gäller riktiga push-notiser (ingen
-backend/service worker) och AI Pantry ("fotografera kylskåpet" kräver
-riktig bild-AI, som medvetet inte är kopplad på — se nästa avsnitt för var
-gränsen dras). AI Meal Planner är däremot byggd på riktigt, se ovan.
+framtidsvision, inte MVP. AI Pantry är samma sak: "fotografera
+kylskåpet" kräver riktig bild-AI, som medvetet inte är kopplad på. AI
+Meal Planner och Bevakningens riktiga notiser är däremot båda byggda på
+riktigt, se ovan.
 
 ### Koppla på riktig data
 
