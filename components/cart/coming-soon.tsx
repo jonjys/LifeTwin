@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { Camera, ChefHat, type LucideIcon } from "lucide-react";
+import { Camera, type LucideIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 function ComingSoonTile({
@@ -31,19 +31,15 @@ function ComingSoonTile({
   );
 }
 
-/** AI Pantry and AI Meal Planner — real product bets, teased not built. */
+/** AI Pantry — a real product bet, teased not built (AI Meal Planner
+ *  graduated to a real feature at /build/meals). */
 export const ComingSoon = memo(function ComingSoon() {
   return (
-    <Card className="flex flex-col gap-4 sm:flex-row">
+    <Card className="flex flex-col gap-4">
       <ComingSoonTile
         icon={Camera}
         title="AI Pantry"
         description="Fotografera kylskåpet. ProjektOS ser vad du saknar och lägger bara till det."
-      />
-      <ComingSoonTile
-        icon={ChefHat}
-        title="AI Meal Planner"
-        description="Skriv vad du vill äta den här veckan — recept, portioner och billigaste inköpslista på en gång."
       />
     </Card>
   );

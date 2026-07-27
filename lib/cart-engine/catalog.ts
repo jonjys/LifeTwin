@@ -340,11 +340,34 @@ export const CATALOG: CatalogItem[] = GROCERY_ITEMS.map((item) => ({
   domain: "grocery" as const,
 }));
 
-/** Meals expand into a few grocery items — "tacos" isn't a product. */
+/** Meals expand into a few grocery items — "tacos" isn't a product.
+ *  Keys are matched exactly (trimmed, lowercased) against what the AI
+ *  Meal Planner (`/build/meals`) sends through, the same expansion
+ *  `expandItems` already applies to free-text /build input. */
 export const MEAL_EXPANSIONS: Record<string, string[]> = {
   tacos: ["tacokrydda", "tortilla", "kottfars", "ost", "salsa"],
   taco: ["tacokrydda", "tortilla", "kottfars", "ost", "salsa"],
+  "pasta bolognese": ["pasta", "kottfars", "tomater", "ost"],
+  kycklinggryta: ["kyckling", "frystagronsaker", "tomater"],
+  laxwok: ["lax", "frystagronsaker"],
+  pannkakor: ["agg", "mjolk", "smor"],
+  "grekisk sallad": ["tomater", "gurka", "ost"],
+  avokadotoast: ["brod", "avokado", "agg"],
+  fruktsallad: ["bananer", "applen", "vattenmelon"],
 };
+
+/** Display list for the AI Meal Planner's chip picker — one entry per
+ *  distinct meal (skips the "taco"/"tacos" duplicate key). */
+export const MEAL_OPTIONS: { value: string; label: string }[] = [
+  { value: "tacos", label: "Tacos" },
+  { value: "pasta bolognese", label: "Pasta Bolognese" },
+  { value: "kycklinggryta", label: "Kycklinggryta" },
+  { value: "laxwok", label: "Laxwok" },
+  { value: "pannkakor", label: "Pannkakor" },
+  { value: "grekisk sallad", label: "Grekisk sallad" },
+  { value: "avokadotoast", label: "Avokadotoast" },
+  { value: "fruktsallad", label: "Fruktsallad" },
+];
 
 /** Fuzzy-matches free text against a catalog's keyword lists — defaults
  *  to the grocery catalog, but any project's catalog works the same way. */

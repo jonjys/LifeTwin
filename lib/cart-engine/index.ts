@@ -8,6 +8,7 @@ export { STORES, STORE_LIST, storesForDomain, DEFAULT_STORE_BY_DOMAIN } from "@/
 export {
   CATALOG,
   MEAL_EXPANSIONS,
+  MEAL_OPTIONS,
   GROCERY_CATEGORIES,
   groceryItemsByCategory,
   type GroceryCategory,

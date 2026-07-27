@@ -29,7 +29,7 @@ beroende på vilket projekt du startar.
    medvetet istället för att skriva fritt: Storhandla, Bygga altan,
    Husdjur, Elektronik och Apotek är byggda; Renovera badrum, Flytta, Jul,
    Bröllop, Semester, Bilservice och IKEA är "Kommer snart" — samma
-   ärliga mönster som AI Pantry/Meal Planner.
+   ärliga mönster som AI Pantry.
 3. **Min Profil** (`/profile`) — hemadress, skriven manuellt eller hämtad
    på riktigt via "Använd min plats" (webbläsarens Geolocation-API +
    omvänd geokodning mot Nominatim — godkänn en gång, adressen fylls i
@@ -50,6 +50,11 @@ beroende på vilket projekt du startar.
      matkatalogen mot alla åtta butiker för dagens kampanjer och bygger en
      hel veckas matkasse (minst en vara per kategori, resten de hårdaste
      rabatterna) i ett klick.
+   - **AI Meal Planner** (`/build/meals`) — välj vilka måltider du vill
+     äta i veckan (Tacos, Pasta Bolognese, Kycklinggryta, …); samma
+     motor som expanderar "tacos" till konkreta varor på `/build`
+     expanderar alla valda måltider på en gång till en aggregerad,
+     redan optimerad inköpslista.
    - **Bygga altan** (`/projects/deck`) — ange bredd och djup; AI räknar
      ut Trall, Reglar, Plintar, Skruv, Betong och Verktyg i rätt mängd,
      scannar sedan synligt (Byggmax, Hornbach, Bauhaus, Beijer, XL-BYGG,
@@ -104,7 +109,7 @@ beroende på vilket projekt du startar.
      äkta till skillnad från resten av appens kampanjmärkningar.
    - Grocery-specifikt (döljs för andra projekt): **Automatiska inköp**
      (AI Memory-baserad återköp), **Matsmart fynd**, **Bevakning**-feeden,
-     samt **AI Pantry**/**AI Meal Planner** ("Kommer snart").
+     samt **AI Pantry** ("Kommer snart").
 6. **Mina inköp** (`/orders`) — hela orderhistoriken, senaste först, en
    rad per köp med projektikon (Storhandla/Bygga altan/Husdjur/Elektronik/
    Apotek), datum, hämtningssätt, totalpris och besparing. Nås från
@@ -262,8 +267,9 @@ Renovera badrum, Flytta, Jul, Bröllop, Semester, Bilservice och IKEA
 `/projects` — arkitektoniskt förberedda (lägg till en katalog + butiker
 taggade med rätt domän) men inte implementerade; explicit
 framtidsvision, inte MVP. Samma gäller riktiga push-notiser (ingen
-backend/service worker) och AI Pantry/Meal Planner (teasers, inte
-funktion).
+backend/service worker) och AI Pantry ("fotografera kylskåpet" kräver
+riktig bild-AI, som medvetet inte är kopplad på — se nästa avsnitt för var
+gränsen dras). AI Meal Planner är däremot byggd på riktigt, se ovan.
 
 ### Koppla på riktig data
 

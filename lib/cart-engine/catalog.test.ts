@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CATALOG, groceryItemsByCategory, matchCatalogItem } from "@/lib/cart-engine/catalog";
+import { CATALOG, groceryItemsByCategory, matchCatalogItem, MEAL_EXPANSIONS, MEAL_OPTIONS } from "@/lib/cart-engine/catalog";
 
 describe("matchCatalogItem", () => {
   it("returns null for empty input", () => {
@@ -27,6 +27,23 @@ describe("matchCatalogItem", () => {
     for (const item of CATALOG) {
       for (const keyword of item.keywords) {
         expect(matchCatalogItem(keyword, CATALOG)?.id).toBe(item.id);
+      }
+    }
+  });
+});
+
+describe("MEAL_EXPANSIONS / MEAL_OPTIONS", () => {
+  it("every MEAL_OPTIONS entry has a matching expansion", () => {
+    for (const option of MEAL_OPTIONS) {
+      expect(MEAL_EXPANSIONS[option.value]).toBeDefined();
+    }
+  });
+
+  it("every expansion only references real catalog ids", () => {
+    const validIds = new Set(CATALOG.map((i) => i.id));
+    for (const ingredientIds of Object.values(MEAL_EXPANSIONS)) {
+      for (const id of ingredientIds) {
+        expect(validIds.has(id)).toBe(true);
       }
     }
   });
