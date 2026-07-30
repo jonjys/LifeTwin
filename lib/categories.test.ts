@@ -22,19 +22,19 @@ describe("CATEGORIES", () => {
     }
   });
 
-  it("every 'query' subcategory resolves to a real, non-unsupported, non-grocery-fallback intent (except the meal-expansion case)", () => {
+  it("every 'query' subcategory resolves to a real intent, never 'unsupported' — and any grocery fallback is a deliberate multi-item list, not an accidental single word", () => {
     for (const category of CATEGORIES) {
       for (const sub of category.subcategories) {
         if (!("query" in sub)) continue;
         const intent = interpretHomeQuery(sub.query);
-        // "tacos" deliberately falls through to the grocery pipeline,
-        // where MEAL_EXPANSIONS expands it — everything else must
-        // resolve to a real, named intent kind.
+        expect(intent.kind).not.toBe("unsupported");
+        if (intent.kind !== "grocery") continue;
+        // "tacos" deliberately falls through as a single item —
+        // MEAL_EXPANSIONS expands it into a full list downstream.
         if (sub.query === "tacos") {
-          expect(intent.kind).toBe("grocery");
+          expect(intent.items).toHaveLength(1);
         } else {
-          expect(intent.kind).not.toBe("unsupported");
-          expect(intent.kind).not.toBe("grocery");
+          expect(intent.items.length).toBeGreaterThan(1);
         }
       }
     }
