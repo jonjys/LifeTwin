@@ -39,6 +39,19 @@ describe("interpretHomeQuery", () => {
     expect(interpretHomeQuery("bilservice")).toEqual({ kind: "auto" });
   });
 
+  it("recognizes every category-accordion subcategory query used on the home screen", () => {
+    // These are the exact `query` strings lib/categories.ts feeds through
+    // submit() for its built subcategories — every one must resolve to
+    // something other than a mis-parsed grocery item.
+    expect(interpretHomeQuery("tacos").kind).toBe("grocery");
+    expect(interpretHomeQuery("reservdelar bil")).toEqual({ kind: "auto" });
+    expect(interpretHomeQuery("allergi apotek")).toEqual({ kind: "pharmacy" });
+    expect(interpretHomeQuery("förkylning apotek")).toEqual({ kind: "pharmacy" });
+    expect(interpretHomeQuery("hudvård apotek")).toEqual({ kind: "pharmacy" });
+    expect(interpretHomeQuery("barnvård apotek")).toEqual({ kind: "pharmacy" });
+    expect(interpretHomeQuery("första hjälpen apotek")).toEqual({ kind: "pharmacy" });
+  });
+
   it("flags genuinely unsupported categories honestly instead of mis-parsing them", () => {
     expect(interpretHomeQuery("semester i spanien")).toEqual({ kind: "unsupported", label: "Semester" });
     expect(interpretHomeQuery("ikea")).toEqual({ kind: "unsupported", label: "IKEA" });

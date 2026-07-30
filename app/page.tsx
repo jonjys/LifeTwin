@@ -11,6 +11,7 @@ import {
   UserCog,
 } from "lucide-react";
 import Link from "next/link";
+import { CategoryAccordion } from "@/components/home/category-accordion";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -42,17 +43,6 @@ import { DEFAULT_PROFILE, type CartResult, type ProjectCategory, type UserProfil
 import { formatSEK, todayKey } from "@/lib/utils";
 
 type Stage = "idle" | "scanning" | "result";
-
-const EXAMPLES = [
-  { emoji: "🥛", label: "Veckohandling", query: "veckohandling" },
-  { emoji: "🌮", label: "Tacomiddag", query: "tacos" },
-  { emoji: "🐶", label: "Hundmat", query: "hundmat" },
-  { emoji: "🏡", label: "Bygg altan", query: "bygg altan" },
-  { emoji: "📺", label: "Ny TV", query: "ny tv" },
-  { emoji: "✈️", label: "Semester", query: "semester" },
-  { emoji: "💊", label: "Apotek", query: "apotek" },
-  { emoji: "🔧", label: "Bilservice", query: "bilservice" },
-] as const;
 
 /** Free-text/chip defaults when the query doesn't say more than
  *  "ny tv", "apotek", or "bilservice" — /projects/electronics,
@@ -185,11 +175,6 @@ export default function HomePage() {
     setStage("scanning");
   };
 
-  const handleExample = (ex: (typeof EXAMPLES)[number]) => {
-    setQuery(ex.label);
-    submit(ex.query);
-  };
-
   const handleViewFullPlan = () => {
     if (!result) return;
     if (result.category === "deck") {
@@ -275,28 +260,17 @@ export default function HomePage() {
                   </p>
                 )}
 
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {EXAMPLES.map((ex) => (
-                    <button
-                      key={ex.label}
-                      type="button"
-                      onClick={() => handleExample(ex)}
-                      className="rounded-full border border-border bg-surface-2/50 px-3.5 py-1.5 text-sm text-ink-secondary transition-colors hover:border-white/20 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    >
-                      <span aria-hidden="true">{ex.emoji}</span> {ex.label}
-                    </button>
-                  ))}
-                </div>
-
                 <Button
                   size="lg"
-                  className="mt-4 w-full"
+                  className="mt-3 w-full"
                   onClick={() => submit(query)}
                   disabled={!query.trim()}
                 >
                   <Brain />
                   Planera åt mig
                 </Button>
+
+                <CategoryAccordion onQuery={submit} />
               </motion.div>
             )}
 

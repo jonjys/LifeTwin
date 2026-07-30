@@ -9,6 +9,7 @@ import { generateElectronicsCatalog } from "@/lib/cart-engine/electronics-catalo
 import { findMatsmartDeals } from "@/lib/cart-engine/matsmart";
 import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
 import { CAT_ITEM_IDS, DOG_ITEM_IDS, generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
+import { generateWallCatalog } from "@/lib/cart-engine/wall-catalog";
 import {
   computeFulfillmentOptions,
   buildShoppingRoute,
@@ -96,7 +97,9 @@ export function useSmartCart(): UseSmartCart {
                 ? generateApotekCatalog()
                 : loaded.currentCategory === "auto"
                   ? generateAutoCatalog()
-                  : CATALOG;
+                  : loaded.currentCategory === "wall" && loaded.wallOptions
+                    ? generateWallCatalog(loaded.wallOptions)
+                    : CATALOG;
       setCart(buildCart(loaded.currentItems, todayKey(), loaded.usualItems, catalog));
     }
     setLoading(false);

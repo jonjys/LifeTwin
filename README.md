@@ -14,18 +14,21 @@ beroende på vilket projekt du startar.
 ## Upplevelsen
 
 1. **Start** (`/`) — inte en landningssida, ett beslutsverktyg: en
-   hälsning, ett stort fält ("Vad behöver du idag?"), exempel-chips
-   (Veckohandling, Tacomiddag, Hundmat, Bygg altan, Ny TV, Semester,
-   Apotek, Bilservice) och en knapp: "Planera åt mig". Skriv fritt eller
-   tryck ett exempel — `lib/home-intent.ts` tolkar det till en matkasse,
-   en veckoplan, ett altanprojekt, ett husdjursinköp, en ny TV, ett
-   apoteksinköp eller ett bilserviceköp (allt annat är ärligt "inte byggt
-   ännu", inte gissat). En kort, animerad scanning-sekvens (samma motor,
-   bara pausad för effekt) mynnar ut i **ett** AI-rekommendationskort —
+   hälsning, ett stort fritextfält ("Vad behöver du idag?"), en
+   **kategoriaccordion** (sju huvudkategorier — Mat, Bygg, Bil, Hem,
+   Resor, Husdjur, Apotek — varje kategori fäller ut sina
+   underkategorier, `lib/categories.ts` är den enda källan till sanning
+   för hela trädet) och en knapp: "Planera åt mig". Skriv fritt, eller
+   tryck en byggd underkategori — `lib/home-intent.ts` tolkar det till en
+   matkasse, en veckoplan, ett altan- eller innerväggsprojekt, ett
+   husdjursinköp, en ny TV, ett apoteksinköp eller ett bilserviceköp (allt
+   annat är ärligt "Kommer snart", inte gissat — varje obyggd
+   underkategori visas synligt inaktiverad med en "Snart"-tagg istället
+   för att tyst felmatchas). En kort, animerad scanning-sekvens (samma
+   motor, bara pausad för effekt) mynnar ut i **ett** AI-rekommendationskort —
    rekommenderade butiker, totalpris, en kompakt rad (spara/tid/butiker/
    metod), tre konkreta skäl — med "Visa fullständig plan" till `/cart`
-   eller "Visa alternativ" inline. Allt får plats på en mobilskärm utan
-   scroll, i varje steg.
+   eller "Visa alternativ" inline.
 2. **Projekt** (`/projects`) — Flik 1 för den som vill välja mer
    medvetet istället för att skriva fritt: Storhandla, Bygga altan,
    Husdjur, Elektronik, Apotek och Bilservice är byggda; Renovera badrum,
@@ -62,6 +65,14 @@ beroende på vilket projekt du startar.
      en efter en) och visar redan här vilken butik som är billigast per
      vara idag — samma automatiska cross-store-scan som Veckoplanering,
      bara för byggvaror.
+   - **Innervägg** (`/projects/wall`) — flaggskeppets AI-kalkylator: ange
+     bredd × höjd, svara Ja/Nej på isolering/dörr/målning/verktyg och
+     välj budget eller premium; AI räknar ut Reglar, Gipsskivor, Skruv,
+     Isolering, Spackel, Färg, Lister (och Dörrsats/Verktygssats om
+     valt), en uppskattad arbetstid i timmar, och scannar samma fem
+     byggbutiker som Bygga altan — delar samma `"building"`-domän istället
+     för att behöva egna butiker, ett bevis på att ett nytt projekt inte
+     alltid ens behöver nya butiker, bara en ny katalog.
    - **Husdjur** (`/projects/pet`) — svara Ja/Nej på hund och katt; AI
      väljer rätt foder/kattsand/godis och scannar synligt över Arken Zoo,
      Granngården, Vetzoo och Zooplus — samma cross-store-scan igen, bara
@@ -149,8 +160,8 @@ npm run dev
 
 ```
 app/
-  page.tsx                 Landing
-  projects/                Flik 1: projekthubb + /projects/deck, /projects/pet, /projects/electronics, /projects/pharmacy, /projects/auto (Flik 2 för respektive projekt)
+  page.tsx                 Landing: fritextfält + kategoriaccordion
+  projects/                Flik 1: projekthubb + /projects/deck, /projects/wall, /projects/pet, /projects/electronics, /projects/pharmacy, /projects/auto (Flik 2 för respektive projekt)
   build/                   Flik 2 för storhandla: bygg listan
   cart/                    Flik 3 + 4: inköp + Smartaste beslutet, för alla projekt
   profile/                 Personlig profil — driver Beslutsmotorn
@@ -158,12 +169,14 @@ app/
   error.tsx, not-found.tsx Märkta fel- och 404-sidor
 components/
   cart/                    Inköps-UI (swap-kort, smartaste beslutet, beslutsmotor, live karta, rutt, sparande, Matsmart, bevakning)
+  home/category-accordion.tsx  Startsidans kategoriträd — läser lib/categories.ts, ingen egen logik
   map/live-map.tsx         Leaflet-kartan (dark tiles, markörer, rutter) — dynamiskt laddad, klient-only
   profile/                 Delade formulärkomponenter (chip-grupper, fält, adress-kartförhandsvisning)
   shared/                  Återanvändbara visuella delar (animated number, confetti, ambient bg)
   ui/                      shadcn-liknande primitiver (button, card)
 hooks/use-smart-cart.ts    Allt state: bygg cart (rätt katalog per projekt), beslutsmotor, rutt, checkout, sparande
 lib/
+  categories.ts            Enda källan till sanning för startsidans kategoriträd (7 kategorier, ~48 underkategorier, byggd/obyggd/länk per rad)
   cart-engine/             Motorn: butiker (29, taggade grocery/building/pet/electronics/pharmacy/auto), katalog(er), prisoptimering, checkout, Matsmart, notiser
   decision-engine/         Hämta själv / hemleverans / promenera + AI Shopping Route + Smartaste beslutet-narrativet
   geo/                     Geokodning (Nominatim), ruttning (OSRM), koordinat-offset — riktiga tjänster, tidsgränsade
@@ -189,7 +202,11 @@ oavsett projekt. Det som byter ut sig är enbart:
   hamnar i kassen avgörs helt av intagssidans val, inte av katalogen) eller
   `lib/cart-engine/apotek-catalog.ts` (`generateApotekCatalog`, en fast
   lista vardagsbasics) eller `lib/cart-engine/auto-catalog.ts`
-  (`generateAutoCatalog`, en fast lista bildelar). Varje `CatalogItem` har
+  (`generateAutoCatalog`, en fast lista bildelar) eller
+  `lib/cart-engine/wall-catalog.ts` (`generateWallCatalog`, som räknar
+  Reglar/Gipsskivor/Skruv/Isolering/Spackel/Färg/Lister utifrån
+  väggens mått och fem följdfrågor — samma idé som altanens katalog,
+  fast med fler variabler). Varje `CatalogItem` har
   en `domain: "grocery" | "building" | "pet" | "electronics" | "pharmacy" | "auto"`.
 - **Butikerna** som jämförs — `lib/cart-engine/stores.ts` har alla 29
   butiker taggade med samma `domain`; `optimizeItem`/`buildCheckoutOptions`
@@ -205,13 +222,39 @@ oavsett projekt. Det som byter ut sig är enbart:
   försvinner kostnaden helt. Ett nytt profilfält (`Har du släp?`), synligt
   bara för bil/elbil under Transport.
 
-Ett nytt projekt (t.ex. semester) kräver bara en ny
+Ett nytt projekt (t.ex. semester) kräver oftast bara en ny
 katalog-genererande funktion och nya butiker taggade med rätt `domain` —
 inte en ny motor, precis som Husdjur, Elektronik, Apotek och Bilservice
-bevisade om och om igen. `lib/cart-engine/deal-scanner.ts`
+bevisade om och om igen. Innervägg (`lib/cart-engine/wall-catalog.ts`)
+går ett steg längre: den delar `"building"`-domänen med Bygga altan
+istället för att behöva egna butiker alls — ett nytt projekt kräver
+alltså inte alltid nya butiker, bara en ny katalog. `lib/cart-engine/deal-scanner.ts`
 (`scanCatalogForDeals`) är samma sak för prisscanning: Veckoplanering
-(grocery), Bygga altan (building), Husdjur (pet), Elektronik, Apotek och
-Bilservice delar exakt samma scan-funktion, bara katalogen skiljer.
+(grocery), Bygga altan och Innervägg (building), Husdjur (pet),
+Elektronik, Apotek och Bilservice delar exakt samma scan-funktion, bara
+katalogen skiljer.
+
+### Kategoriträdet är datadrivet
+
+Startsidans hela kategoriaccordion (7 kategorier, ~48 underkategorier)
+kommer från en enda fil, `lib/categories.ts` — inte hårdkodad JSX. Varje
+underkategori är exakt en av tre saker:
+
+- `query: string` — matas rakt in i samma `submit()`/`interpretHomeQuery`
+  -flöde de gamla platta cheapsen redan använde; att lägga till en byggd
+  underkategori kräver aldrig att man rör scanning-UI:t.
+- `href: string` — länkar till en egen intagssida (används bara när
+  flödet behöver egna följdfrågor, som Innervägg).
+- `comingSoon: true` — ärligt inaktiverad med en "Snart"-tagg, exakt
+  samma mönster som `/projects`-hubbens kort.
+
+`components/home/category-accordion.tsx` innehåller ingen egen
+kategorilogik alls — den bara renderar vad `lib/categories.ts` säger.
+Ett nytt ämne (t.ex. en åttonde underkategori under Bygg) är en rad i en
+array, inte en ny komponent. `lib/categories.test.ts` håller konfigen
+ärlig: unika id:n, exakt en av de tre formerna per underkategori, och att
+varje `query` faktiskt löser till ett riktigt intent istället för att
+tyst hamna i det generiska matkasse-fallet.
 
 ### Viktigt att veta
 
