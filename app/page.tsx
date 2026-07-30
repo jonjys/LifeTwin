@@ -13,6 +13,7 @@ import {
   UserCog,
 } from "lucide-react";
 import Link from "next/link";
+import { AiChat } from "@/components/home/ai-chat";
 import { CategoryAccordion } from "@/components/home/category-accordion";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
@@ -300,6 +301,8 @@ export default function HomePage() {
                   <Brain />
                   Planera åt mig
                 </Button>
+
+                <AiChat onReady={submit} />
 
                 <CategoryAccordion onQuery={submit} />
               </motion.div>

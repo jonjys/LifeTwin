@@ -24,7 +24,12 @@ beroende på vilket projekt du startar.
    husdjursinköp, en ny TV, ett apoteksinköp eller ett bilserviceköp (allt
    annat är ärligt "Kommer snart", inte gissat — varje obyggd
    underkategori visas synligt inaktiverad med en "Snart"-tagg istället
-   för att tyst felmatchas). En kort, animerad scanning-sekvens (samma
+   för att tyst felmatchas). Vet du inte riktigt vad du behöver: "Fråga
+   Karma AI" öppnar en riktig konversation (Claude, `/api/ai/chat`) som
+   ställer 1–3 följdfrågor och sedan lämnar över en konkret produktlista
+   till exakt samma `submit()`-flöde — AI:t hittar aldrig på priser eller
+   butiker själv, det gör motorn efteråt (se "Karma AI" nedan). En kort,
+   animerad scanning-sekvens (samma
    motor, bara pausad för effekt) mynnar ut i **ett** AI-rekommendationskort —
    rekommenderade butiker, totalpris, en kompakt rad (spara/tid/butiker/
    metod), tre konkreta skäl — med "Visa fullständig plan" till `/cart`
@@ -153,7 +158,10 @@ beroende på vilket projekt du startar.
 - Next.js 15 (App Router) + TypeScript
 - TailwindCSS med shadcn-liknande UI-primitiver
 - Framer Motion, Lucide Icons
-- Allt state i `localStorage` — ingen backend, ingen inloggning, ingen databas
+- Allt state i `localStorage` — ingen inloggning, ingen databas. En enda
+  server-endpoint finns (`app/api/ai/chat`, se "Karma AI" nedan) och den är
+  stateless: den sparar ingenting, den vidarebefordrar bara konversationen
+  till Claude och svarar
 - Installerbar PWA: manifest, genererade ikoner (`next/og`, inga binära
   assets att underhålla), offline app-shell via en enkel service worker
 - Deploy-klar för Vercel
@@ -272,6 +280,34 @@ array, inte en ny komponent. `lib/categories.test.ts` håller konfigen
 varje `query` faktiskt löser till ett riktigt intent istället för att
 tyst hamna i det generiska matkasse-fallet.
 
+### Karma AI — den riktiga konversationen
+
+"Fråga Karma AI" på startsidan är den enda delen av appen som pratar med
+en riktig LLM. `app/api/ai/chat/route.ts` är en stateless Next.js-route:
+klienten skickar hela konversationshistoriken, routen anropar Claude
+(`claude-opus-5`, adaptiv extended thinking) via det officiella
+`@anthropic-ai/sdk`, och tvingar fram strukturerat svar med ett enda
+tool-use-schema (`respond`) — `type: "question"` (med `quickReplies`),
+`type: "ready"` (med en färdig, konkret `itemsQuery`) eller `type:
+"decline"` för sådant Karma uppenbarligen inte kan hjälpa till att köpa.
+Systemprompten läser `lib/categories.ts` direkt, så AI:t alltid känner
+till exakt samma kategoriträd som accordionen visar.
+
+Det avgörande gränssnittet: AI:t hittar **aldrig** på priser, butiker
+eller leveranstider — dess enda jobb är konversationen och den
+slutgiltiga produktlistan. När den är klar (`type: "ready"`) stänger
+chatten och `itemsQuery` går rakt in i samma `submit()` →
+`interpretHomeQuery` → `buildCart` → `computeFulfillmentOptions`-kedja som
+alla andra sökningar redan använder — kostnad, prisjämförelse,
+billigaste/bästa/snabbaste alternativ och leverans/hämta-själv beräknas
+alltså av exakt samma deterministiska motor som resten av appen, aldrig
+av AI:t själv.
+
+Detta kräver en `ANTHROPIC_API_KEY` i miljövariablerna (Vercel eller
+`.env.local`) — utan den svarar routen ärligt med 503 och ett klartext-
+meddelande i chatten ("AI-chatten är inte aktiverad än…") istället för
+att krascha eller låtsas fungera.
+
 ### Viktigt att veta
 
 Det finns ingen riktig prisdata-API och ingen ruttplanerings-backend av
@@ -339,6 +375,20 @@ framtidsvision, inte MVP. AI Pantry är samma sak: "fotografera
 kylskåpet" kräver riktig bild-AI, som medvetet inte är kopplad på. AI
 Meal Planner och Bevakningens riktiga notiser är däremot båda byggda på
 riktigt, se ovan.
+
+Av kategoriträdets ~48 underkategorier (`lib/categories.ts`) är hela Mat
+(10/10) och Apotek (5/5) klara, plus 2/13 Bygg, 2/5 Bil, 1/5 Hem och 2/4
+Husdjur — resten är ärligt "Snart". De flesta återstående är inte "en
+konfigrad" utan riktiga nya domäner: Bygg-kalkylatorer (Golv, Målning,
+Tak, …) kan återanvända `"building"`-domänen precis som Innervägg gjorde,
+men var och en behöver sin egen måttbaserade katalog och intagssida;
+Hems Möbler/Vitvaror/Smart Home/Förvaring behöver en helt ny domän (ingen
+befintlig butikslista passar); Resor passar inte alls i
+inköpskorgs-motorn — att boka flyg/hotell är inte samma problem som att
+optimera ett köp, och skulle kräva en egen motor, inte bara en ny katalog.
+Bils Tvätt/Besiktning är tjänster, inte produkter — att lägga dem i en
+"varukorg" vore direkt missvisande, så de förblir "Snart" av
+arkitekturskäl, inte av tidsbrist.
 
 ### Koppla på riktig data
 
