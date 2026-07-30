@@ -1,6 +1,7 @@
 import { tvItemId, type TvSizeInch } from "@/lib/cart-engine/electronics-catalog";
 import { DECK_ITEM_IDS } from "@/lib/cart-engine/materials-catalog";
 import { ALL_PET_ITEM_IDS, CAT_ITEM_IDS, DOG_ITEM_IDS } from "@/lib/cart-engine/pet-catalog";
+import type { WallOptions } from "@/lib/cart-engine/wall-catalog";
 import { DEFAULT_PROFILE } from "@/lib/types";
 import type { OrderRecord, SmartCartState, UserProfile } from "@/lib/types";
 
@@ -19,6 +20,7 @@ export function loadState(): SmartCartState | null {
     if (parsed.profile.name === undefined) parsed.profile.name = "";
     if (!parsed.currentCategory) parsed.currentCategory = "grocery";
     if (parsed.deckDimensions === undefined) parsed.deckDimensions = null;
+    if (parsed.wallOptions === undefined) parsed.wallOptions = null;
     return parsed;
   } catch {
     return null;
@@ -42,6 +44,7 @@ export function ensureState(): SmartCartState {
     currentItems: [],
     currentCategory: "grocery",
     deckDimensions: null,
+    wallOptions: null,
   };
   saveState(fresh);
   return fresh;
@@ -76,6 +79,7 @@ export function recordList(items: string[]): SmartCartState {
     currentItems: items,
     currentCategory: "grocery",
     deckDimensions: null,
+    wallOptions: null,
   };
   saveState(next);
   return next;
@@ -91,6 +95,33 @@ export function startDeckProject(widthM: number, depthM: number): SmartCartState
     currentItems: DECK_ITEM_IDS,
     currentCategory: "deck",
     deckDimensions: { widthM, depthM },
+    wallOptions: null,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts an "Innervägg" project — the flagship AI calculator: dimensions
+ *  plus every follow-up answer are persisted so a reload can regenerate
+ *  the exact same wall catalog (see lib/cart-engine/wall-catalog.ts). */
+export function startWallProject(opts: WallOptions): SmartCartState {
+  const state = ensureState();
+  const items = [
+    "regel-innervagg",
+    "gipsskiva-innervagg",
+    "skruv-innervagg",
+    ...(opts.isolera ? ["isolering-innervagg"] : []),
+    ...(opts.malas ? ["spackel-innervagg", "farg-innervagg"] : []),
+    "list-innervagg",
+    ...(opts.dorr ? ["dorrsats-innervagg"] : []),
+    ...(opts.verktyg ? ["verktygssats-innervagg"] : []),
+  ];
+  const next: SmartCartState = {
+    ...state,
+    currentItems: items,
+    currentCategory: "wall",
+    deckDimensions: null,
+    wallOptions: opts,
   };
   saveState(next);
   return next;
@@ -106,6 +137,7 @@ export function startPetProject(hasDog: boolean, hasCat: boolean): SmartCartStat
     currentItems: items,
     currentCategory: "pet",
     deckDimensions: null,
+    wallOptions: null,
   };
   saveState(next);
   return next;
@@ -133,6 +165,7 @@ export function startElectronicsProject(
     currentItems: items,
     currentCategory: "electronics",
     deckDimensions: null,
+    wallOptions: null,
   };
   saveState(next);
   return next;
@@ -147,6 +180,7 @@ export function startApotekProject(selectedIds: string[]): SmartCartState {
     currentItems: selectedIds,
     currentCategory: "pharmacy",
     deckDimensions: null,
+    wallOptions: null,
   };
   saveState(next);
   return next;
@@ -161,6 +195,7 @@ export function startAutoProject(selectedIds: string[]): SmartCartState {
     currentItems: selectedIds,
     currentCategory: "auto",
     deckDimensions: null,
+    wallOptions: null,
   };
   saveState(next);
   return next;

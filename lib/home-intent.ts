@@ -14,7 +14,7 @@ const DOG_KEYWORDS = ["hundmat", "hund"];
 const CAT_KEYWORDS = ["kattmat", "katt"];
 const ELECTRONICS_KEYWORDS = ["ny tv", "elektronik", "hdmi", "tv "];
 const PHARMACY_KEYWORDS = ["apotek", "medicin", "recept", "smärtstillande", "vitamin"];
-const AUTO_KEYWORDS = ["bilservice", "bilverkstad", "motorolja", "bromsklossar", "bromsar", "bilen"];
+const AUTO_KEYWORDS = ["bilservice", "bilverkstad", "motorolja", "bromsklossar", "bromsar", "bilen", "reservdelar"];
 
 /** Categories the app doesn't actually run yet (see /projects "Kommer
  *  snart" tiles) — matched so the home screen can say so honestly
