@@ -52,12 +52,15 @@ export function CategoryAccordion({ onQuery }: { onQuery: (query: string) => voi
 
   return (
     <div className="mt-3 flex flex-col gap-2">
-      {CATEGORIES.map((category) => {
+      {CATEGORIES.map((category, i) => {
         const open = openId === category.id;
         const builtCount = category.subcategories.filter((s) => !("comingSoon" in s)).length;
         return (
-          <div
+          <motion.div
             key={category.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.04 * i, ease: EASE }}
             className="overflow-hidden rounded-2xl border border-border bg-surface-2/30"
           >
             <button
@@ -96,7 +99,7 @@ export function CategoryAccordion({ onQuery }: { onQuery: (query: string) => voi
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         );
       })}
     </div>
