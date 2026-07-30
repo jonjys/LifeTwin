@@ -129,9 +129,21 @@ beroende på vilket projekt du startar.
      — ett klick på "Aktivera riktiga notiser" frågar om lov, riktigt),
      samt **AI Pantry** ("Kommer snart").
 6. **Mina inköp** (`/orders`) — hela orderhistoriken, senaste först, en
-   rad per köp med projektikon (Storhandla/Bygga altan/Husdjur/Elektronik/
-   Apotek/Bilservice), datum, hämtningssätt, totalpris och besparing. Nås
-   från `/profile`, inte från huvudflödet på startsidan.
+   rad per köp med projektikon (Storhandla/Bygga altan/Innervägg/Husdjur/
+   Elektronik/Apotek/Bilservice), datum, hämtningssätt, totalpris och
+   besparing. Nås från `/profile`, inte från huvudflödet på startsidan.
+7. **Dashboard** (`/dashboard`) — allt samlat på ett ställe, samma
+   riktiga data som resten av appen redan beräknar, inget nytt fejkat:
+   **Pågående projekt** (`currentItems`, om något är redo för inköp),
+   **Sparade pengar** (samma månad/år/totalt-siffror som `/cart`),
+   **Mina projekt** (orderhistoriken grupperad per projektkategori, antal
+   köp + besparing), **Historik** (de tre senaste köpen + länk till hela
+   `/orders`), **Mina inköpslistor** (AI Memory — samma `usualItems` som
+   Automatiska inköp), **Favoriter** (profilens favoritbutiker, samma
+   fält Beslutsmotorn redan väger in), **Prisbevakningar** (samma
+   `generateNotifications`-feed som `/cart`s Bevakning), och
+   **Rekommendationer** (samma Matsmart-fynd som `/cart`). Nås från
+   `/profile`.
 
 ## Tech
 
@@ -166,6 +178,7 @@ app/
   cart/                    Flik 3 + 4: inköp + Smartaste beslutet, för alla projekt
   profile/                 Personlig profil — driver Beslutsmotorn
   orders/                  Mina inköp: hela orderhistoriken
+  dashboard/               Allt samlat: pågående projekt, sparande, historik, bevakningar — samma data som redan finns
   error.tsx, not-found.tsx Märkta fel- och 404-sidor
 components/
   cart/                    Inköps-UI (swap-kort, smartaste beslutet, beslutsmotor, live karta, rutt, sparande, Matsmart, bevakning)

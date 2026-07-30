@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, LocateFixed, Receipt } from "lucide-react";
+import { ArrowLeft, Check, LayoutDashboard, LocateFixed, Receipt } from "lucide-react";
 import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { AddressMapPreview } from "@/components/profile/address-map-preview";
@@ -162,6 +162,20 @@ export default function ProfilePage() {
         </motion.header>
 
         <div className="flex flex-col gap-4">
+          <motion.div {...fadeUp(0.005)}>
+            <Link href="/dashboard">
+              <Card className="flex flex-row items-center gap-3 transition-colors hover:border-primary/40">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-2 text-ink-secondary">
+                  <LayoutDashboard className="size-4" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle>Dashboard</CardTitle>
+                  <p className="text-xs text-ink-muted">Projekt, sparande, bevakningar — allt på ett ställe</p>
+                </div>
+              </Card>
+            </Link>
+          </motion.div>
+
           <motion.div {...fadeUp(0.01)}>
             <Link href="/orders">
               <Card className="flex flex-row items-center gap-3 transition-colors hover:border-primary/40">
