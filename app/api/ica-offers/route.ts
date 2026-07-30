@@ -31,7 +31,7 @@ export async function GET() {
     const res = await fetch(SOURCE_URL, {
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; ProjektOS/1.0; +https://github.com/jonjys/LifeTwin) offer-reader",
+          "Mozilla/5.0 (compatible; Karma/1.0; +https://github.com/jonjys/LifeTwin) offer-reader",
       },
       next: { revalidate },
     });

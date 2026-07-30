@@ -1,4 +1,4 @@
-# ProjektOS
+# Karma
 
 **Vi jämför inte priser. Vi fattar köpbeslut.**
 

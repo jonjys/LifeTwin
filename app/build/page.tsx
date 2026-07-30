@@ -168,7 +168,7 @@ export default function BuildListPage() {
             Vad behöver du?
           </h1>
           <p className="mt-3 text-ink-secondary">
-            Skriv en vara i taget. ProjektOS bygger och optimerar listan åt dig.
+            Skriv en vara i taget. Karma bygger och optimerar listan åt dig.
           </p>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5">
             <Link

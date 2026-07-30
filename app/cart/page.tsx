@@ -76,7 +76,7 @@ export default function CartPage() {
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/30">
               <span className="font-mono text-sm font-bold text-primary">AI</span>
             </div>
-            <span className="text-lg font-semibold tracking-tight">ProjektOS</span>
+            <span className="text-lg font-semibold tracking-tight">Karma</span>
           </div>
           <div className="flex items-center gap-5">
             <Link

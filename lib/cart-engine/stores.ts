@@ -324,7 +324,7 @@ export function storesForDomain(domain: StoreDomain) {
   return STORE_LIST.filter((s) => s.domain === domain);
 }
 
-/** Which store a naive shopper defaults to, per domain, before ProjektOS optimizes. */
+/** Which store a naive shopper defaults to, per domain, before Karma optimizes. */
 export const DEFAULT_STORE_BY_DOMAIN: Record<StoreDomain, StoreId> = {
   grocery: "ica",
   building: "byggmax",

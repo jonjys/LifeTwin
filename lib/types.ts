@@ -325,7 +325,7 @@ export type MatsmartDeal = {
   priceSEK: number;
 };
 
-/** Everything ProjektOS persists locally. */
+/** Everything Karma persists locally. */
 export type SmartCartState = {
   createdAt: string;
   profile: UserProfile;

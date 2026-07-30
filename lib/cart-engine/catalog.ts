@@ -19,7 +19,7 @@ export type CatalogItem = {
   /** A believable "naive" single-unit price, name-brand, no campaign. */
   basePriceSEK: number;
   naiveBrand: string;
-  /** The cheaper store-brand alternative ProjektOS swaps toward. */
+  /** The cheaper store-brand alternative Karma swaps toward. */
   smartBrand: string;
   /** Large-pack details, for items where buying bigger is the smarter move. */
   bulkPack?: { naiveUnits: number; bulkPriceSEK: number; bulkLabel: string };

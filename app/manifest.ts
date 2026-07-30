@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ProjektOS",
-    short_name: "ProjektOS",
+    name: "Karma",
+    short_name: "Karma",
     description: "Vi jämför inte priser. Vi fattar köpbeslut.",
     start_url: "/",
     display: "standalone",

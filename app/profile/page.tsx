@@ -213,7 +213,7 @@ export default function ProfilePage() {
               {locateError && <p className="text-xs text-danger">{locateError}</p>}
               <AddressMapPreview address={profile.homeAddress} />
               <p className="text-xs text-ink-muted">
-                Visas på en riktig karta — ProjektOS placerar butiker och rutter runt den här
+                Visas på en riktig karta — Karma placerar butiker och rutter runt den här
                 punkten oavsett vilket projekt du startar.
               </p>
             </Card>
@@ -385,7 +385,7 @@ export default function ProfilePage() {
             <Card className="flex flex-col gap-4">
               <CardTitle>Favoritbutiker</CardTitle>
               <p className="text-xs text-ink-muted">
-                Klicka i den ordning du föredrar dem — ProjektOS väger in det när flera butiker är nästan lika bra.
+                Klicka i den ordning du föredrar dem — Karma väger in det när flera butiker är nästan lika bra.
               </p>
               <div className="flex flex-wrap gap-2">
                 {STORE_LIST.filter((store) => store.domain === "grocery").map((store) => {
