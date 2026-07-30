@@ -16,15 +16,57 @@ describe("interpretHomeQuery", () => {
   });
 
   it("recognizes a dog-only pet request", () => {
-    expect(interpretHomeQuery("hundmat")).toEqual({ kind: "pet", hasDog: true, hasCat: false });
+    expect(interpretHomeQuery("hundmat")).toEqual({
+      kind: "pet",
+      hasDog: true,
+      hasCat: false,
+      hasSmadjur: false,
+      hasFisk: false,
+    });
   });
 
   it("recognizes a cat-only pet request", () => {
-    expect(interpretHomeQuery("kattmat")).toEqual({ kind: "pet", hasDog: false, hasCat: true });
+    expect(interpretHomeQuery("kattmat")).toEqual({
+      kind: "pet",
+      hasDog: false,
+      hasCat: true,
+      hasSmadjur: false,
+      hasFisk: false,
+    });
   });
 
   it("recognizes both dog and cat when both are mentioned", () => {
-    expect(interpretHomeQuery("hund och katt")).toEqual({ kind: "pet", hasDog: true, hasCat: true });
+    expect(interpretHomeQuery("hund och katt")).toEqual({
+      kind: "pet",
+      hasDog: true,
+      hasCat: true,
+      hasSmadjur: false,
+      hasFisk: false,
+    });
+  });
+
+  it("recognizes a smådjur request", () => {
+    expect(interpretHomeQuery("smådjur")).toEqual({
+      kind: "pet",
+      hasDog: false,
+      hasCat: false,
+      hasSmadjur: true,
+      hasFisk: false,
+    });
+  });
+
+  it("recognizes a fisk/aquarium request", () => {
+    expect(interpretHomeQuery("akvarium")).toEqual({
+      kind: "pet",
+      hasDog: false,
+      hasCat: false,
+      hasSmadjur: false,
+      hasFisk: true,
+    });
+  });
+
+  it("does not mis-route a real grocery item containing 'fisk' as a substring", () => {
+    expect(interpretHomeQuery("fiskpinnar")).toEqual({ kind: "grocery", items: ["fiskpinnar"] });
   });
 
   it("recognizes an electronics request", () => {

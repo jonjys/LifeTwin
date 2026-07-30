@@ -2,7 +2,7 @@ export type HomeIntent =
   | { kind: "week" }
   | { kind: "grocery"; items: string[] }
   | { kind: "deck" }
-  | { kind: "pet"; hasDog: boolean; hasCat: boolean }
+  | { kind: "pet"; hasDog: boolean; hasCat: boolean; hasSmadjur: boolean; hasFisk: boolean }
   | { kind: "electronics" }
   | { kind: "pharmacy" }
   | { kind: "auto" }
@@ -12,6 +12,10 @@ const DECK_KEYWORDS = ["altan", "deck", "trall", "uterum"];
 const WEEK_KEYWORDS = ["veckohandling", "veckans", "hela veckan", "storhandla", "storhandling"];
 const DOG_KEYWORDS = ["hundmat", "hund"];
 const CAT_KEYWORDS = ["kattmat", "katt"];
+const SMADJUR_KEYWORDS = ["smådjur", "smadjur", "hamster", "marsvin", "kanin", "gnagare"];
+// Deliberately no bare "fisk" — it would substring-match the grocery
+// catalog's "fiskpinnar" keyword and mis-route a normal grocery item.
+const FISK_KEYWORDS = ["akvarium", "guldfisk", "akvariefilter", "akvarievätska"];
 const ELECTRONICS_KEYWORDS = ["ny tv", "elektronik", "hdmi", "tv "];
 const PHARMACY_KEYWORDS = ["apotek", "medicin", "recept", "smärtstillande", "vitamin"];
 const AUTO_KEYWORDS = ["bilservice", "bilverkstad", "motorolja", "bromsklossar", "bromsar", "bilen", "reservdelar"];
@@ -52,7 +56,9 @@ export function interpretHomeQuery(raw: string): HomeIntent {
 
   const hasDog = DOG_KEYWORDS.some((k) => text.includes(k));
   const hasCat = CAT_KEYWORDS.some((k) => text.includes(k));
-  if (hasDog || hasCat) return { kind: "pet", hasDog, hasCat };
+  const hasSmadjur = SMADJUR_KEYWORDS.some((k) => text.includes(k));
+  const hasFisk = FISK_KEYWORDS.some((k) => text.includes(k));
+  if (hasDog || hasCat || hasSmadjur || hasFisk) return { kind: "pet", hasDog, hasCat, hasSmadjur, hasFisk };
 
   const items = raw
     .split(/,| och |\n|;/i)

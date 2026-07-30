@@ -51,6 +51,38 @@ const AUTO_ITEMS: CatalogItem[] = [
     smartBrand: "",
     domain: "auto",
   },
+  {
+    id: "vinterdack",
+    // No bare "däck" here — it would substring-match "sommardack" too and,
+    // since matching takes the first array hit, always win.
+    keywords: ["vinterdack", "vinterdäck", "vinterhjul"],
+    displayName: "Vinterdäck (sats om 4)",
+    unitLabel: "4 st",
+    basePriceSEK: 3600,
+    naiveBrand: "Michelin",
+    smartBrand: "Mekonomen Eget Märke",
+    domain: "auto",
+  },
+  {
+    id: "sommardack",
+    keywords: ["sommardack", "sommardäck", "sommarhjul"],
+    displayName: "Sommardäck (sats om 4)",
+    unitLabel: "4 st",
+    basePriceSEK: 3200,
+    naiveBrand: "Continental",
+    smartBrand: "Mekonomen Eget Märke",
+    domain: "auto",
+  },
+  {
+    id: "hjulskifte",
+    keywords: ["hjulskifte", "däckskifte", "dackskifte"],
+    displayName: "Hjulskifte (montering + balansering)",
+    unitLabel: "1 tillfälle",
+    basePriceSEK: 449,
+    naiveBrand: "",
+    smartBrand: "",
+    domain: "auto",
+  },
 ];
 
 export const AUTO_ITEM_IDS = AUTO_ITEMS.map((i) => i.id);

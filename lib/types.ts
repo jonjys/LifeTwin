@@ -52,7 +52,7 @@ export type Store = {
 /* Projects — the top-level entity everything else hangs off           */
 /* ------------------------------------------------------------------ */
 
-export const PROJECT_CATEGORIES = ["grocery", "deck", "pet", "electronics", "pharmacy", "auto", "wall"] as const;
+export const PROJECT_CATEGORIES = ["grocery", "deck", "pet", "electronics", "pharmacy", "auto", "wall", "floor"] as const;
 export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
 
 /** One line the user asked for, e.g. "mjölk" or "tacos" (a meal, expanded to items). */
@@ -349,6 +349,15 @@ export type SmartCartState = {
     dorr: boolean;
     malas: boolean;
     verktyg: boolean;
+    tier: "budget" | "premium";
+  } | null;
+  /** Set when currentCategory is "floor" — the dimensions + follow-up
+   *  answers the AI Plan was generated from. */
+  floorOptions: {
+    widthM: number;
+    lengthM: number;
+    golvvarme: boolean;
+    troskel: boolean;
     tier: "budget" | "premium";
   } | null;
 };

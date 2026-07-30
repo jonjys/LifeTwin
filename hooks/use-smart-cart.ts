@@ -7,8 +7,15 @@ import { generateAutoCatalog } from "@/lib/cart-engine/auto-catalog";
 import { usesFuel } from "@/lib/cart-engine/distance";
 import { generateElectronicsCatalog } from "@/lib/cart-engine/electronics-catalog";
 import { findMatsmartDeals } from "@/lib/cart-engine/matsmart";
+import { generateFloorCatalog } from "@/lib/cart-engine/floor-catalog";
 import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
-import { CAT_ITEM_IDS, DOG_ITEM_IDS, generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
+import {
+  CAT_ITEM_IDS,
+  DOG_ITEM_IDS,
+  FISK_ITEM_IDS,
+  generatePetCatalog,
+  SMADJUR_ITEM_IDS,
+} from "@/lib/cart-engine/pet-catalog";
 import { generateWallCatalog } from "@/lib/cart-engine/wall-catalog";
 import {
   computeFulfillmentOptions,
@@ -89,7 +96,9 @@ export function useSmartCart(): UseSmartCart {
           : loaded.currentCategory === "pet"
             ? generatePetCatalog(
                 loaded.currentItems.some((id) => DOG_ITEM_IDS.includes(id)),
-                loaded.currentItems.some((id) => CAT_ITEM_IDS.includes(id))
+                loaded.currentItems.some((id) => CAT_ITEM_IDS.includes(id)),
+                loaded.currentItems.some((id) => SMADJUR_ITEM_IDS.includes(id)),
+                loaded.currentItems.some((id) => FISK_ITEM_IDS.includes(id))
               )
             : loaded.currentCategory === "electronics"
               ? generateElectronicsCatalog()
@@ -99,7 +108,9 @@ export function useSmartCart(): UseSmartCart {
                   ? generateAutoCatalog()
                   : loaded.currentCategory === "wall" && loaded.wallOptions
                     ? generateWallCatalog(loaded.wallOptions)
-                    : CATALOG;
+                    : loaded.currentCategory === "floor" && loaded.floorOptions
+                      ? generateFloorCatalog(loaded.floorOptions)
+                      : CATALOG;
       setCart(buildCart(loaded.currentItems, todayKey(), loaded.usualItems, catalog));
     }
     setLoading(false);
