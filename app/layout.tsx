@@ -4,9 +4,9 @@ import { GeistMono } from "geist/font/mono";
 import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
 import "./globals.css";
 
-const TITLE = "ProjektOS — Vi fattar köpbeslut";
+const TITLE = "Karma — Vi fattar köpbeslut";
 const DESCRIPTION =
-  "ProjektOS bryter ner projektet du startar — matkasse, altan, eller vad som helst härnäst — jämför rätt butiker och säger exakt vad du ska göra. Inte fler priser. Ett beslut.";
+  "Karma bryter ner projektet du startar — matkasse, altan, eller vad som helst härnäst — jämför rätt butiker och säger exakt vad du ska göra. Inte fler priser. Ett beslut.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "ProjektOS",
+    title: "Karma",
   },
   openGraph: {
     title: TITLE,

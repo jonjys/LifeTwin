@@ -56,7 +56,7 @@ export function notifyNewSmartNotifications(notifications: SmartNotification[], 
   if (fresh.length === 0) return;
 
   for (const notification of fresh) {
-    displayNotification("ProjektOS", notification.text, notification.id);
+    displayNotification("Karma", notification.text, notification.id);
   }
   window.localStorage.setItem(key, JSON.stringify([...seen, ...fresh.map((n) => n.id)]));
 }

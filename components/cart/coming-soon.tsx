@@ -39,7 +39,7 @@ export const ComingSoon = memo(function ComingSoon() {
       <ComingSoonTile
         icon={Camera}
         title="AI Pantry"
-        description="Fotografera kylskåpet. ProjektOS ser vad du saknar och lägger bara till det."
+        description="Fotografera kylskåpet. Karma ser vad du saknar och lägger bara till det."
       />
     </Card>
   );

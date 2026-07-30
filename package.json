@@ -1,8 +1,8 @@
 {
-  "name": "projektos",
+  "name": "karma",
   "version": "1.0.0",
   "private": true,
-  "description": "ProjektOS — samma AI, samma beslutsmotor, oavsett vilket projekt du startar.",
+  "description": "Karma — samma AI, samma beslutsmotor, oavsett vilket projekt du startar.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

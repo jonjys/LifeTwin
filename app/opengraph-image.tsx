@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "ProjektOS — Vi fattar köpbeslut";
+export const alt = "Karma — Vi fattar köpbeslut";
 
 /** The link-preview image for every share of the app — generated from
  *  the same brand mark and headline used on the landing page. */
@@ -37,7 +37,7 @@ export default async function OpengraphImage() {
           >
             <span style={{ color: "#00E8FF", fontSize: 28, fontWeight: 700 }}>AI</span>
           </div>
-          <span style={{ color: "#EDEDF2", fontSize: 34, fontWeight: 600 }}>ProjektOS</span>
+          <span style={{ color: "#EDEDF2", fontSize: 34, fontWeight: 600 }}>Karma</span>
         </div>
         <div
           style={{
