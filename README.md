@@ -28,7 +28,10 @@ beroende på vilket projekt du startar.
    motor, bara pausad för effekt) mynnar ut i **ett** AI-rekommendationskort —
    rekommenderade butiker, totalpris, en kompakt rad (spara/tid/butiker/
    metod), tre konkreta skäl — med "Visa fullständig plan" till `/cart`
-   eller "Visa alternativ" inline.
+   eller "Visa alternativ" inline. Har du sparat pengar sedan start visas
+   det som en riktig, klickbar rad direkt under hälsningen (länkar till
+   `/dashboard`) — riktig data, inte en placeholder-siffra som alltid
+   visar 0.
 2. **Projekt** (`/projects`) — Flik 1 för den som vill välja mer
    medvetet istället för att skriva fritt: Storhandla, Bygga altan,
    Husdjur, Elektronik, Apotek och Bilservice är byggda; Renovera badrum,

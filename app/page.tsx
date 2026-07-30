@@ -7,6 +7,8 @@ import {
   ArrowRight,
   Brain,
   Check,
+  LayoutDashboard,
+  PiggyBank,
   Sparkles,
   UserCog,
 } from "lucide-react";
@@ -33,6 +35,7 @@ import { EASE } from "@/lib/motion";
 import {
   ensureState,
   recordList,
+  savingsSinceInstall,
   startApotekProject,
   startAutoProject,
   startDeckProject,
@@ -128,6 +131,7 @@ export default function HomePage() {
   const [query, setQuery] = useState("");
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [usualItems, setUsualItems] = useState<string[]>([]);
+  const [totalSavedSEK, setTotalSavedSEK] = useState(0);
   const [scanIndex, setScanIndex] = useState(0);
   const [result, setResult] = useState<PlanResult | null>(null);
   const [unsupportedLabel, setUnsupportedLabel] = useState<string | null>(null);
@@ -138,6 +142,7 @@ export default function HomePage() {
     const state = ensureState();
     setProfile(state.profile);
     setUsualItems(state.usualItems);
+    setTotalSavedSEK(savingsSinceInstall(state));
   }, []);
 
   const greeting = useMemo(() => buildGreeting(profile.name ?? ""), [profile.name]);
@@ -218,14 +223,40 @@ export default function HomePage() {
             <p className="text-lg font-semibold tracking-tight sm:text-xl">{greeting}</p>
             <p className="text-sm text-ink-muted">Redo att göra det smartaste köpet idag?</p>
           </div>
-          <Link
-            href="/profile"
-            aria-label="Min profil"
-            className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface-2/50 text-ink-muted transition-colors hover:text-ink"
-          >
-            <UserCog className="size-4" aria-hidden="true" />
-          </Link>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href="/dashboard"
+              aria-label="Dashboard"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface-2/50 text-ink-muted transition-colors hover:text-ink"
+            >
+              <LayoutDashboard className="size-4" aria-hidden="true" />
+            </Link>
+            <Link
+              href="/profile"
+              aria-label="Min profil"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface-2/50 text-ink-muted transition-colors hover:text-ink"
+            >
+              <UserCog className="size-4" aria-hidden="true" />
+            </Link>
+          </div>
         </motion.div>
+
+        {totalSavedSEK > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
+            className="mt-3"
+          >
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 rounded-full border border-success/20 bg-success/[0.06] px-3.5 py-1.5 text-xs font-medium text-success transition-colors hover:border-success/35"
+            >
+              <PiggyBank className="size-3.5" aria-hidden="true" />
+              Du har sparat {formatSEK(totalSavedSEK)} sedan du började
+            </Link>
+          </motion.div>
+        )}
 
         <div className="flex flex-1 flex-col justify-center py-6">
           <AnimatePresence mode="wait">
