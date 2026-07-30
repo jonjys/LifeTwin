@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { matchCatalogItem } from "@/lib/cart-engine/catalog";
-import { ALL_PET_ITEM_IDS, CAT_ITEM_IDS, DOG_ITEM_IDS, generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
+import {
+  ALL_PET_ITEM_IDS,
+  CAT_ITEM_IDS,
+  DOG_ITEM_IDS,
+  FISK_ITEM_IDS,
+  generatePetCatalog,
+  SMADJUR_ITEM_IDS,
+} from "@/lib/cart-engine/pet-catalog";
 
 describe("generatePetCatalog", () => {
   it("returns only dog items when only a dog is selected", () => {
@@ -13,7 +20,17 @@ describe("generatePetCatalog", () => {
     expect(catalog.map((i) => i.id).sort()).toEqual([...CAT_ITEM_IDS].sort());
   });
 
-  it("falls back to both dog and cat items when neither is specified", () => {
+  it("returns only smådjur items when only smådjur is selected", () => {
+    const catalog = generatePetCatalog(false, false, true, false);
+    expect(catalog.map((i) => i.id).sort()).toEqual([...SMADJUR_ITEM_IDS].sort());
+  });
+
+  it("returns only fisk items when only fisk is selected", () => {
+    const catalog = generatePetCatalog(false, false, false, true);
+    expect(catalog.map((i) => i.id).sort()).toEqual([...FISK_ITEM_IDS].sort());
+  });
+
+  it("falls back to every species when none is specified", () => {
     const catalog = generatePetCatalog(false, false);
     expect(catalog.map((i) => i.id).sort()).toEqual([...ALL_PET_ITEM_IDS].sort());
   });

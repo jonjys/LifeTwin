@@ -1,6 +1,13 @@
 import { tvItemId, type TvSizeInch } from "@/lib/cart-engine/electronics-catalog";
+import type { FloorOptions } from "@/lib/cart-engine/floor-catalog";
 import { DECK_ITEM_IDS } from "@/lib/cart-engine/materials-catalog";
-import { ALL_PET_ITEM_IDS, CAT_ITEM_IDS, DOG_ITEM_IDS } from "@/lib/cart-engine/pet-catalog";
+import {
+  ALL_PET_ITEM_IDS,
+  CAT_ITEM_IDS,
+  DOG_ITEM_IDS,
+  FISK_ITEM_IDS,
+  SMADJUR_ITEM_IDS,
+} from "@/lib/cart-engine/pet-catalog";
 import type { WallOptions } from "@/lib/cart-engine/wall-catalog";
 import { DEFAULT_PROFILE } from "@/lib/types";
 import type { OrderRecord, SmartCartState, UserProfile } from "@/lib/types";
@@ -21,6 +28,7 @@ export function loadState(): SmartCartState | null {
     if (!parsed.currentCategory) parsed.currentCategory = "grocery";
     if (parsed.deckDimensions === undefined) parsed.deckDimensions = null;
     if (parsed.wallOptions === undefined) parsed.wallOptions = null;
+    if (parsed.floorOptions === undefined) parsed.floorOptions = null;
     return parsed;
   } catch {
     return null;
@@ -45,6 +53,7 @@ export function ensureState(): SmartCartState {
     currentCategory: "grocery",
     deckDimensions: null,
     wallOptions: null,
+    floorOptions: null,
   };
   saveState(fresh);
   return fresh;
@@ -80,6 +89,7 @@ export function recordList(items: string[]): SmartCartState {
     currentCategory: "grocery",
     deckDimensions: null,
     wallOptions: null,
+    floorOptions: null,
   };
   saveState(next);
   return next;
@@ -96,6 +106,7 @@ export function startDeckProject(widthM: number, depthM: number): SmartCartState
     currentCategory: "deck",
     deckDimensions: { widthM, depthM },
     wallOptions: null,
+    floorOptions: null,
   };
   saveState(next);
   return next;
@@ -122,22 +133,62 @@ export function startWallProject(opts: WallOptions): SmartCartState {
     currentCategory: "wall",
     deckDimensions: null,
     wallOptions: opts,
+    floorOptions: null,
   };
   saveState(next);
   return next;
 }
 
-/** Starts a "Husdjur" project — dog and/or cat items, no dimensions to
- *  set (unlike the deck project), so no extra params to persist. */
-export function startPetProject(hasDog: boolean, hasCat: boolean): SmartCartState {
+/** Starts a "Golv" project — same shape as Innervägg: dimensions plus
+ *  follow-up answers are persisted so a reload can regenerate the exact
+ *  same floor catalog (see lib/cart-engine/floor-catalog.ts). */
+export function startFloorProject(opts: FloorOptions): SmartCartState {
   const state = ensureState();
-  const items = hasDog && !hasCat ? DOG_ITEM_IDS : hasCat && !hasDog ? CAT_ITEM_IDS : ALL_PET_ITEM_IDS;
+  const items = [
+    "golv-golv",
+    "underlag-golv",
+    "list-golv",
+    ...(opts.golvvarme ? ["golvvarme-golv"] : []),
+    ...(opts.troskel ? ["troskel-golv"] : []),
+  ];
+  const next: SmartCartState = {
+    ...state,
+    currentItems: items,
+    currentCategory: "floor",
+    deckDimensions: null,
+    wallOptions: null,
+    floorOptions: opts,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts a "Husdjur" project — whichever species the user has, no
+ *  dimensions to set (unlike the deck project), so no extra params to
+ *  persist beyond which item ids land in currentItems. */
+export function startPetProject(
+  hasDog: boolean,
+  hasCat: boolean,
+  hasSmadjur = false,
+  hasFisk = false
+): SmartCartState {
+  const state = ensureState();
+  const items =
+    hasDog || hasCat || hasSmadjur || hasFisk
+      ? [
+          ...(hasDog ? DOG_ITEM_IDS : []),
+          ...(hasCat ? CAT_ITEM_IDS : []),
+          ...(hasSmadjur ? SMADJUR_ITEM_IDS : []),
+          ...(hasFisk ? FISK_ITEM_IDS : []),
+        ]
+      : ALL_PET_ITEM_IDS;
   const next: SmartCartState = {
     ...state,
     currentItems: items,
     currentCategory: "pet",
     deckDimensions: null,
     wallOptions: null,
+    floorOptions: null,
   };
   saveState(next);
   return next;
@@ -166,6 +217,7 @@ export function startElectronicsProject(
     currentCategory: "electronics",
     deckDimensions: null,
     wallOptions: null,
+    floorOptions: null,
   };
   saveState(next);
   return next;
@@ -181,6 +233,7 @@ export function startApotekProject(selectedIds: string[]): SmartCartState {
     currentCategory: "pharmacy",
     deckDimensions: null,
     wallOptions: null,
+    floorOptions: null,
   };
   saveState(next);
   return next;
@@ -196,6 +249,7 @@ export function startAutoProject(selectedIds: string[]): SmartCartState {
     currentCategory: "auto",
     deckDimensions: null,
     wallOptions: null,
+    floorOptions: null,
   };
   saveState(next);
   return next;

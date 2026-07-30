@@ -23,7 +23,14 @@ import { APOTEK_ITEM_IDS, generateApotekCatalog } from "@/lib/cart-engine/apotek
 import { AUTO_ITEM_IDS, generateAutoCatalog } from "@/lib/cart-engine/auto-catalog";
 import { generateElectronicsCatalog, tvItemId } from "@/lib/cart-engine/electronics-catalog";
 import { DECK_ITEM_IDS, generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
-import { ALL_PET_ITEM_IDS, CAT_ITEM_IDS, DOG_ITEM_IDS, generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
+import {
+  ALL_PET_ITEM_IDS,
+  CAT_ITEM_IDS,
+  DOG_ITEM_IDS,
+  FISK_ITEM_IDS,
+  generatePetCatalog,
+  SMADJUR_ITEM_IDS,
+} from "@/lib/cart-engine/pet-catalog";
 import type { CatalogItem } from "@/lib/cart-engine/catalog";
 import {
   buildRecommendationSummary,
@@ -91,14 +98,17 @@ function runIntent(intent: HomeIntent, profile: UserProfile, usualItems: string[
     category = "deck";
     catalog = generateDeckMaterialsCatalog(4, 3);
   } else if (intent.kind === "pet") {
-    items =
-      intent.hasDog && !intent.hasCat
-        ? DOG_ITEM_IDS
-        : intent.hasCat && !intent.hasDog
-          ? CAT_ITEM_IDS
-          : ALL_PET_ITEM_IDS;
+    const anySpecies = intent.hasDog || intent.hasCat || intent.hasSmadjur || intent.hasFisk;
+    items = anySpecies
+      ? [
+          ...(intent.hasDog ? DOG_ITEM_IDS : []),
+          ...(intent.hasCat ? CAT_ITEM_IDS : []),
+          ...(intent.hasSmadjur ? SMADJUR_ITEM_IDS : []),
+          ...(intent.hasFisk ? FISK_ITEM_IDS : []),
+        ]
+      : ALL_PET_ITEM_IDS;
     category = "pet";
-    catalog = generatePetCatalog(intent.hasDog, intent.hasCat);
+    catalog = generatePetCatalog(intent.hasDog, intent.hasCat, intent.hasSmadjur, intent.hasFisk);
   } else if (intent.kind === "electronics") {
     items = [tvItemId(DEFAULT_ELECTRONICS_SIZE), "hdmi-kabel"];
     category = "electronics";
@@ -189,7 +199,9 @@ export default function HomePage() {
       const intent = pendingIntent.current;
       const hasDog = intent?.kind === "pet" ? intent.hasDog : true;
       const hasCat = intent?.kind === "pet" ? intent.hasCat : false;
-      startPetProject(hasDog, hasCat);
+      const hasSmadjur = intent?.kind === "pet" ? intent.hasSmadjur : false;
+      const hasFisk = intent?.kind === "pet" ? intent.hasFisk : false;
+      startPetProject(hasDog, hasCat, hasSmadjur, hasFisk);
     } else if (result.category === "electronics") {
       startElectronicsProject(DEFAULT_ELECTRONICS_SIZE, false, false);
     } else if (result.category === "pharmacy") {

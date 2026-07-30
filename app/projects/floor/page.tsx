@@ -3,49 +3,58 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, PawPrint, Tag } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock3, Layers, Ruler, Tag } from "lucide-react";
 import Link from "next/link";
 import { AmbientBackground } from "@/components/shared/ambient-background";
-import { FieldLabel, YesNoToggle } from "@/components/profile/fields";
+import { FieldLabel, SingleChipGroup, YesNoToggle } from "@/components/profile/fields";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { scanCatalogForDeals, storesForDomain } from "@/lib/cart-engine";
-import { generatePetCatalog } from "@/lib/cart-engine/pet-catalog";
+import { estimateFloorLaborHours, generateFloorCatalog, type FloorTier } from "@/lib/cart-engine/floor-catalog";
 import { EASE, fadeUp } from "@/lib/motion";
-import { ensureState, startPetProject } from "@/lib/storage";
+import { startFloorProject } from "@/lib/storage";
 import { formatSEK, todayKey } from "@/lib/utils";
 
-const PET_STORES = storesForDomain("pet");
+const BUILDING_STORES = storesForDomain("building");
+const TIER_OPTIONS = [
+  { value: "budget", label: "Budget" },
+  { value: "premium", label: "Premium" },
+] as const;
 /** Purely a pace for the store-by-store reveal below — the scan itself
  *  is instant and synchronous, this just lets you see it happen. */
 const SCAN_STEP_MS = 220;
 
-export default function PetProjectPage() {
+/**
+ * "Golv" — the second calculator to prove Innervägg's pattern generalizes:
+ * dimensions plus follow-up questions (golvvärme, trösklar, budget/premium)
+ * feed lib/cart-engine/floor-catalog.ts, and it shares the exact same
+ * "building" domain/retailers as Bygga altan and Innervägg — no new
+ * stores needed.
+ */
+export default function FloorProjectPage() {
   const router = useRouter();
-  const [hasDog, setHasDog] = useState(true);
-  const [hasCat, setHasCat] = useState(false);
-  const [hasSmadjur, setHasSmadjur] = useState(false);
-  const [hasFisk, setHasFisk] = useState(false);
+  const [widthM, setWidthM] = useState(4);
+  const [lengthM, setLengthM] = useState(5);
+  const [golvvarme, setGolvvarme] = useState(false);
+  const [troskel, setTroskel] = useState(true);
+  const [tier, setTier] = useState<FloorTier>("budget");
   const [planGenerated, setPlanGenerated] = useState(false);
   const [scannedCount, setScannedCount] = useState(0);
 
-  useEffect(() => {
-    const profile = ensureState().profile;
-    setHasDog(profile.hasDog);
-    setHasCat(profile.hasCat);
-  }, []);
-
-  const items = useMemo(
-    () => (planGenerated ? generatePetCatalog(hasDog, hasCat, hasSmadjur, hasFisk) : []),
-    [planGenerated, hasDog, hasCat, hasSmadjur, hasFisk]
+  const opts = useMemo(
+    () => ({ widthM, lengthM, golvvarme, troskel, tier }),
+    [widthM, lengthM, golvvarme, troskel, tier]
   );
 
-  const deals = useMemo(() => (planGenerated ? scanCatalogForDeals(items, todayKey()) : []), [
-    planGenerated,
-    items,
-  ]);
+  const materials = useMemo(() => (planGenerated ? generateFloorCatalog(opts) : []), [planGenerated, opts]);
+  const laborHours = useMemo(() => estimateFloorLaborHours(opts), [opts]);
 
-  const scanning = planGenerated && scannedCount < PET_STORES.length;
+  const deals = useMemo(
+    () => (planGenerated ? scanCatalogForDeals(materials, todayKey()) : []),
+    [planGenerated, materials]
+  );
+
+  const scanning = planGenerated && scannedCount < BUILDING_STORES.length;
   const totalSEK = deals.reduce((sum, d) => sum + d.priceSEK, 0);
   const totalNaiveSEK = deals.reduce((sum, d) => sum + d.naivePriceSEK, 0);
   const totalSavingsSEK = Math.max(0, totalNaiveSEK - totalSEK);
@@ -56,12 +65,14 @@ export default function PetProjectPage() {
       return;
     }
     setScannedCount(0);
-    const timers = PET_STORES.map((_, i) => setTimeout(() => setScannedCount(i + 1), SCAN_STEP_MS * (i + 1)));
+    const timers = BUILDING_STORES.map((_, i) =>
+      setTimeout(() => setScannedCount(i + 1), SCAN_STEP_MS * (i + 1))
+    );
     return () => timers.forEach(clearTimeout);
-  }, [planGenerated, hasDog, hasCat, hasSmadjur, hasFisk]);
+  }, [planGenerated, opts]);
 
   const handleContinue = () => {
-    startPetProject(hasDog, hasCat, hasSmadjur, hasFisk);
+    startFloorProject(opts);
     router.push("/cart");
   };
 
@@ -82,11 +93,11 @@ export default function PetProjectPage() {
           <p className="mb-2 font-mono text-xs font-semibold uppercase tracking-[0.24em] text-primary">
             {planGenerated ? "Flik 2 — AI Plan" : "Flik 1 — Projekt"}
           </p>
-          <h1 className="text-balance text-2xl font-bold tracking-tight sm:text-4xl">Husdjur</h1>
+          <h1 className="text-balance text-2xl font-bold tracking-tight sm:text-4xl">Golv</h1>
           <p className="mt-3 text-ink-secondary">
             {planGenerated
               ? "AI har brutit ner projektet i vad du faktiskt behöver."
-              : "Vem handlar vi till? AI räknar ut vad de behöver."}
+              : "Ange rummets mått och svara på några frågor. AI räknar ut exakt vad du behöver."}
           </p>
         </motion.div>
 
@@ -95,28 +106,53 @@ export default function PetProjectPage() {
             <Card className="flex flex-col gap-5">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <FieldLabel>Har du hund?</FieldLabel>
-                  <YesNoToggle value={hasDog} onChange={setHasDog} />
+                  <label className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
+                    <Ruler className="size-3.5" />
+                    Bredd (meter)
+                  </label>
+                  <input
+                    type="number"
+                    min={0.5}
+                    step={0.1}
+                    value={widthM}
+                    onChange={(e) => setWidthM(Number(e.target.value) || 0)}
+                    className="w-full rounded-xl border border-border bg-surface-2/50 px-4 py-3 text-base text-ink focus:border-primary/40 focus:outline-none"
+                  />
                 </div>
                 <div>
-                  <FieldLabel>Har du katt?</FieldLabel>
-                  <YesNoToggle value={hasCat} onChange={setHasCat} />
-                </div>
-                <div>
-                  <FieldLabel>Har du smådjur?</FieldLabel>
-                  <YesNoToggle value={hasSmadjur} onChange={setHasSmadjur} />
-                </div>
-                <div>
-                  <FieldLabel>Har du fisk?</FieldLabel>
-                  <YesNoToggle value={hasFisk} onChange={setHasFisk} />
+                  <label className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
+                    <Ruler className="size-3.5" />
+                    Längd (meter)
+                  </label>
+                  <input
+                    type="number"
+                    min={0.5}
+                    step={0.1}
+                    value={lengthM}
+                    onChange={(e) => setLengthM(Number(e.target.value) || 0)}
+                    className="w-full rounded-xl border border-border bg-surface-2/50 px-4 py-3 text-base text-ink focus:border-primary/40 focus:outline-none"
+                  />
                 </div>
               </div>
-              <Button
-                size="xl"
-                onClick={() => setPlanGenerated(true)}
-                disabled={!hasDog && !hasCat && !hasSmadjur && !hasFisk}
-              >
-                <PawPrint />
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <FieldLabel>Vill du ha golvvärme?</FieldLabel>
+                  <YesNoToggle value={golvvarme} onChange={setGolvvarme} />
+                </div>
+                <div>
+                  <FieldLabel>Behövs trösklar?</FieldLabel>
+                  <YesNoToggle value={troskel} onChange={setTroskel} />
+                </div>
+              </div>
+
+              <div>
+                <FieldLabel>Premium eller budget?</FieldLabel>
+                <SingleChipGroup options={TIER_OPTIONS} value={tier} onChange={(v) => setTier(v as FloorTier)} />
+              </div>
+
+              <Button size="xl" onClick={() => setPlanGenerated(true)} disabled={widthM <= 0 || lengthM <= 0}>
+                <Layers />
                 Skapa AI-plan
               </Button>
             </Card>
@@ -126,9 +162,7 @@ export default function PetProjectPage() {
             <Card className="flex flex-col gap-5">
               <div className="flex items-end justify-between gap-4">
                 <CardTitle>
-                  {[hasDog && "Hund", hasCat && "Katt", hasSmadjur && "Smådjur", hasFisk && "Fisk"]
-                    .filter(Boolean)
-                    .join(" & ")}
+                  Golv {widthM} × {lengthM} m
                 </CardTitle>
                 {!scanning && (
                   <div className="text-right">
@@ -144,8 +178,15 @@ export default function PetProjectPage() {
                 )}
               </div>
 
+              {!scanning && (
+                <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+                  <Clock3 className="size-3.5" />
+                  Uppskattad arbetstid: <span className="font-medium text-ink-secondary">{laborHours} timmar</span>
+                </div>
+              )}
+
               <div className="flex flex-wrap gap-1.5">
-                {PET_STORES.map((store, i) => (
+                {BUILDING_STORES.map((store, i) => (
                   <motion.span
                     key={store.id}
                     initial={{ opacity: 0, scale: 0.9 }}

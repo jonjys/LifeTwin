@@ -230,8 +230,11 @@ oavsett projekt. Det som byter ut sig är enbart:
   `lib/cart-engine/wall-catalog.ts` (`generateWallCatalog`, som räknar
   Reglar/Gipsskivor/Skruv/Isolering/Spackel/Färg/Lister utifrån
   väggens mått och fem följdfrågor — samma idé som altanens katalog,
-  fast med fler variabler). Varje `CatalogItem` har
-  en `domain: "grocery" | "building" | "pet" | "electronics" | "pharmacy" | "auto"`.
+  fast med fler variabler) eller `lib/cart-engine/floor-catalog.ts`
+  (`generateFloorCatalog`, samma mönster för Golv: Laminatgolv/
+  Underlagspapp/Golvlister utifrån rummets mått, plus golvvärme och
+  trösklar som valbara tillägg). Varje `CatalogItem` har en
+  `domain: "grocery" | "building" | "pet" | "electronics" | "pharmacy" | "auto"`.
 - **Butikerna** som jämförs — `lib/cart-engine/stores.ts` har alla 29
   butiker taggade med samma `domain`; `optimizeItem`/`buildCheckoutOptions`
   filtrerar alltid på katalogens domän, så en byggvara aldrig jämförs mot
@@ -252,7 +255,17 @@ inte en ny motor, precis som Husdjur, Elektronik, Apotek och Bilservice
 bevisade om och om igen. Innervägg (`lib/cart-engine/wall-catalog.ts`)
 går ett steg längre: den delar `"building"`-domänen med Bygga altan
 istället för att behöva egna butiker alls — ett nytt projekt kräver
-alltså inte alltid nya butiker, bara en ny katalog. `lib/cart-engine/deal-scanner.ts`
+alltså inte alltid nya butiker, bara en ny katalog. Golv
+(`lib/cart-engine/floor-catalog.ts`) bevisar samma sak en tredje gång i
+samma domän. Husdjur gick samma väg utan att lämna sin egen domän: Smådjur
+och Fisk (`SMADJUR_ITEM_IDS`/`FISK_ITEM_IDS` i `lib/cart-engine/pet-catalog.ts`)
+är bara två fler artikelgrupper i samma `generatePetCatalog`, och
+`/projects/pet` bara två fler `YesNoToggle`-frågor — ingen ny sida, ingen
+ny motor. Bils Däck (`vinterdack`/`sommardack`/`hjulskifte` i
+`lib/cart-engine/auto-catalog.ts`) är samma insikt igen: `/projects/auto`s
+intagssida var redan generisk över hela `AUTO_ITEM_OPTIONS`, så nya
+artiklar i katalogen blev valbara utan att röra sidan alls.
+`lib/cart-engine/deal-scanner.ts`
 (`scanCatalogForDeals`) är samma sak för prisscanning: Veckoplanering
 (grocery), Bygga altan och Innervägg (building), Husdjur (pet),
 Elektronik, Apotek och Bilservice delar exakt samma scan-funktion, bara
@@ -377,10 +390,10 @@ Meal Planner och Bevakningens riktiga notiser är däremot båda byggda på
 riktigt, se ovan.
 
 Av kategoriträdets ~48 underkategorier (`lib/categories.ts`) är hela Mat
-(10/10) och Apotek (5/5) klara, plus 2/13 Bygg, 2/5 Bil, 1/5 Hem och 2/4
-Husdjur — resten är ärligt "Snart". De flesta återstående är inte "en
-konfigrad" utan riktiga nya domäner: Bygg-kalkylatorer (Golv, Målning,
-Tak, …) kan återanvända `"building"`-domänen precis som Innervägg gjorde,
+(10/10), Apotek (5/5) och Husdjur (4/4) klara, plus 3/13 Bygg och 3/5 Bil
+— resten är ärligt "Snart". De flesta återstående är inte "en konfigrad"
+utan riktiga nya domäner: Bygg-kalkylatorer (Målning, Tak, Kök, …) kan
+återanvända `"building"`-domänen precis som Innervägg och Golv gjorde,
 men var och en behöver sin egen måttbaserade katalog och intagssida;
 Hems Möbler/Vitvaror/Smart Home/Förvaring behöver en helt ny domän (ingen
 befintlig butikslista passar); Resor passar inte alls i

@@ -58,7 +58,7 @@ export const CATEGORIES: Category[] = [
       { id: "yttervagg", label: "Yttervägg", emoji: "🏠", comingSoon: true },
       { id: "parkering", label: "Parkering", emoji: "🅿️", comingSoon: true },
       { id: "tak", label: "Tak", emoji: "🏘️", comingSoon: true },
-      { id: "golv", label: "Golv", emoji: "🪵", comingSoon: true },
+      { id: "golv", label: "Golv", emoji: "🪵", href: "/projects/floor" },
       { id: "kok", label: "Kök", emoji: "🍳", comingSoon: true },
       { id: "badrum", label: "Badrum", emoji: "🛁", comingSoon: true },
       { id: "malning", label: "Målning", emoji: "🎨", comingSoon: true },
@@ -74,7 +74,7 @@ export const CATEGORIES: Category[] = [
     emoji: "🚗",
     subcategories: [
       { id: "service", label: "Service", emoji: "🔧", query: "bilservice" },
-      { id: "dack", label: "Däck", emoji: "🛞", comingSoon: true },
+      { id: "dack", label: "Däck", emoji: "🛞", href: "/projects/auto" },
       { id: "tvatt", label: "Tvätt", emoji: "🚿", comingSoon: true },
       { id: "besiktning", label: "Besiktning", emoji: "📋", comingSoon: true },
       { id: "reservdelar", label: "Reservdelar", emoji: "⚙️", query: "reservdelar bil" },
@@ -112,8 +112,8 @@ export const CATEGORIES: Category[] = [
     subcategories: [
       { id: "hund", label: "Hund", emoji: "🐶", query: "hund" },
       { id: "katt", label: "Katt", emoji: "🐱", query: "katt" },
-      { id: "smadjur", label: "Smådjur", emoji: "🐹", comingSoon: true },
-      { id: "fisk", label: "Fisk", emoji: "🐟", comingSoon: true },
+      { id: "smadjur", label: "Smådjur", emoji: "🐹", query: "smådjur" },
+      { id: "fisk", label: "Fisk", emoji: "🐟", query: "akvarium" },
     ],
   },
   {
