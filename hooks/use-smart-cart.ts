@@ -6,9 +6,11 @@ import { generateApotekCatalog } from "@/lib/cart-engine/apotek-catalog";
 import { generateAutoCatalog } from "@/lib/cart-engine/auto-catalog";
 import { usesFuel } from "@/lib/cart-engine/distance";
 import { generateElectronicsCatalog } from "@/lib/cart-engine/electronics-catalog";
+import { generateExteriorWallCatalog } from "@/lib/cart-engine/exterior-wall-catalog";
 import { findMatsmartDeals } from "@/lib/cart-engine/matsmart";
 import { generateFloorCatalog } from "@/lib/cart-engine/floor-catalog";
 import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
+import { generatePaintCatalog } from "@/lib/cart-engine/paint-catalog";
 import {
   CAT_ITEM_IDS,
   DOG_ITEM_IDS,
@@ -16,6 +18,7 @@ import {
   generatePetCatalog,
   SMADJUR_ITEM_IDS,
 } from "@/lib/cart-engine/pet-catalog";
+import { generateRoofCatalog } from "@/lib/cart-engine/roof-catalog";
 import { generateWallCatalog } from "@/lib/cart-engine/wall-catalog";
 import {
   computeFulfillmentOptions,
@@ -110,7 +113,13 @@ export function useSmartCart(): UseSmartCart {
                     ? generateWallCatalog(loaded.wallOptions)
                     : loaded.currentCategory === "floor" && loaded.floorOptions
                       ? generateFloorCatalog(loaded.floorOptions)
-                      : CATALOG;
+                      : loaded.currentCategory === "paint" && loaded.paintOptions
+                        ? generatePaintCatalog(loaded.paintOptions)
+                        : loaded.currentCategory === "roof" && loaded.roofOptions
+                          ? generateRoofCatalog(loaded.roofOptions)
+                          : loaded.currentCategory === "extwall" && loaded.extWallOptions
+                            ? generateExteriorWallCatalog(loaded.extWallOptions)
+                            : CATALOG;
       setCart(buildCart(loaded.currentItems, todayKey(), loaded.usualItems, catalog));
     }
     setLoading(false);

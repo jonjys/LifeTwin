@@ -255,9 +255,11 @@ inte en ny motor, precis som Husdjur, Elektronik, Apotek och Bilservice
 bevisade om och om igen. Innervägg (`lib/cart-engine/wall-catalog.ts`)
 går ett steg längre: den delar `"building"`-domänen med Bygga altan
 istället för att behöva egna butiker alls — ett nytt projekt kräver
-alltså inte alltid nya butiker, bara en ny katalog. Golv
-(`lib/cart-engine/floor-catalog.ts`) bevisar samma sak en tredje gång i
-samma domän. Husdjur gick samma väg utan att lämna sin egen domän: Smådjur
+alltså inte alltid nya butiker, bara en ny katalog. Golv, Målning, Tak och
+Yttervägg (`floor-catalog.ts`, `paint-catalog.ts`, `roof-catalog.ts`,
+`exterior-wall-catalog.ts`) bevisar samma sak fyra gånger till i samma
+`"building"`-domän — sex Bygg-projekt, fem butiker, noll dubbletter.
+Husdjur gick samma väg utan att lämna sin egen domän: Smådjur
 och Fisk (`SMADJUR_ITEM_IDS`/`FISK_ITEM_IDS` i `lib/cart-engine/pet-catalog.ts`)
 är bara två fler artikelgrupper i samma `generatePetCatalog`, och
 `/projects/pet` bara två fler `YesNoToggle`-frågor — ingen ny sida, ingen
@@ -390,18 +392,18 @@ Meal Planner och Bevakningens riktiga notiser är däremot båda byggda på
 riktigt, se ovan.
 
 Av kategoriträdets ~48 underkategorier (`lib/categories.ts`) är hela Mat
-(10/10), Apotek (5/5) och Husdjur (4/4) klara, plus 3/13 Bygg och 3/5 Bil
-— resten är ärligt "Snart". De flesta återstående är inte "en konfigrad"
-utan riktiga nya domäner: Bygg-kalkylatorer (Målning, Tak, Kök, …) kan
-återanvända `"building"`-domänen precis som Innervägg och Golv gjorde,
-men var och en behöver sin egen måttbaserade katalog och intagssida;
-Hems Möbler/Vitvaror/Smart Home/Förvaring behöver en helt ny domän (ingen
-befintlig butikslista passar); Resor passar inte alls i
-inköpskorgs-motorn — att boka flyg/hotell är inte samma problem som att
-optimera ett köp, och skulle kräva en egen motor, inte bara en ny katalog.
-Bils Tvätt/Besiktning är tjänster, inte produkter — att lägga dem i en
-"varukorg" vore direkt missvisande, så de förblir "Snart" av
-arkitekturskäl, inte av tidsbrist.
+(10/10), Apotek (5/5) och Husdjur (4/4) klara, plus 6/13 Bygg (Altan,
+Innervägg, Golv, Målning, Tak, Yttervägg) och 3/5 Bil — resten är ärligt
+"Snart". Kök och Badrum är inte dimensionsbaserade på samma sätt (skåp,
+vitvaror och kakel skalar inte linjärt med en yta) och byggs som ett eget,
+fast urval istället, samma mönster som Apotek/Bilservice. Parkering,
+Förråd, Trappa och Isolering väntar fortfarande. Hems Möbler/Vitvaror/
+Smart Home/Förvaring behöver en helt ny domän (ingen befintlig butikslista
+passar). Resor passar inte alls i inköpskorgs-motorn — att boka
+flyg/hotell är inte samma problem som att optimera ett köp, och skulle
+kräva en egen motor, inte bara en ny katalog; det lämnas permanent som
+"Snart". Bils Tvätt/Besiktning är tjänster, inte produkter — de byggs som
+ett bokningsflöde istället för att tvingas in i en varukorg.
 
 ### Koppla på riktig data
 

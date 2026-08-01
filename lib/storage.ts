@@ -1,6 +1,8 @@
 import { tvItemId, type TvSizeInch } from "@/lib/cart-engine/electronics-catalog";
+import type { ExteriorWallOptions } from "@/lib/cart-engine/exterior-wall-catalog";
 import type { FloorOptions } from "@/lib/cart-engine/floor-catalog";
 import { DECK_ITEM_IDS } from "@/lib/cart-engine/materials-catalog";
+import type { PaintOptions } from "@/lib/cart-engine/paint-catalog";
 import {
   ALL_PET_ITEM_IDS,
   CAT_ITEM_IDS,
@@ -8,6 +10,7 @@ import {
   FISK_ITEM_IDS,
   SMADJUR_ITEM_IDS,
 } from "@/lib/cart-engine/pet-catalog";
+import type { RoofOptions } from "@/lib/cart-engine/roof-catalog";
 import type { WallOptions } from "@/lib/cart-engine/wall-catalog";
 import { DEFAULT_PROFILE } from "@/lib/types";
 import type { OrderRecord, SmartCartState, UserProfile } from "@/lib/types";
@@ -29,6 +32,9 @@ export function loadState(): SmartCartState | null {
     if (parsed.deckDimensions === undefined) parsed.deckDimensions = null;
     if (parsed.wallOptions === undefined) parsed.wallOptions = null;
     if (parsed.floorOptions === undefined) parsed.floorOptions = null;
+    if (parsed.paintOptions === undefined) parsed.paintOptions = null;
+    if (parsed.roofOptions === undefined) parsed.roofOptions = null;
+    if (parsed.extWallOptions === undefined) parsed.extWallOptions = null;
     return parsed;
   } catch {
     return null;
@@ -54,6 +60,9 @@ export function ensureState(): SmartCartState {
     deckDimensions: null,
     wallOptions: null,
     floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
   };
   saveState(fresh);
   return fresh;
@@ -90,6 +99,9 @@ export function recordList(items: string[]): SmartCartState {
     deckDimensions: null,
     wallOptions: null,
     floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
   };
   saveState(next);
   return next;
@@ -107,6 +119,9 @@ export function startDeckProject(widthM: number, depthM: number): SmartCartState
     deckDimensions: { widthM, depthM },
     wallOptions: null,
     floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
   };
   saveState(next);
   return next;
@@ -134,6 +149,9 @@ export function startWallProject(opts: WallOptions): SmartCartState {
     deckDimensions: null,
     wallOptions: opts,
     floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
   };
   saveState(next);
   return next;
@@ -158,6 +176,84 @@ export function startFloorProject(opts: FloorOptions): SmartCartState {
     deckDimensions: null,
     wallOptions: null,
     floorOptions: opts,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts a "Målning" project — one dimension (yta) plus follow-up
+ *  answers are persisted so a reload can regenerate the exact same paint
+ *  catalog (see lib/cart-engine/paint-catalog.ts). */
+export function startPaintProject(opts: PaintOptions): SmartCartState {
+  const state = ensureState();
+  const items = [
+    "farg-malning",
+    "spackel-malning",
+    "skydd-malning",
+    ...(opts.verktyg ? ["verktygssats-malning"] : []),
+  ];
+  const next: SmartCartState = {
+    ...state,
+    currentItems: items,
+    currentCategory: "paint",
+    deckDimensions: null,
+    wallOptions: null,
+    floorOptions: null,
+    paintOptions: opts,
+    roofOptions: null,
+    extWallOptions: null,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts a "Tak" project — one dimension (yta) plus follow-up answers
+ *  are persisted so a reload can regenerate the exact same roof catalog
+ *  (see lib/cart-engine/roof-catalog.ts). */
+export function startRoofProject(opts: RoofOptions): SmartCartState {
+  const state = ensureState();
+  const items = ["takmaterial-tak", "underlag-tak", "spik-tak", ...(opts.rannor ? ["hangranna-tak"] : [])];
+  const next: SmartCartState = {
+    ...state,
+    currentItems: items,
+    currentCategory: "roof",
+    deckDimensions: null,
+    wallOptions: null,
+    floorOptions: null,
+    paintOptions: null,
+    roofOptions: opts,
+    extWallOptions: null,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts a "Yttervägg" project — same shape as Innervägg: dimensions
+ *  plus follow-up answers are persisted so a reload can regenerate the
+ *  exact same catalog (see lib/cart-engine/exterior-wall-catalog.ts). */
+export function startExteriorWallProject(opts: ExteriorWallOptions): SmartCartState {
+  const state = ensureState();
+  const items = [
+    "regel-yttervagg",
+    "vindskyddsskiva-yttervagg",
+    "fasadpanel-yttervagg",
+    "skruv-yttervagg",
+    ...(opts.isolera ? ["isolering-yttervagg"] : []),
+    ...(opts.malas ? ["farg-yttervagg"] : []),
+  ];
+  const next: SmartCartState = {
+    ...state,
+    currentItems: items,
+    currentCategory: "extwall",
+    deckDimensions: null,
+    wallOptions: null,
+    floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: opts,
   };
   saveState(next);
   return next;
@@ -189,6 +285,9 @@ export function startPetProject(
     deckDimensions: null,
     wallOptions: null,
     floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
   };
   saveState(next);
   return next;
@@ -218,6 +317,9 @@ export function startElectronicsProject(
     deckDimensions: null,
     wallOptions: null,
     floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
   };
   saveState(next);
   return next;
@@ -234,6 +336,9 @@ export function startApotekProject(selectedIds: string[]): SmartCartState {
     deckDimensions: null,
     wallOptions: null,
     floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
   };
   saveState(next);
   return next;
@@ -250,6 +355,9 @@ export function startAutoProject(selectedIds: string[]): SmartCartState {
     deckDimensions: null,
     wallOptions: null,
     floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
   };
   saveState(next);
   return next;
