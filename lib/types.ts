@@ -52,7 +52,19 @@ export type Store = {
 /* Projects — the top-level entity everything else hangs off           */
 /* ------------------------------------------------------------------ */
 
-export const PROJECT_CATEGORIES = ["grocery", "deck", "pet", "electronics", "pharmacy", "auto", "wall", "floor"] as const;
+export const PROJECT_CATEGORIES = [
+  "grocery",
+  "deck",
+  "pet",
+  "electronics",
+  "pharmacy",
+  "auto",
+  "wall",
+  "floor",
+  "paint",
+  "roof",
+  "extwall",
+] as const;
 export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
 
 /** One line the user asked for, e.g. "mjölk" or "tacos" (a meal, expanded to items). */
@@ -358,6 +370,30 @@ export type SmartCartState = {
     lengthM: number;
     golvvarme: boolean;
     troskel: boolean;
+    tier: "budget" | "premium";
+  } | null;
+  /** Set when currentCategory is "paint" — the area + follow-up answers
+   *  the AI Plan was generated from. */
+  paintOptions: {
+    areaM2: number;
+    tak: boolean;
+    verktyg: boolean;
+    tier: "budget" | "premium";
+  } | null;
+  /** Set when currentCategory is "roof" — the area + follow-up answers
+   *  the AI Plan was generated from. */
+  roofOptions: {
+    areaM2: number;
+    rannor: boolean;
+    tier: "budget" | "premium";
+  } | null;
+  /** Set when currentCategory is "extwall" — the dimensions + follow-up
+   *  answers the AI Plan was generated from. */
+  extWallOptions: {
+    widthM: number;
+    heightM: number;
+    isolera: boolean;
+    malas: boolean;
     tier: "budget" | "premium";
   } | null;
 };
