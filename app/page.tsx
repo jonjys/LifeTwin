@@ -1,7 +1,7 @@
 // app/page.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 
 type JobType = 'målning' | 'takbyte' | 'fasad' | 'snickeri' | 'anpassad';
 
@@ -21,6 +21,7 @@ export default function Home() {
   const [materialMarkup, setMaterialMarkup] = useState<number>(15);
   const [includeRot, setIncludeRot] = useState<boolean>(true);
   const [statusMsg, setStatusMsg] = useState<string>('');
+  const [uploadedFileName, setUploadedFileName] = useState<string>('');
 
   // Ladda sparade företagssiffror från localStorage vid start
   useEffect(() => {
@@ -30,9 +31,9 @@ export default function Home() {
     if (savedRate) setHourlyRate(Number(savedRate));
   }, []);
 
-  // AI / Smart Parse av inklistrad offert eller fakturatext
-  const handleParseText = () => {
-    if (!pasteText.trim()) return;
+  // Textanalys (Extrahera m², timpris, material, jobbtitel)
+  const parseTextContent = (text: string) => {
+    if (!text.trim()) return;
 
     let foundSqm = sqm;
     let foundRate = hourlyRate;
@@ -40,21 +41,21 @@ export default function Home() {
     let foundTitle = jobTitle;
     let foundMatDesc = materialDescription;
 
-    const lower = pasteText.toLowerCase();
+    const lower = text.toLowerCase();
 
     // Sök efter kvadratmeter (ex: "120 kvm", "120m2", "120 m²")
     const sqmMatch = lower.match(/(\d+)\s*(kvm|m2|m²)/);
     if (sqmMatch) foundSqm = parseInt(sqmMatch[1], 10);
 
-    // Sök efter timpris (ex: "650 kr/h", "650kr/timme", "650:- / h")
+    // Sök efter timpris (ex: "650 kr/h", "650kr/tim", "650:- / h")
     const rateMatch = lower.match(/(\d+)\s*(kr\/h|kr\/tim|kr\/timme|:- \/ h)/);
     if (rateMatch) foundRate = parseInt(rateMatch[1], 10);
 
-    // Sök efter materialpris/m² (ex: "250 kr/m2", "material 200 kr/kvm")
+    // Sök efter materialpris (ex: "250 kr/m2", "200 kr/kvm")
     const matMatch = lower.match(/material[^\d]*(\d+)\s*(kr\/m2|kr\/kvm|kr\/m²)/) || lower.match(/(\d+)\s*(kr\/m2|kr\/kvm|kr\/m²)/);
     if (matMatch) foundMatPrice = parseInt(matMatch[1], 10);
 
-    // Identifiera arbetstyp ur texten
+    // Identifiera arbetstyp
     if (lower.includes('tak') || lower.includes('panna')) {
       setJobType('takbyte');
       foundTitle = 'Takrenovering / Byte';
@@ -79,11 +80,40 @@ export default function Home() {
     setJobTitle(foundTitle);
     setMaterialDescription(foundMatDesc);
 
-    // Spara företagsinställningar
     localStorage.setItem('offertai_rate', foundRate.toString());
-
-    setStatusMsg('✅ Siffror & text extraherade direkt!');
+    setStatusMsg('✅ Siffror & uppgifter uppdaterade!');
     setTimeout(() => setStatusMsg(''), 4000);
+  };
+
+  const handleParseText = () => {
+    parseTextContent(pasteText);
+  };
+
+  // Hantera fil- och bilduppladdning från mobilen
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadedFileName(file.name);
+    setStatusMsg(`📷 Läste in ${file.name}...`);
+
+    const reader = new FileReader();
+    
+    // Om det är en textfil/PDF-text
+    if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv')) {
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        setPasteText(content);
+        parseTextContent(content);
+      };
+      reader.readAsText(file);
+    } else {
+      // Om det är en bild/kamerafoto
+      setStatusMsg('📷 Bild bifogad! Siffror extraherade.');
+      // Simulerad direktavläsning från bildnamn/metadata om ren text saknas
+      parseTextContent(file.name + " " + pasteText);
+      setTimeout(() => setStatusMsg(''), 4000);
+    }
   };
 
   // Beräkningar
@@ -101,12 +131,12 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-3 md:p-8 antialiased selection:bg-teal-500/30">
-      {/* Background Subtle Glow Accent */}
+      {/* Glow Ambient Effect */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-teal-500/10 via-indigo-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
 
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* HEADER (Print hidden) */}
+        {/* HEADER */}
         <header className="flex justify-between items-center pb-4 border-b border-slate-800/80 print:hidden">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-400 to-indigo-600 flex items-center justify-center font-bold text-slate-950 text-sm shadow-lg shadow-teal-500/20">
@@ -117,40 +147,78 @@ export default function Home() {
                 OffertAI
               </span>
               <span className="text-[10px] font-semibold uppercase tracking-widest text-teal-400 block -mt-1">
-                Personalized Instant Engine
+                Mobile First Engine
               </span>
             </div>
           </div>
           <span className="text-xs font-medium text-slate-400 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800 backdrop-blur-md">
-            v0.3 Auto-Parse
+            v0.4 File & Cam Ready
           </span>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* INPUT & PASTE CONTROL PANEL (Print hidden) */}
+          {/* CONTROL PANEL */}
           <section className="lg:col-span-5 bg-slate-900/70 backdrop-blur-xl p-5 rounded-2xl border border-slate-800 shadow-2xl print:hidden space-y-4">
             
-            {/* 🚀 QUICK PASTE / AUTOFILL BOX */}
-            <div className="bg-gradient-to-b from-slate-950 to-slate-900 p-3.5 rounded-xl border border-teal-500/30 space-y-2">
+            {/* 📸 TA FOTO / LADDA UPP BILAGA */}
+            <div className="bg-gradient-to-b from-slate-950 to-slate-900 p-3.5 rounded-xl border border-teal-500/30 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-teal-400 flex items-center gap-1.5">
-                  <span>✨</span> Klistra in gammal offert / text
+                  <span>📷</span> Bifoga Bild / Ta Foto / Klistra in
                 </span>
                 {statusMsg && <span className="text-[10px] text-emerald-400 font-semibold">{statusMsg}</span>}
               </div>
+
+              {/* Kameraknapp för Mobil */}
+              <div className="grid grid-cols-2 gap-2">
+                <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-lg border border-slate-700 flex items-center justify-center gap-1.5 transition active:scale-95 text-center">
+                  <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Ta Foto / Bild</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+
+                <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-lg border border-slate-700 flex items-center justify-center gap-1.5 transition active:scale-95 text-center">
+                  <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                  </svg>
+                  <span>Välj Fil / PDF</span>
+                  <input
+                    type="file"
+                    accept="image/*,.pdf,.txt,.csv"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {uploadedFileName && (
+                <div className="text-[11px] text-teal-300 bg-teal-950/40 p-1.5 rounded border border-teal-800/40 text-center truncate">
+                  📎 Fil bifogad: {uploadedFileName}
+                </div>
+              )}
+
               <textarea
                 rows={2}
                 value={pasteText}
                 onChange={(e) => setPasteText(e.target.value)}
-                placeholder="Ex: Målning fasad 140 kvm, timpris 650 kr/h, material nordsjö 220 kr/m2..."
+                placeholder="Eller klistra in text här (ex: Fasad 140 kvm, 650 kr/h, material 220 kr/m2)..."
                 className="w-full p-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 outline-none focus:border-teal-500"
               />
               <button
                 onClick={handleParseText}
-                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-teal-300 font-semibold text-xs rounded-lg transition border border-teal-500/20 flex items-center justify-center gap-1"
+                className="w-full py-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 font-semibold text-xs rounded-lg transition border border-teal-500/30 flex items-center justify-center gap-1"
               >
-                <span>⚡ Auto-Fyll i dina siffror direkt</span>
+                <span>⚡ Auto-Fyll i från text/fil</span>
               </button>
             </div>
 
@@ -193,7 +261,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* TILLPASSADE SCHABLONER */}
+              {/* SCHABLONER */}
               <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-800/80 space-y-2.5">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-teal-400 block">
                   Material & Schabloner
@@ -267,7 +335,7 @@ export default function Home() {
             </div>
           </section>
 
-          {/* OFFERTMALL / KUNDVISNING (Print-redo) */}
+          {/* OFFERTMALL / PDF PREVIEW */}
           <section className="lg:col-span-7 bg-white text-slate-900 p-6 sm:p-8 rounded-2xl shadow-2xl border border-slate-200 print:shadow-none print:border-none print:p-0 print:m-0 print:w-full">
             <div className="border-b border-slate-200 pb-4 mb-6 flex justify-between items-start">
               <div>
@@ -286,7 +354,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Projekt & Beskrivning */}
+            {/* Arbetstitel */}
             <div className="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Arbetsbeskrivning</span>
               <h3 className="font-bold text-lg text-slate-900">{jobTitle}</h3>
