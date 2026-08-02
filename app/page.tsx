@@ -60,18 +60,27 @@ export default function Home() {
     const onboarded = localStorage.getItem('offertai_onboarded');
     const name = localStorage.getItem('offertai_company');
     const rate = localStorage.getItem('offertai_rate');
+    const email = localStorage.getItem('offertai_email');
+    const phone = localStorage.getItem('offertai_phone');
     if (onboarded === 'true') {
       setIsOnboarded(true);
       if (name) setCompanyName(name);
       if (rate) setHourlyRate(Number(rate));
+      if (email) setCompanyEmail(email);
+      if (phone) setCompanyPhone(phone);
     }
   }, []);
 
   const handleCompleteOnboarding = () => {
-    if (!companyName.trim()) return;
+    if (!companyName.trim()) {
+      alert('Vänligen ange ditt företagsnamn.');
+      return;
+    }
     localStorage.setItem('offertai_onboarded', 'true');
     localStorage.setItem('offertai_company', companyName);
     localStorage.setItem('offertai_rate', hourlyRate.toString());
+    localStorage.setItem('offertai_email', companyEmail);
+    localStorage.setItem('offertai_phone', companyPhone);
     setIsOnboarded(true);
   };
 
@@ -87,30 +96,90 @@ export default function Home() {
   const rotDeduction = includeRot ? Math.round(laborCost * 0.3) : 0;
   const totalToPay = totalBeforeRot - rotDeduction;
 
+  // 1. TYDLIG VÄLKOMMENSIDA / ONBOARDING ("GÖR DETTA 1 GÅNG")
   if (!isOnboarded) {
     return (
       <main className="min-h-screen bg-[#0B0F17] text-slate-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-slate-900 border border-teal-500/30 p-6 rounded-2xl shadow-2xl space-y-4">
-          <h1 className="text-2xl font-black text-center">⚡ Välkommen till din App</h1>
-          <p className="text-xs text-slate-400 text-center">Ställ in ditt företag en gång, sedan är appen din!</p>
-          <input
-            type="text"
-            placeholder="Ditt Företagsnamn"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-            className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm"
-          />
-          <button
-            onClick={handleCompleteOnboarding}
-            className="w-full bg-teal-500 text-slate-950 font-bold py-3 rounded-xl shadow-lg"
-          >
-            Lås Appen till Mitt Företag
-          </button>
+        <div className="max-w-md w-full bg-slate-900/90 border border-teal-500/40 backdrop-blur-xl p-6 sm:p-8 rounded-3xl shadow-2xl space-y-6 relative overflow-hidden">
+          
+          {/* Tydlig "Gör detta 1 gång"-tagg */}
+          <div className="flex justify-center">
+            <span className="bg-teal-500/10 text-teal-400 border border-teal-500/30 text-[11px] font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full shadow-inner flex items-center gap-1.5">
+              <span>🔒</span> Gör detta 1 gång – Spara för alltid
+            </span>
+          </div>
+
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 to-indigo-600 flex items-center justify-center font-bold text-slate-950 text-2xl shadow-xl shadow-teal-500/20 mx-auto">
+              ⚡
+            </div>
+            <h1 className="text-2xl font-black tracking-tight text-white">Ställ in ditt Företag</h1>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Fyll i dina grunduppgifter en enda gång. Appen sparar dina priser och branding så att den fungerar som din helt egna företags-app varje gång du öppnar den!
+            </p>
+          </div>
+
+          <div className="space-y-4 text-xs pt-2">
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1">Ditt Företagsnamn *</label>
+              <input
+                type="text"
+                placeholder="Ex: Malmö Måleri AB"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 font-medium focus:border-teal-500 outline-none text-sm shadow-inner"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Standard Timpris (kr/h)</label>
+                <input
+                  type="number"
+                  value={hourlyRate}
+                  onChange={(e) => setHourlyRate(Number(e.target.value))}
+                  className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 font-medium focus:border-teal-500 outline-none shadow-inner"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Telefonnummer</label>
+                <input
+                  type="text"
+                  placeholder="070-000 00 00"
+                  value={companyPhone}
+                  onChange={(e) => setCompanyPhone(e.target.value)}
+                  className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 font-medium focus:border-teal-500 outline-none shadow-inner"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-semibold mb-1">E-post (på offerter)</label>
+              <input
+                type="email"
+                placeholder="kontakt@foretag.se"
+                value={companyEmail}
+                onChange={(e) => setCompanyEmail(e.target.value)}
+                className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 font-medium focus:border-teal-500 outline-none shadow-inner"
+              />
+            </div>
+
+            <button
+              onClick={handleCompleteOnboarding}
+              className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black py-4 rounded-xl shadow-lg shadow-teal-500/20 transition duration-200 active:scale-[0.98] text-sm mt-3 flex items-center justify-center gap-2"
+            >
+              <span>🚀 Spara & Lås Appen Till Mitt Företag</span>
+            </button>
+            <p className="text-[10px] text-slate-500 text-center italic">
+              Du kan när som helst ändra dina uppgifter under "Min Profil" i menyn senare.
+            </p>
+          </div>
         </div>
       </main>
     );
   }
 
+  // 2. HUVUDAPP MED HAMBURGERMENY (☰)
   return (
     <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-3 md:p-8 antialiased">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -120,20 +189,20 @@ export default function Home() {
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-teal-400 font-bold"
+              className="p-2 bg-slate-900 border border-slate-800 rounded-xl text-teal-400 font-bold active:scale-95 transition"
             >
               ☰
             </button>
             <div>
               <span className="font-extrabold text-base text-white block">{companyName}</span>
-              <span className="text-[10px] font-semibold uppercase text-teal-400 block -mt-1">Offert & Jämförelse Pro</span>
+              <span className="text-[10px] font-semibold uppercase text-teal-400 block -mt-1">Offert & Företags-System</span>
             </div>
           </div>
 
           <div className="flex gap-2 text-xs">
             <button
               onClick={() => setActiveTab('offert')}
-              className={`px-3 py-1.5 font-semibold rounded-lg border ${
+              className={`px-3 py-1.5 font-semibold rounded-lg border transition ${
                 activeTab === 'offert' ? 'bg-teal-500/20 border-teal-500/40 text-teal-300' : 'bg-slate-900 border-slate-800 text-slate-400'
               }`}
             >
@@ -141,7 +210,7 @@ export default function Home() {
             </button>
             <button
               onClick={() => setActiveTab('jamfor')}
-              className={`px-3 py-1.5 font-semibold rounded-lg border ${
+              className={`px-3 py-1.5 font-semibold rounded-lg border transition ${
                 activeTab === 'jamfor' ? 'bg-indigo-500/20 border-indigo-500/40 text-indigo-300' : 'bg-slate-900 border-slate-800 text-slate-400'
               }`}
             >
@@ -151,18 +220,33 @@ export default function Home() {
 
           {/* MENY DROPDOWN */}
           {menuOpen && (
-            <div className="absolute top-14 left-0 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-3 z-50 space-y-1">
+            <div className="absolute top-14 left-0 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-3 z-50 space-y-1 backdrop-blur-xl">
+              <div className="p-2 border-b border-slate-800 mb-1">
+                <span className="text-xs font-bold text-white block">{companyName}</span>
+                <span className="text-[10px] text-teal-400 font-medium block">Inloggad & Sparad</span>
+              </div>
               <button
                 onClick={() => { setActiveTab('offert'); setMenuOpen(false); }}
-                className="w-full text-left p-2.5 rounded-lg text-xs font-semibold hover:bg-slate-800 text-slate-200"
+                className="w-full text-left p-2.5 rounded-lg text-xs font-semibold hover:bg-slate-800 text-slate-200 flex items-center gap-2"
               >
-                ⚡ Skapa Offert
+                <span>⚡</span> Skapa Offert
               </button>
               <button
                 onClick={() => { setActiveTab('jamfor'); setMenuOpen(false); }}
-                className="w-full text-left p-2.5 rounded-lg text-xs font-semibold hover:bg-slate-800 text-slate-200"
+                className="w-full text-left p-2.5 rounded-lg text-xs font-semibold hover:bg-slate-800 text-slate-200 flex items-center gap-2"
               >
-                📊 Varför Välja Oss (Jämför-Sida)
+                <span>📊</span> Varför Välja Oss (Jämför)
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm('Vill du återställa företagets inställningar och köra onboarding igen?')) {
+                    localStorage.removeItem('offertai_onboarded');
+                    setIsOnboarded(false);
+                  }
+                }}
+                className="w-full text-left p-2.5 rounded-lg text-xs font-semibold hover:bg-rose-950/40 text-rose-400 flex items-center gap-2"
+              >
+                <span>⚙️</span> Ändra Företagsuppgifter
               </button>
             </div>
           )}
@@ -231,16 +315,6 @@ export default function Home() {
         {/* TAB 2: JÄMFÖR / "VARFÖR VÄLJA OSS" */}
         {activeTab === 'jamfor' && (
           <div className="space-y-6">
-            <div className="bg-slate-900/80 p-5 rounded-2xl border border-indigo-500/30 print:hidden space-y-2">
-              <h2 className="text-lg font-bold text-indigo-300 flex items-center gap-2">
-                <span>📊</span> Anpassa din Jämförelsesida
-              </h2>
-              <p className="text-xs text-slate-400">
-                Visa för kunden varför ert erbjudande är tryggare och mer prisvärt än "billiga" konkurrenter online.
-              </p>
-            </div>
-
-            {/* JÄMFÖRELSEBILAGA (Redo att skrivas ut / visas för kund) */}
             <section className="bg-white text-slate-900 p-6 sm:p-8 rounded-2xl shadow-2xl print:p-0 print:shadow-none">
               <div className="text-center border-b pb-4 mb-6">
                 <span className="text-xs font-bold text-teal-700 uppercase tracking-widest block">{companyName}</span>
@@ -267,11 +341,6 @@ export default function Home() {
                     ))}
                   </tbody>
                 </table>
-              </div>
-
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-center text-xs text-slate-600">
-                <p className="font-bold text-slate-900 mb-1">💡 Vårt löfte till dig som kund</p>
-                Vi konkurrerar inte med fuskarpriser. Vi levererar ett noggrant utfört arbete med garantier, schyssta villkor och utan överraskningar på fakturan.
               </div>
 
               <div className="mt-6 flex justify-center print:hidden">
