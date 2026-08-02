@@ -6,7 +6,6 @@ import React, { useState, useEffect, ChangeEvent } from 'react';
 type JobType = 'målning' | 'takbyte' | 'fasad' | 'snickeri' | 'anpassad';
 
 export default function Home() {
-  // Snabb-inklistring / Paste bin text
   const [pasteText, setPasteText] = useState<string>('');
   
   // Offertuppgifter
@@ -20,10 +19,13 @@ export default function Home() {
   const [materialPerSqm, setMaterialPerSqm] = useState<number>(180);
   const [materialMarkup, setMaterialMarkup] = useState<number>(15);
   const [includeRot, setIncludeRot] = useState<boolean>(true);
+  
+  // 🎯 NYTT: Svårighets- & Marginalreglage (-20% till +50%)
+  const [riskMargin, setRiskMargin] = useState<number>(0);
+
   const [statusMsg, setStatusMsg] = useState<string>('');
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
 
-  // Ladda sparade företagssiffror från localStorage vid start
   useEffect(() => {
     const savedCompany = localStorage.getItem('offertai_company');
     const savedRate = localStorage.getItem('offertai_rate');
@@ -31,7 +33,6 @@ export default function Home() {
     if (savedRate) setHourlyRate(Number(savedRate));
   }, []);
 
-  // Textanalys (Extrahera m², timpris, material, jobbtitel)
   const parseTextContent = (text: string) => {
     if (!text.trim()) return;
 
@@ -43,19 +44,15 @@ export default function Home() {
 
     const lower = text.toLowerCase();
 
-    // Sök efter kvadratmeter (ex: "120 kvm", "120m2", "120 m²")
     const sqmMatch = lower.match(/(\d+)\s*(kvm|m2|m²)/);
     if (sqmMatch) foundSqm = parseInt(sqmMatch[1], 10);
 
-    // Sök efter timpris (ex: "650 kr/h", "650kr/tim", "650:- / h")
     const rateMatch = lower.match(/(\d+)\s*(kr\/h|kr\/tim|kr\/timme|:- \/ h)/);
     if (rateMatch) foundRate = parseInt(rateMatch[1], 10);
 
-    // Sök efter materialpris (ex: "250 kr/m2", "200 kr/kvm")
     const matMatch = lower.match(/material[^\d]*(\d+)\s*(kr\/m2|kr\/kvm|kr\/m²)/) || lower.match(/(\d+)\s*(kr\/m2|kr\/kvm|kr\/m²)/);
     if (matMatch) foundMatPrice = parseInt(matMatch[1], 10);
 
-    // Identifiera arbetstyp
     if (lower.includes('tak') || lower.includes('panna')) {
       setJobType('takbyte');
       foundTitle = 'Takrenovering / Byte';
@@ -81,7 +78,7 @@ export default function Home() {
     setMaterialDescription(foundMatDesc);
 
     localStorage.setItem('offertai_rate', foundRate.toString());
-    setStatusMsg('✅ Siffror & uppgifter uppdaterade!');
+    setStatusMsg('✅ Siffror uppdaterade!');
     setTimeout(() => setStatusMsg(''), 4000);
   };
 
@@ -89,7 +86,6 @@ export default function Home() {
     parseTextContent(pasteText);
   };
 
-  // Hantera fil- och bilduppladdning från mobilen
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -98,8 +94,6 @@ export default function Home() {
     setStatusMsg(`📷 Läste in ${file.name}...`);
 
     const reader = new FileReader();
-    
-    // Om det är en textfil/PDF-text
     if (file.type.includes('text') || file.name.endsWith('.txt') || file.name.endsWith('.csv')) {
       reader.onload = (event) => {
         const content = event.target?.result as string;
@@ -108,17 +102,21 @@ export default function Home() {
       };
       reader.readAsText(file);
     } else {
-      // Om det är en bild/kamerafoto
       setStatusMsg('📷 Bild bifogad! Siffror extraherade.');
-      // Simulerad direktavläsning från bildnamn/metadata om ren text saknas
       parseTextContent(file.name + " " + pasteText);
       setTimeout(() => setStatusMsg(''), 4000);
     }
   };
 
-  // Beräkningar
-  const laborHours = Math.ceil(sqm * hoursPerSqm);
-  const laborCost = laborHours * hourlyRate;
+  // 🧮 Beräkningar inkl. Risk/Svårighetspåslag
+  const marginMultiplier = 1 + riskMargin / 100;
+  
+  const baseLaborHours = Math.ceil(sqm * hoursPerSqm);
+  // Påslaget justerar både timuppskattning och slutpris baserat på svårighet/brådska
+  const laborHours = Math.ceil(baseLaborHours * (riskMargin > 0 ? (1 + (riskMargin * 0.5) / 100) : 1));
+  const effectiveHourlyRate = Math.round(hourlyRate * (riskMargin > 0 ? (1 + (riskMargin * 0.5) / 100) : marginMultiplier));
+  
+  const laborCost = laborHours * effectiveHourlyRate;
   const rawMaterial = sqm * materialPerSqm;
   const materialCost = Math.ceil(rawMaterial * (1 + materialMarkup / 100));
   const totalBeforeRot = laborCost + materialCost;
@@ -131,7 +129,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#0B0F17] text-slate-100 font-sans p-3 md:p-8 antialiased selection:bg-teal-500/30">
-      {/* Glow Ambient Effect */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-teal-500/10 via-indigo-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
 
       <div className="max-w-6xl mx-auto space-y-6">
@@ -147,12 +144,12 @@ export default function Home() {
                 OffertAI
               </span>
               <span className="text-[10px] font-semibold uppercase tracking-widest text-teal-400 block -mt-1">
-                Mobile First Engine
+                Risk & Cash Multiplier Edition
               </span>
             </div>
           </div>
           <span className="text-xs font-medium text-slate-400 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800 backdrop-blur-md">
-            v0.4 File & Cam Ready
+            v0.5 Dynamic Margin
           </span>
         </header>
 
@@ -165,19 +162,18 @@ export default function Home() {
             <div className="bg-gradient-to-b from-slate-950 to-slate-900 p-3.5 rounded-xl border border-teal-500/30 space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-teal-400 flex items-center gap-1.5">
-                  <span>📷</span> Bifoga Bild / Ta Foto / Klistra in
+                  <span>📷</span> Bifoga Bild / Foto / Text
                 </span>
                 {statusMsg && <span className="text-[10px] text-emerald-400 font-semibold">{statusMsg}</span>}
               </div>
 
-              {/* Kameraknapp för Mobil */}
               <div className="grid grid-cols-2 gap-2">
                 <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-lg border border-slate-700 flex items-center justify-center gap-1.5 transition active:scale-95 text-center">
                   <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span>Ta Foto / Bild</span>
+                  <span>Ta Foto</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -191,7 +187,7 @@ export default function Home() {
                   <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                   </svg>
-                  <span>Välj Fil / PDF</span>
+                  <span>Välj Fil</span>
                   <input
                     type="file"
                     accept="image/*,.pdf,.txt,.csv"
@@ -203,7 +199,7 @@ export default function Home() {
 
               {uploadedFileName && (
                 <div className="text-[11px] text-teal-300 bg-teal-950/40 p-1.5 rounded border border-teal-800/40 text-center truncate">
-                  📎 Fil bifogad: {uploadedFileName}
+                  📎 Fil: {uploadedFileName}
                 </div>
               )}
 
@@ -211,7 +207,7 @@ export default function Home() {
                 rows={2}
                 value={pasteText}
                 onChange={(e) => setPasteText(e.target.value)}
-                placeholder="Eller klistra in text här (ex: Fasad 140 kvm, 650 kr/h, material 220 kr/m2)..."
+                placeholder="Eller klistra in text (ex: Fasad 140 kvm, 650 kr/h, material 220 kr/m2)..."
                 className="w-full p-2 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-200 placeholder:text-slate-600 outline-none focus:border-teal-500"
               />
               <button
@@ -220,6 +216,60 @@ export default function Home() {
               >
                 <span>⚡ Auto-Fyll i från text/fil</span>
               </button>
+            </div>
+
+            {/* 🎯 NYTT: SVÅRIGHET, BINGO & MARGINALREGLAGE */}
+            <div className="p-3 bg-slate-950/60 rounded-xl border border-indigo-500/30 space-y-2.5">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-indigo-300 flex items-center gap-1">
+                  🎯 Jobbets Svårighet & Marginal
+                </span>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+                  riskMargin > 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
+                  riskMargin < 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' :
+                  'bg-slate-800 text-slate-300'
+                }`}>
+                  {riskMargin > 0 ? `+${riskMargin}% Påslag` : riskMargin < 0 ? `${riskMargin}% Rabatt` : 'Normal (0%)'}
+                </span>
+              </div>
+
+              <input
+                type="range"
+                min="-20"
+                max="50"
+                step="5"
+                value={riskMargin}
+                onChange={(e) => setRiskMargin(Number(e.target.value))}
+                className="w-full accent-indigo-400 cursor-pointer h-2 bg-slate-800 rounded-lg"
+              />
+
+              {/* Quick Preset Buttons */}
+              <div className="grid grid-cols-4 gap-1.5 text-[10px] pt-1">
+                <button
+                  onClick={() => setRiskMargin(-10)}
+                  className={`py-1 rounded border ${riskMargin === -10 ? 'bg-emerald-500/30 border-emerald-400 text-emerald-200' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
+                >
+                  Kompis (-10%)
+                </button>
+                <button
+                  onClick={() => setRiskMargin(0)}
+                  className={`py-1 rounded border ${riskMargin === 0 ? 'bg-slate-700 border-slate-500 text-white' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
+                >
+                  Normal (0%)
+                </button>
+                <button
+                  onClick={() => setRiskMargin(15)}
+                  className={`py-1 rounded border ${riskMargin === 15 ? 'bg-amber-500/30 border-amber-400 text-amber-200' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
+                >
+                  Svårt (+15%)
+                </button>
+                <button
+                  onClick={() => setRiskMargin(35)}
+                  className={`py-1 rounded border ${riskMargin === 35 ? 'bg-rose-500/30 border-rose-400 text-rose-200' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
+                >
+                  💰 Extra Cash (+35%)
+                </button>
+              </div>
             </div>
 
             {/* FÖRETAGETS INSTÄLLNINGAR */}
@@ -248,7 +298,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Timpris (kr/h)</label>
+                  <label className="block text-slate-300 font-semibold mb-1">Grundtimpris (kr/h)</label>
                   <input
                     type="number"
                     value={hourlyRate}
@@ -377,7 +427,7 @@ export default function Home() {
                     <td className="py-3">
                       <span className="font-bold text-slate-900 block">Arbetstid & Utförande</span>
                       <span className="text-[11px] text-slate-500">
-                        {laborHours} timmar à {hourlyRate} kr/h ({hoursPerSqm} h/m²)
+                        {laborHours} timmar à {effectiveHourlyRate} kr/h
                       </span>
                     </td>
                     <td className="py-3 text-right font-bold text-slate-900">{laborCost.toLocaleString()} kr</td>
