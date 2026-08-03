@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchCatalogItem } from "@/lib/cart-engine/catalog";
+import { matchMaterialItem } from "@/lib/quote-engine/material";
 import { estimateRoofLaborHours, generateRoofCatalog, type RoofOptions } from "@/lib/cart-engine/roof-catalog";
 
 const BASE: RoofOptions = { areaM2: 80, rannor: false, tier: "budget" };
@@ -40,7 +40,7 @@ describe("generateRoofCatalog", () => {
   it("every item id resolves back to itself", () => {
     const catalog = generateRoofCatalog({ ...BASE, rannor: true });
     for (const item of catalog) {
-      expect(matchCatalogItem(item.id, catalog)?.id).toBe(item.id);
+      expect(matchMaterialItem(item.id, catalog)?.id).toBe(item.id);
     }
   });
 });

@@ -1,14 +1,14 @@
-import type { CatalogItem } from "@/lib/cart-engine/catalog";
+import type { MaterialItem } from "@/lib/quote-engine/material";
 
 /**
  * The "Bygga altan" AI Plan: given a deck's width and depth, computes how
  * much of each material the build actually needs, then hands back a
- * catalog shaped exactly like the grocery one — same `CatalogItem` type,
+ * catalog shaped exactly like the grocery one — same `MaterialItem` type,
  * same engine (optimize.ts/checkout.ts) reads it the same way. Quantities
  * are honest rules-of-thumb (spacing, coverage), not a real materials
  * calculator; prices are illustrative, same as the grocery catalog.
  */
-export function generateDeckMaterialsCatalog(widthM: number, depthM: number): CatalogItem[] {
+export function generateDeckMaterialsCatalog(widthM: number, depthM: number): MaterialItem[] {
   const width = Math.max(1, widthM);
   const depth = Math.max(1, depthM);
   const areaM2 = Math.round(width * depth * 10) / 10;

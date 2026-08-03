@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { AppShell } from "@/components/nav/app-shell";
 import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
 import "./globals.css";
 
-const TITLE = "Karma — Vi fattar köpbeslut";
+const TITLE = "OffertPro — AI Operating System för hantverkare";
 const DESCRIPTION =
-  "Karma bryter ner projektet du startar — matkasse, altan, eller vad som helst härnäst — jämför rätt butiker och säger exakt vad du ska göra. Inte fler priser. Ett beslut.";
+  "OffertPro bryter ner jobbet du beskriver till en färdig offert — material, arbetstid, ROT-avdrag och marginal på 30 sekunder, med rösten eller texten. Inte ett formulär. En medgrundare.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Karma",
+    title: "OffertPro",
   },
   openGraph: {
     title: TITLE,
@@ -43,7 +44,7 @@ export default function RootLayout({
       <body
         className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}
       >
-        {children}
+        <AppShell>{children}</AppShell>
         <ServiceWorkerRegister />
       </body>
     </html>

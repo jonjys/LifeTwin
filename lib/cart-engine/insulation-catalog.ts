@@ -1,4 +1,4 @@
-import type { CatalogItem } from "@/lib/cart-engine/catalog";
+import type { MaterialItem } from "@/lib/quote-engine/material";
 
 export type InsulationTier = "budget" | "premium";
 
@@ -21,11 +21,11 @@ export const INSULATION_ITEM_IDS = ["isolering-isolering", "angsparr-isolering",
  * (yta) plus follow-up answers in, a fully quantified materials list out.
  * Shares the "building" domain with the rest of Bygg.
  */
-export function generateInsulationCatalog(opts: InsulationOptions): CatalogItem[] {
+export function generateInsulationCatalog(opts: InsulationOptions): MaterialItem[] {
   const { areaM2, tapeRullar } = deriveInsulationQuantities(opts);
   const premium = opts.tier === "premium";
 
-  const items: CatalogItem[] = [
+  const items: MaterialItem[] = [
     {
       id: "isolering-isolering",
       keywords: ["isolering-isolering"],

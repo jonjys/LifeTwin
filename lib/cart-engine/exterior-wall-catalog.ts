@@ -1,4 +1,4 @@
-import type { CatalogItem } from "@/lib/cart-engine/catalog";
+import type { MaterialItem } from "@/lib/quote-engine/material";
 
 export type ExteriorWallTier = "budget" | "premium";
 
@@ -37,11 +37,11 @@ export const EXTERIOR_WALL_ITEM_IDS = [
  * "building"-domän) men med väderskyddande material istället för
  * gipsskivor: vindskydd, fasadpanel, och isolering/målning som tillval.
  */
-export function generateExteriorWallCatalog(opts: ExteriorWallOptions): CatalogItem[] {
+export function generateExteriorWallCatalog(opts: ExteriorWallOptions): MaterialItem[] {
   const { areaM2, studCount, sheetsNeeded, height, paintLiters } = deriveExteriorWallQuantities(opts);
   const premium = opts.tier === "premium";
 
-  const items: CatalogItem[] = [
+  const items: MaterialItem[] = [
     {
       id: "regel-yttervagg",
       keywords: ["regel-yttervagg"],

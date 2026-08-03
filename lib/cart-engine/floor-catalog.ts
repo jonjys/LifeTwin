@@ -1,4 +1,4 @@
-import type { CatalogItem } from "@/lib/cart-engine/catalog";
+import type { MaterialItem } from "@/lib/quote-engine/material";
 
 export type FloorTier = "budget" | "premium";
 
@@ -35,11 +35,11 @@ export const FLOOR_ITEM_IDS = ["golv-golv", "underlag-golv", "list-golv", "golvv
  * Bygga altan and Innervägg instead of needing its own stores, the same
  * insight Innervägg proved first.
  */
-export function generateFloorCatalog(opts: FloorOptions): CatalogItem[] {
+export function generateFloorCatalog(opts: FloorOptions): MaterialItem[] {
   const { areaM2, perimeterM, packsNeeded, underlayRolls } = deriveFloorQuantities(opts);
   const premium = opts.tier === "premium";
 
-  const items: CatalogItem[] = [
+  const items: MaterialItem[] = [
     {
       id: "golv-golv",
       keywords: ["golv-golv"],

@@ -1,4 +1,4 @@
-import type { CatalogItem } from "@/lib/cart-engine/catalog";
+import type { MaterialItem } from "@/lib/quote-engine/material";
 
 export type ParkingTier = "budget" | "premium"; // budget = grus, premium = asfalt
 
@@ -21,11 +21,11 @@ export const PARKING_ITEM_IDS = ["underlag-parkering", "markduk-parkering", "kan
  * (yta) plus follow-up answers in, a fully quantified materials list out.
  * Shares the "building" domain with the rest of Bygg.
  */
-export function generateParkingCatalog(opts: ParkingOptions): CatalogItem[] {
+export function generateParkingCatalog(opts: ParkingOptions): MaterialItem[] {
   const { areaM2, markdukRullar } = deriveParkingQuantities(opts);
   const premium = opts.tier === "premium";
 
-  const items: CatalogItem[] = [
+  const items: MaterialItem[] = [
     {
       id: "underlag-parkering",
       keywords: ["underlag-parkering"],
