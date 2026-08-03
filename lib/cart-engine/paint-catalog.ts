@@ -41,6 +41,8 @@ export function generatePaintCatalog(opts: PaintOptions): MaterialItem[] {
       naiveBrand: premium ? "Flügger" : "Beckers",
       smartBrand: "Byggmax Eget Märke",
       domain: "building",
+      qty: paintLiters,
+      unitPriceSEK: premium ? 219 : 129,
     },
     {
       id: "spackel-malning",
@@ -51,6 +53,8 @@ export function generatePaintCatalog(opts: PaintOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: spackelHinkar,
+      unitPriceSEK: premium ? 149 : 89,
     },
     {
       id: "skydd-malning",
@@ -61,6 +65,8 @@ export function generatePaintCatalog(opts: PaintOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: skyddRullar,
+      unitPriceSEK: 79,
     },
   ];
 
@@ -74,6 +80,8 @@ export function generatePaintCatalog(opts: PaintOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: 1,
+      unitPriceSEK: 449,
     });
   }
 

@@ -35,6 +35,8 @@ export function generateParkingCatalog(opts: ParkingOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: areaM2,
+      unitPriceSEK: premium ? 449 : 89,
     },
     {
       id: "markduk-parkering",
@@ -45,6 +47,8 @@ export function generateParkingCatalog(opts: ParkingOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: markdukRullar,
+      unitPriceSEK: 249,
     },
   ];
 
@@ -58,6 +62,8 @@ export function generateParkingCatalog(opts: ParkingOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: 1,
+      unitPriceSEK: premium ? 3200 : 1900,
     });
   }
 

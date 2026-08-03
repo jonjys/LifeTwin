@@ -69,6 +69,8 @@ export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: studCount * height,
+      unitPriceSEK: premium ? 42 : 35,
     },
     {
       id: "gipsskiva-innervagg",
@@ -79,6 +81,8 @@ export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
       naiveBrand: premium ? "Gyproc Robust" : "Gyproc Normal",
       smartBrand: "",
       domain: "building",
+      qty: sheetsNeeded,
+      unitPriceSEK: premium ? 149 : 99,
     },
     {
       id: "skruv-innervagg",
@@ -89,6 +93,8 @@ export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: screwBoxes,
+      unitPriceSEK: 89,
     },
   ];
 
@@ -102,6 +108,8 @@ export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
       naiveBrand: premium ? "Paroc" : "Rockwool",
       smartBrand: "",
       domain: "building",
+      qty: wallAreaM2,
+      unitPriceSEK: premium ? 69 : 49,
     });
   }
 
@@ -116,6 +124,8 @@ export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
         naiveBrand: "",
         smartBrand: "",
         domain: "building",
+        qty: 1,
+        unitPriceSEK: premium ? 149 : 89,
       },
       {
         id: "farg-innervagg",
@@ -126,6 +136,8 @@ export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
         naiveBrand: premium ? "Flügger" : "Beckers",
         smartBrand: "Byggmax Eget Märke",
         domain: "building",
+        qty: paintLiters,
+        unitPriceSEK: premium ? 219 : 129,
       }
     );
   }
@@ -139,6 +151,8 @@ export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
     naiveBrand: "",
     smartBrand: "",
     domain: "building",
+    qty: skirtingM,
+    unitPriceSEK: premium ? 49 : 29,
   });
 
   if (opts.dorr) {
@@ -151,6 +165,8 @@ export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
       naiveBrand: premium ? "Swedoor Premium" : "Swedoor Basic",
       smartBrand: "",
       domain: "building",
+      qty: 1,
+      unitPriceSEK: premium ? 2200 : 1200,
     });
   }
 
@@ -164,6 +180,8 @@ export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: 1,
+      unitPriceSEK: 800,
     });
   }
 

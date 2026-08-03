@@ -28,6 +28,8 @@ export function generateDeckMaterialsCatalog(widthM: number, depthM: number): Ma
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: areaM2,
+      unitPriceSEK: 449,
     },
     {
       id: "reglar",
@@ -38,6 +40,8 @@ export function generateDeckMaterialsCatalog(widthM: number, depthM: number): Ma
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: areaM2,
+      unitPriceSEK: 165,
     },
     {
       id: "plintar",
@@ -48,6 +52,8 @@ export function generateDeckMaterialsCatalog(widthM: number, depthM: number): Ma
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: plintCount,
+      unitPriceSEK: 149,
     },
     {
       id: "skruv",
@@ -58,6 +64,8 @@ export function generateDeckMaterialsCatalog(widthM: number, depthM: number): Ma
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: screwBoxes,
+      unitPriceSEK: 249,
     },
     {
       id: "betong",
@@ -68,6 +76,8 @@ export function generateDeckMaterialsCatalog(widthM: number, depthM: number): Ma
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: concreteBags,
+      unitPriceSEK: 89,
     },
     {
       id: "verktyg",
@@ -78,6 +88,8 @@ export function generateDeckMaterialsCatalog(widthM: number, depthM: number): Ma
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: 1,
+      unitPriceSEK: 1200,
     },
   ];
 }

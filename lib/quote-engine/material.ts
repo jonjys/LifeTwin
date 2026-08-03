@@ -17,6 +17,18 @@ export type MaterialItem = {
   naiveBrand: string;
   smartBrand: string;
   domain?: string;
+  /** The quantity `unitPriceSEK` is multiplied by to get `basePriceSEK`
+   *  (e.g. sheet count, m², liters — whatever varies with the project's
+   *  dimensions). Lets a materialbank price genuinely override the
+   *  per-unit price without needing to know the project's own math. */
+  qty: number;
+  /** The catalog's built-in per-unit price — always `basePriceSEK / qty`.
+   *  Kept separate from `basePriceSEK` (rather than derived) so a
+   *  materialbank match can replace just this and recompute the total. */
+  unitPriceSEK: number;
+  /** Set when a MaterialBankItem's own price replaced the simulated
+   *  unitPriceSEK — lets the UI show "från din materialbank". */
+  sourcedFromBank?: boolean;
 };
 
 /** Finds the material a raw id/string resolves to — used by each
