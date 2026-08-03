@@ -36,9 +36,21 @@ behövs igen.
    mönster för alla: mått + några följdfrågor in, en fullt kvantifierad
    materiallista, arbetstid, moms och ROT-avdrag ut. Timpris och
    materialpåslag justerbara direkt i kalkylen.
-4. **Offerter, Kunder, Materialbank, AI Studio, Inställningar** — ärligt
-   "kommer snart": informationsarkitekturen och datamodellen (Prisma-
-   schemat) finns redan, UI:t byggs i nästa fas.
+4. **Offert-wizarden** (`/offers/new`) — kund (välj eller snabblägg till)
+   → jobbeskrivning (text eller röst) → samma kalkylatormotor som
+   `/calculator` föreslår material och arbetstid → justera timpris/
+   påslag/ROT → spara. `/offers` listar sparade offerter med status
+   (Utkast/Skickad/Vunnen/Avslagen); `/offers/[id]` visar hela
+   prisbilden och statusändring.
+5. **Kunder** (`/customers`) och **Materialbank** (`/materials`) — riktiga
+   CRUD-sidor mot Postgres: kundregister, och företagets egna
+   materialpriser versionerade över tid (varje prisändring arkiverar
+   det gamla priset i `MaterialPriceHistory`).
+6. **Inställningar** (`/settings`) — företagsprofil (org.nr, moms,
+   bankgiro, standardtimpris/påslag), som Offert-wizarden hämtar sina
+   startvärden från.
+7. **AI Studio** — fortfarande ärligt "kommer snart": uppföljnings-SMS
+   och marginalanalys är inte byggda än.
 
 ## Tech
 
@@ -70,10 +82,15 @@ för att slå på AI Command Bar.
 app/
   page.tsx                 Dashboard — KPI:er (Prisma) + AI Command Bar
   calculator/page.tsx      AI-Kalkylatorn — 8 projekttyper, en sida
-  offers/ customers/       "Kommer snart" — datamodellen finns, UI:t inte än
-  materials/ ai-studio/
-  settings/
+  offers/page.tsx          Offertlista — status, totalsumma
+  offers/new/page.tsx      Offert-wizarden — kund → jobb → kalkyl → spara
+  offers/[id]/page.tsx     Offertdetalj — prisbild + statusändring
+  customers/page.tsx       Kundregister — CRUD
+  materials/page.tsx       Materialbank — CRUD + prishistorik
+  settings/page.tsx        Företagsprofil
+  ai-studio/               "Kommer snart" — inte byggd än
   api/ai/chat/route.ts     Claude-integrationen bakom Command Bar
+  api/{customers,quotes,materials,company}/  REST-routes mot Prisma
 components/
   nav/app-shell.tsx        Sidebar (desktop) + bottom nav (mobil)
   dashboard/command-bar.tsx  AI Command Bar — text + röst
@@ -85,12 +102,17 @@ lib/
                              material + arbetstid ut, ingen butik inblandad
   quote-engine/material.ts  MaterialItem — den gemensamma prisrads-typen
                              kalkylatorerna producerar
+  quote-engine/estimate.ts  Delad dispatch (estimateProject) + prisbild-
+                             formel (computeQuoteTotals) — används av både
+                             /calculator och Offert-wizarden
   use-speech-input.ts      Web Speech API-wrapper (sv-SE) för Command Bar
-  db.ts                    Prisma-singleton
+                             och Offert-wizarden
+  db.ts                    Prisma-singleton + getOrCreateDefaultCompany()
   types.ts                 Customer, Quote, QuoteLineItem, CompanyProfile,
                             ROT/moms-konstanter
   seeded.ts                Deterministisk pseudo-slump (kalkylatorernas
-                            priser är simulerade tills materialbanken finns)
+                            priser är simulerade tills materialbanken
+                            faktiskt kopplas in i kalkylen)
 prisma/schema.prisma       Company, Customer, Quote, QuoteLineItem,
                             MaterialBankItem, MaterialPriceHistory
 ```
@@ -102,14 +124,25 @@ exterior-wall,insulation,parking,materials}-catalog.ts`) är oförändrade
 sedan Karma-eran — samma tester, samma pure functions. Det enda som
 ändrats är typen de returnerar: `MaterialItem` (`lib/quote-engine/
 material.ts`) istället för det gamla `CatalogItem` — identisk form, bara
-utan butiksdomän. `/calculator` anropar dem direkt och lägger på
-offert-specifik logik ovanpå: materialpåslag, timpris × arbetstid, moms,
-ROT-avdrag.
+utan butiksdomän. Both `/calculator` och Offert-wizarden anropar samma
+`lib/quote-engine/estimate.ts`-funktioner och lägger på offert-specifik
+logik ovanpå: materialpåslag, timpris × arbetstid, moms, ROT-avdrag.
+
+### Byggt hittills (Fas 1 + 2)
+
+Dashboard, Command Bar, AI-Kalkylator, Offert-wizard (kund → jobb →
+kalkyl → spara), kundregister, materialbank (CRUD + versionerad
+prishistorik) och företagsinställningar är alla riktiga skrivvägar mot
+Postgres via Prisma — inga stubbar.
 
 ### Medvetet inte byggt än
 
-Offert-wizarden (kund → jobb → kalkyl → skicka), CRM:et, materialbanken
-med kvittoavläsning och dynamisk prisindexering, AI Studio (uppföljnings-
-SMS, marginalanalys) och företagsinställningar är alla "kommer snart" —
-navigationen och datamodellen finns, men skrivvägarna (API-routes som
-faktiskt sparar till Postgres) är nästa fas, inte den här.
+- **AI Studio** — uppföljnings-SMS, marginalanalys.
+- **Kvittoavläsning / OCR** — materialbankens prishistorik finns och
+  versioneras redan vid manuell prisändring, men att automatiskt läsa
+  av ett kvitto och föreslå en prisuppdatering ("priset har ökat 8%
+  hos Bauhaus") är inte byggt.
+- **PDF/SMS-utskick av offerter** — offerter sparas och visas, men
+  skickas inte ut som PDF eller SMS än.
+- **Kalkylatorns priser** är fortfarande simulerade (`lib/seeded.ts`)
+  — de läser inte från materialbanken än, trots att båda nu finns.
