@@ -7,30 +7,9 @@ import { FieldLabel, SingleChipGroup, YesNoToggle } from "@/components/profile/f
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
-import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
-import { estimateExteriorWallLaborHours, generateExteriorWallCatalog } from "@/lib/cart-engine/exterior-wall-catalog";
-import { estimateFloorLaborHours, generateFloorCatalog } from "@/lib/cart-engine/floor-catalog";
-import { estimateInsulationLaborHours, generateInsulationCatalog } from "@/lib/cart-engine/insulation-catalog";
-import { estimatePaintLaborHours, generatePaintCatalog } from "@/lib/cart-engine/paint-catalog";
-import { estimateParkingLaborHours, generateParkingCatalog } from "@/lib/cart-engine/parking-catalog";
-import { estimateRoofLaborHours, generateRoofCatalog } from "@/lib/cart-engine/roof-catalog";
-import { estimateWallLaborHours, generateWallCatalog } from "@/lib/cart-engine/wall-catalog";
 import type { MaterialItem } from "@/lib/quote-engine/material";
+import { computeQuoteTotals, estimateProject, PROJECT_TYPES, type ProjectType } from "@/lib/quote-engine/estimate";
 import { fadeUp } from "@/lib/motion";
-import { ROT_DEDUCTION_RATE, VAT_RATE } from "@/lib/types";
-
-type ProjectType = "altan" | "innervagg" | "yttervagg" | "golv" | "tak" | "malning" | "isolering" | "parkering";
-
-const PROJECT_TYPES: { value: ProjectType; label: string }[] = [
-  { value: "altan", label: "Altan" },
-  { value: "innervagg", label: "Innervägg" },
-  { value: "yttervagg", label: "Yttervägg" },
-  { value: "golv", label: "Golv" },
-  { value: "tak", label: "Tak" },
-  { value: "malning", label: "Målning" },
-  { value: "isolering", label: "Isolering" },
-  { value: "parkering", label: "Parkering" },
-];
 
 const TIER_OPTIONS = [
   { value: "budget", label: "Budget" },
@@ -59,112 +38,15 @@ export default function CalculatorPage() {
   const [includeRot, setIncludeRot] = useState(true);
   const [calculated, setCalculated] = useState(false);
 
-  const { materials, laborHours, toggleALabel, toggleBLabel, usesArea, usesToggleB } = useMemo(() => {
-    switch (type) {
-      case "altan": {
-        const items = generateDeckMaterialsCatalog(widthM, heightM);
-        return { materials: items, laborHours: widthM * heightM * 0.5, toggleALabel: "", toggleBLabel: "", usesArea: false, usesToggleB: false };
-      }
-      case "innervagg": {
-        const opts = { widthM, heightM, isolera: toggleA, dorr: false, malas: toggleB, verktyg: false, tier };
-        return {
-          materials: generateWallCatalog(opts),
-          laborHours: estimateWallLaborHours(opts),
-          toggleALabel: "Isolera väggen?",
-          toggleBLabel: "Ska den målas?",
-          usesArea: false,
-          usesToggleB: true,
-        };
-      }
-      case "yttervagg": {
-        const opts = { widthM, heightM, isolera: toggleA, malas: toggleB, tier };
-        return {
-          materials: generateExteriorWallCatalog(opts),
-          laborHours: estimateExteriorWallLaborHours(opts),
-          toggleALabel: "Isolera väggen?",
-          toggleBLabel: "Ska den målas?",
-          usesArea: false,
-          usesToggleB: true,
-        };
-      }
-      case "golv": {
-        const opts = { widthM, lengthM: heightM, golvvarme: toggleA, troskel: toggleB, tier };
-        return {
-          materials: generateFloorCatalog(opts),
-          laborHours: estimateFloorLaborHours(opts),
-          toggleALabel: "Golvvärme?",
-          toggleBLabel: "Trösklar?",
-          usesArea: false,
-          usesToggleB: true,
-        };
-      }
-      case "tak": {
-        const opts = { areaM2, rannor: toggleA, tier };
-        return {
-          materials: generateRoofCatalog(opts),
-          laborHours: estimateRoofLaborHours(opts),
-          toggleALabel: "Hängrännor?",
-          toggleBLabel: "",
-          usesArea: true,
-          usesToggleB: false,
-        };
-      }
-      case "malning": {
-        const opts = { areaM2, tak: toggleA, verktyg: toggleB, tier };
-        return {
-          materials: generatePaintCatalog(opts),
-          laborHours: estimatePaintLaborHours(opts),
-          toggleALabel: "Måla taket också?",
-          toggleBLabel: "Inkludera verktyg?",
-          usesArea: true,
-          usesToggleB: true,
-        };
-      }
-      case "isolering": {
-        const opts = { areaM2, angsparr: toggleA, tier };
-        return {
-          materials: generateInsulationCatalog(opts),
-          laborHours: estimateInsulationLaborHours(opts),
-          toggleALabel: "Ångspärr?",
-          toggleBLabel: "",
-          usesArea: true,
-          usesToggleB: false,
-        };
-      }
-      case "parkering": {
-        const opts = { areaM2, kantsten: toggleA, tier };
-        return {
-          materials: generateParkingCatalog(opts),
-          laborHours: estimateParkingLaborHours(opts),
-          toggleALabel: "Kantsten?",
-          toggleBLabel: "",
-          usesArea: true,
-          usesToggleB: false,
-        };
-      }
-    }
-  }, [type, widthM, heightM, areaM2, toggleA, toggleB, tier]);
+  const { materials, laborHours, toggleALabel, toggleBLabel, usesArea, usesToggleB } = useMemo(
+    () => estimateProject({ type, widthM, heightM, areaM2, toggleA, toggleB, tier }),
+    [type, widthM, heightM, areaM2, toggleA, toggleB, tier]
+  );
 
-  const totals = useMemo(() => {
-    const materialCostSEK = materials.reduce((sum: number, m: MaterialItem) => sum + m.basePriceSEK, 0);
-    const materialWithMarkupSEK = Math.round(materialCostSEK * (1 + markupPct / 100));
-    const laborCostSEK = Math.round(laborHours * hourlyRateSEK);
-    const subtotalExclVatSEK = materialWithMarkupSEK + laborCostSEK;
-    const vatSEK = Math.round(subtotalExclVatSEK * VAT_RATE);
-    const rotDeductionSEK = includeRot ? Math.round(laborCostSEK * ROT_DEDUCTION_RATE) : 0;
-    const totalInclVatSEK = subtotalExclVatSEK + vatSEK;
-    const totalAfterRotSEK = totalInclVatSEK - rotDeductionSEK;
-    return {
-      materialCostSEK,
-      materialWithMarkupSEK,
-      laborCostSEK,
-      subtotalExclVatSEK,
-      vatSEK,
-      rotDeductionSEK,
-      totalInclVatSEK,
-      totalAfterRotSEK,
-    };
-  }, [materials, laborHours, hourlyRateSEK, markupPct, includeRot]);
+  const totals = useMemo(
+    () => computeQuoteTotals({ materials, laborHours, hourlyRateSEK, markupPct, includeRot }),
+    [materials, laborHours, hourlyRateSEK, markupPct, includeRot]
+  );
 
   const fmt = (n: number) => `${Math.round(n).toLocaleString("sv-SE")} kr`;
 
