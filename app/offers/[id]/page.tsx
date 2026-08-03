@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { AlertTriangle, ArrowLeft, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Printer, Trash2 } from "lucide-react";
 import { AmbientBackground } from "@/components/shared/ambient-background";
+import { OfferPrintView } from "@/components/offers/offer-print-view";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
-import { ROT_DEDUCTION_RATE, VAT_RATE } from "@/lib/types";
+import { DEFAULT_COMPANY_PROFILE, ROT_DEDUCTION_RATE, VAT_RATE, type CompanyProfile } from "@/lib/types";
 
 type QuoteStatus = "DRAFT" | "SENT" | "ACCEPTED" | "DECLINED";
 
@@ -39,6 +40,7 @@ export default function OfferDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [quote, setQuote] = useState<QuoteDetail | null>(null);
+  const [company, setCompany] = useState<CompanyProfile>(DEFAULT_COMPANY_PROFILE);
   const [notFound, setNotFound] = useState(false);
   const [updating, setUpdating] = useState(false);
 
@@ -58,6 +60,16 @@ export default function OfferDetailPage() {
 
   useEffect(() => {
     load();
+    (async () => {
+      try {
+        const res = await fetch("/api/company");
+        if (!res.ok) return;
+        const data = await res.json();
+        setCompany(data.company);
+      } catch {
+        // The print view falls back to DEFAULT_COMPANY_PROFILE's blanks.
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id]);
 
@@ -123,7 +135,7 @@ export default function OfferDetailPage() {
     <main className="relative min-h-screen px-5 pb-10 pt-6 sm:px-8 sm:pt-8">
       <AmbientBackground />
 
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
+      <div className="no-print mx-auto flex w-full max-w-2xl flex-col gap-5">
         <button
           onClick={() => router.push("/offers")}
           className="flex w-fit items-center gap-1.5 text-sm text-ink-muted hover:text-ink"
@@ -139,13 +151,22 @@ export default function OfferDetailPage() {
               <h1 className="text-lg font-semibold text-ink">{quote.jobTitle}</h1>
               <p className="text-sm text-ink-muted">{quote.customer.name}</p>
             </div>
-            <button
-              onClick={remove}
-              className="flex size-9 items-center justify-center rounded-xl text-ink-muted hover:bg-danger/10 hover:text-danger"
-              aria-label="Ta bort"
-            >
-              <Trash2 className="size-4" />
-            </button>
+            <div className="flex gap-1">
+              <button
+                onClick={() => window.print()}
+                className="flex size-9 items-center justify-center rounded-xl text-ink-muted hover:bg-white/5 hover:text-ink"
+                aria-label="Skriv ut / Spara som PDF"
+              >
+                <Printer className="size-4" />
+              </button>
+              <button
+                onClick={remove}
+                className="flex size-9 items-center justify-center rounded-xl text-ink-muted hover:bg-danger/10 hover:text-danger"
+                aria-label="Ta bort"
+              >
+                <Trash2 className="size-4" />
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -209,7 +230,30 @@ export default function OfferDetailPage() {
             <span className="font-mono text-2xl font-bold text-ink">{fmt(totalAfterRotSEK)}</span>
           </div>
         </Card>
+
+        <Button variant="outline" onClick={() => window.print()}>
+          <Printer className="size-4" />
+          Skriv ut / Spara som PDF
+        </Button>
       </div>
+
+      <OfferPrintView
+        number={quote.number}
+        jobTitle={quote.jobTitle}
+        createdAt={quote.createdAt}
+        customer={quote.customer}
+        company={company}
+        lineItems={quote.lineItems}
+        materialWithMarkupSEK={materialWithMarkupSEK}
+        materialMarkupPct={quote.materialMarkupPct}
+        laborHours={quote.laborHours}
+        hourlyRateSEK={quote.hourlyRateSEK}
+        laborCostSEK={laborCostSEK}
+        vatSEK={vatSEK}
+        rotDeductionSEK={rotDeductionSEK}
+        includeRot={quote.includeRot}
+        totalAfterRotSEK={totalAfterRotSEK}
+      />
     </main>
   );
 }

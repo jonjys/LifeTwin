@@ -7,7 +7,7 @@ export function AmbientBackground() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden print:hidden"
     >
       <motion.div
         className="absolute -top-40 left-1/4 size-[560px] rounded-full bg-primary/[0.07] blur-[140px]"

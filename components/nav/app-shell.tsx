@@ -41,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <nav className="fixed inset-y-0 left-0 z-40 hidden w-60 shrink-0 flex-col border-r border-border bg-surface/60 px-3 py-6 backdrop-blur-xl lg:flex">
+      <nav className="fixed inset-y-0 left-0 z-40 hidden w-60 shrink-0 flex-col border-r border-border bg-surface/60 px-3 py-6 backdrop-blur-xl lg:flex print:hidden">
         <Link href="/" className="mb-8 flex items-center gap-2 px-3">
           <div className="flex size-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
             <Sparkles className="size-4" />
@@ -72,7 +72,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-h-screen w-full flex-1 flex-col pb-20 lg:pb-0 lg:pl-60">{children}</div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-surface/90 backdrop-blur-xl lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-surface/90 backdrop-blur-xl lg:hidden print:hidden">
         {NAV_ITEMS.map((item) => {
           const active = isActive(pathname, item.href);
           return (
