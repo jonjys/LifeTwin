@@ -1,12 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "next build",
+  "buildCommand": "npx prisma db push --skip-generate && next build",
   "installCommand": "npm install",
-  "outputDirectory": ".next",
-  "crons": [
-    {
-      "path": "/api/ica-offers",
-      "schedule": "0 6 * * *"
-    }
-  ]
+  "outputDirectory": ".next"
 }
