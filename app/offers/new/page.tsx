@@ -3,13 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { AlertTriangle, Mic, Plus, Save } from "lucide-react";
+import { AlertTriangle, Database, Mic, Plus, Save } from "lucide-react";
 import { FieldLabel, SingleChipGroup, TextField, YesNoToggle } from "@/components/profile/fields";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { useSpeechInput } from "@/lib/use-speech-input";
 import { computeQuoteTotals, estimateProject, PROJECT_TYPES, type ProjectType } from "@/lib/quote-engine/estimate";
+import { applyMaterialBankPricing } from "@/lib/quote-engine/materialbank-pricing";
+import { useMaterialBankPrices } from "@/lib/quote-engine/use-material-bank";
 import { fadeUp } from "@/lib/motion";
 import type { Customer } from "@/lib/types";
 
@@ -83,9 +85,15 @@ export default function NewOfferPage() {
     })();
   }, []);
 
-  const { materials, laborHours, toggleALabel, toggleBLabel, usesArea, usesToggleB } = useMemo(
+  const { materials: simulatedMaterials, laborHours, toggleALabel, toggleBLabel, usesArea, usesToggleB } = useMemo(
     () => estimateProject({ type, widthM, heightM, areaM2, toggleA, toggleB, tier }),
     [type, widthM, heightM, areaM2, toggleA, toggleB, tier]
+  );
+
+  const bankPrices = useMaterialBankPrices();
+  const materials = useMemo(
+    () => applyMaterialBankPricing(simulatedMaterials, bankPrices),
+    [simulatedMaterials, bankPrices]
   );
 
   const totals = useMemo(
@@ -138,9 +146,9 @@ export default function NewOfferPage() {
           includeRot,
           lineItems: materials.map((m) => ({
             description: m.displayName,
-            qty: 1,
+            qty: m.qty,
             unitLabel: m.unitLabel,
-            unitPriceSEK: m.basePriceSEK,
+            unitPriceSEK: m.unitPriceSEK,
           })),
         }),
       });
@@ -366,7 +374,18 @@ export default function NewOfferPage() {
             <div className="flex flex-col gap-1.5">
               {materials.map((m) => (
                 <div key={m.id} className="flex items-center justify-between text-sm">
-                  <span className="text-ink-secondary">{m.displayName}</span>
+                  <span className="flex items-center gap-1.5 text-ink-secondary">
+                    {m.displayName}
+                    {m.sourcedFromBank && (
+                      <span
+                        title="Pris från din materialbank"
+                        className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                      >
+                        <Database className="size-2.5" />
+                        Din prisbank
+                      </span>
+                    )}
+                  </span>
                   <span className="font-mono text-ink">{fmt(m.basePriceSEK)}</span>
                 </div>
               ))}

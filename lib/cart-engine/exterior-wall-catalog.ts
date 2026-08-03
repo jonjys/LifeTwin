@@ -51,6 +51,8 @@ export function generateExteriorWallCatalog(opts: ExteriorWallOptions): Material
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: studCount * height,
+      unitPriceSEK: premium ? 48 : 39,
     },
     {
       id: "vindskyddsskiva-yttervagg",
@@ -61,6 +63,8 @@ export function generateExteriorWallCatalog(opts: ExteriorWallOptions): Material
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: sheetsNeeded,
+      unitPriceSEK: 179,
     },
     {
       id: "fasadpanel-yttervagg",
@@ -71,6 +75,8 @@ export function generateExteriorWallCatalog(opts: ExteriorWallOptions): Material
       naiveBrand: premium ? "Kährs" : "",
       smartBrand: premium ? "" : "Byggmax Eget Märke",
       domain: "building",
+      qty: areaM2,
+      unitPriceSEK: premium ? 289 : 179,
     },
     {
       id: "skruv-yttervagg",
@@ -81,6 +87,8 @@ export function generateExteriorWallCatalog(opts: ExteriorWallOptions): Material
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: 2,
+      unitPriceSEK: 89,
     },
   ];
 
@@ -94,6 +102,8 @@ export function generateExteriorWallCatalog(opts: ExteriorWallOptions): Material
       naiveBrand: premium ? "Paroc" : "Rockwool",
       smartBrand: "",
       domain: "building",
+      qty: areaM2,
+      unitPriceSEK: premium ? 69 : 49,
     });
   }
 
@@ -107,6 +117,8 @@ export function generateExteriorWallCatalog(opts: ExteriorWallOptions): Material
       naiveBrand: premium ? "Flügger" : "Beckers",
       smartBrand: "",
       domain: "building",
+      qty: paintLiters,
+      unitPriceSEK: premium ? 259 : 169,
     });
   }
 

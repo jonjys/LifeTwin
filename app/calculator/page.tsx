@@ -2,13 +2,15 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Calculator } from "lucide-react";
+import { Calculator, Database } from "lucide-react";
 import { FieldLabel, SingleChipGroup, YesNoToggle } from "@/components/profile/fields";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import type { MaterialItem } from "@/lib/quote-engine/material";
 import { computeQuoteTotals, estimateProject, PROJECT_TYPES, type ProjectType } from "@/lib/quote-engine/estimate";
+import { applyMaterialBankPricing } from "@/lib/quote-engine/materialbank-pricing";
+import { useMaterialBankPrices } from "@/lib/quote-engine/use-material-bank";
 import { fadeUp } from "@/lib/motion";
 
 const TIER_OPTIONS = [
@@ -38,9 +40,15 @@ export default function CalculatorPage() {
   const [includeRot, setIncludeRot] = useState(true);
   const [calculated, setCalculated] = useState(false);
 
-  const { materials, laborHours, toggleALabel, toggleBLabel, usesArea, usesToggleB } = useMemo(
+  const { materials: simulatedMaterials, laborHours, toggleALabel, toggleBLabel, usesArea, usesToggleB } = useMemo(
     () => estimateProject({ type, widthM, heightM, areaM2, toggleA, toggleB, tier }),
     [type, widthM, heightM, areaM2, toggleA, toggleB, tier]
+  );
+
+  const bankPrices = useMaterialBankPrices();
+  const materials = useMemo(
+    () => applyMaterialBankPricing(simulatedMaterials, bankPrices),
+    [simulatedMaterials, bankPrices]
   );
 
   const totals = useMemo(
@@ -198,7 +206,18 @@ export default function CalculatorPage() {
               <div className="flex flex-col gap-1.5">
                 {materials.map((m: MaterialItem) => (
                   <div key={m.id} className="flex items-center justify-between text-sm">
-                    <span className="text-ink-secondary">{m.displayName}</span>
+                    <span className="flex items-center gap-1.5 text-ink-secondary">
+                      {m.displayName}
+                      {m.sourcedFromBank && (
+                        <span
+                          title="Pris från din materialbank"
+                          className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                        >
+                          <Database className="size-2.5" />
+                          Din prisbank
+                        </span>
+                      )}
+                    </span>
                     <span className="font-mono text-ink">{fmt(m.basePriceSEK)}</span>
                   </div>
                 ))}

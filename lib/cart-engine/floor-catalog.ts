@@ -49,6 +49,8 @@ export function generateFloorCatalog(opts: FloorOptions): MaterialItem[] {
       naiveBrand: premium ? "Pergo Premium" : "Pergo Original",
       smartBrand: premium ? "" : "Byggmax Eget Märke",
       domain: "building",
+      qty: packsNeeded,
+      unitPriceSEK: premium ? 399 : 249,
     },
     {
       id: "underlag-golv",
@@ -59,6 +61,8 @@ export function generateFloorCatalog(opts: FloorOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: underlayRolls,
+      unitPriceSEK: premium ? 229 : 149,
     },
     {
       id: "list-golv",
@@ -69,6 +73,8 @@ export function generateFloorCatalog(opts: FloorOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: perimeterM,
+      unitPriceSEK: premium ? 49 : 29,
     },
   ];
 
@@ -82,6 +88,8 @@ export function generateFloorCatalog(opts: FloorOptions): MaterialItem[] {
       naiveBrand: premium ? "Warmup" : "Thermotech",
       smartBrand: "",
       domain: "building",
+      qty: areaM2,
+      unitPriceSEK: premium ? 189 : 129,
     });
   }
 
@@ -95,6 +103,8 @@ export function generateFloorCatalog(opts: FloorOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: 3,
+      unitPriceSEK: premium ? 149 : 89,
     });
   }
 

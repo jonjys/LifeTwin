@@ -52,6 +52,9 @@ behövs igen.
    → avläst pris, ±%) med ett bekräftelseklick per rad — antingen
    "Uppdatera pris" (arkiverar automatiskt det gamla priset) eller
    "Lägg till" för ett nytt material. Ingen automatisk massuppdatering.
+   Materialbankens priser läses i sin tur in i både `/calculator` och
+   Offert-wizarden — matchar en rad, visas den med en "Din prisbank"-
+   badge och det verkliga priset istället för det simulerade.
 7. **Offert-PDF** (`/offers/[id]`, "Skriv ut / Spara som PDF") — en
    riktig offertblankett (företagsbrevhuvud, kund, prisrader, prisbild)
    via webbläsarens print-till-PDF, ingen extra PDF-motor.
@@ -121,6 +124,9 @@ lib/
   quote-engine/estimate.ts  Delad dispatch (estimateProject) + prisbild-
                              formel (computeQuoteTotals) — används av både
                              /calculator och Offert-wizarden
+  quote-engine/materialbank-pricing.ts  Ersätter en kalkylatorrads
+                             simulerade unitPriceSEK med materialbankens
+                             egna pris, matchat mot namnet
   use-speech-input.ts      Web Speech API-wrapper (sv-SE) för Command Bar
                              och Offert-wizarden
   db.ts                    Prisma-singleton + getOrCreateDefaultCompany()
@@ -137,20 +143,32 @@ prisma/schema.prisma       Company, Customer, Quote, QuoteLineItem,
 
 De åtta AI-kalkylatorerna (`lib/cart-engine/{wall,floor,paint,roof,
 exterior-wall,insulation,parking,materials}-catalog.ts`) är oförändrade
-sedan Karma-eran — samma tester, samma pure functions. Det enda som
-ändrats är typen de returnerar: `MaterialItem` (`lib/quote-engine/
-material.ts`) istället för det gamla `CatalogItem` — identisk form, bara
-utan butiksdomän. Both `/calculator` och Offert-wizarden anropar samma
-`lib/quote-engine/estimate.ts`-funktioner och lägger på offert-specifik
-logik ovanpå: materialpåslag, timpris × arbetstid, moms, ROT-avdrag.
+sedan Karma-eran — samma tester, samma pure functions, samma
+`basePriceSEK`-värden. Det enda som ändrats är typen de returnerar:
+`MaterialItem` (`lib/quote-engine/material.ts`) istället för det gamla
+`CatalogItem` — identisk form, bara utan butiksdomän, plus två nya fält:
+`qty` och `unitPriceSEK`, uppdelade så att `Math.round(qty ×
+unitPriceSEK) === basePriceSEK` alltid håller — även för rader som
+`regel-innervagg` där priset egentligen är `antal × vägghöjd × pris`
+(här blir `qty = antal × höjd` och `unitPriceSEK` det rena grundpriset,
+så uppdelningen aldrig tappar höjdberoendet). Detta är precis vad som
+gör det säkert att låta materialbankens pris ersätta `unitPriceSEK` och
+räkna om `basePriceSEK` från kalkylatorns egen `qty` — aldrig gissat.
+`lib/quote-engine/qty-invariant.test.ts` bevisar det håller för alla 8
+kalkylatorer, alla tiers, alla tillval, flera måttkombinationer — inte
+bara standardvärdena. Both `/calculator` och Offert-wizarden anropar
+samma `lib/quote-engine/estimate.ts`-funktioner och lägger på
+offert-specifik logik ovanpå: materialpåslag, timpris × arbetstid, moms,
+ROT-avdrag.
 
 ### Byggt hittills (Fas 1, 2 + delar av 3)
 
-Dashboard, Command Bar, AI-Kalkylator, Offert-wizard, kundregister,
-materialbank (CRUD + versionerad prishistorik + kvittoavläsning),
-offert-PDF, företagsinställningar och AI Studio (marginalanalys +
-uppföljnings-SMS) är alla riktiga skrivvägar mot Postgres/Claude via
-Prisma — inga stubbar kvar i huvudnavigeringen.
+Dashboard, Command Bar, AI-Kalkylator (nu med riktiga materialbank-
+priser där en match finns), Offert-wizard, kundregister, materialbank
+(CRUD + versionerad prishistorik + kvittoavläsning), offert-PDF,
+företagsinställningar och AI Studio (marginalanalys + uppföljnings-SMS)
+är alla riktiga skrivvägar mot Postgres/Claude via Prisma — inga
+stubbar kvar i huvudnavigeringen.
 
 ### Medvetet inte byggt än
 
@@ -159,15 +177,12 @@ Prisma — inga stubbar kvar i huvudnavigeringen.
   inget skickas automatiskt till kunden än (ingen SMS-gateway/
   e-posttjänst kopplad in — kräver ett tredjepartskonto, samma kategori
   begränsning som `DATABASE_URL`/`ANTHROPIC_API_KEY`).
-- **Kalkylatorns priser läser fortfarande inte från materialbanken.**
-  Detta är medvetet, inte glömt: de flesta kalkylatorrader är ett rent
-  `antal × á-pris`, men några (t.ex. reglar i `wall-catalog.ts` och
-  `exterior-wall-catalog.ts`) beräknas som `antal × höjd × pris` — en
-  sammansatt formel där det inte finns en entydig "á-pris" att ersätta
-  med materialbankens lagrade pris utan att räkna fel på höjdberoendet.
-  Att koppla ihop det korrekt kräver att varje kalkylator delar upp
-  `qty` och `unitPriceSEK` separat (inte bara en `basePriceSEK`-summa)
-  — en genomgång av alla 8 filer som är värd att göra rätt, inte snabbt.
 - **Kvittobilder sparas inte** — varje skanning är en engångskörning;
   ingen historik över själva bilderna, bara de pris-uppdateringar
   användaren väljer att bekräfta.
+- **Materialbank-matchningen är namnbaserad, inte garanterad** — precis
+  som kvittoavläsningens matchning görs den mot materialbankens fria
+  textnamn (substräng, båda riktningar), så en materialbankspost med ett
+  ovanligt namn kanske inte hittas automatiskt. Det är en medveten
+  avvägning (samma som kvittomatchningen), inte ett bevisat korrekthets-
+  hål — se `lib/quote-engine/materialbank-pricing.ts`.

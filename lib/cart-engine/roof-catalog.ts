@@ -40,6 +40,8 @@ export function generateRoofCatalog(opts: RoofOptions): MaterialItem[] {
       naiveBrand: premium ? "Benders" : "Plannja",
       smartBrand: "",
       domain: "building",
+      qty: areaM2,
+      unitPriceSEK: premium ? 349 : 189,
     },
     {
       id: "underlag-tak",
@@ -50,6 +52,8 @@ export function generateRoofCatalog(opts: RoofOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: underlagRullar,
+      unitPriceSEK: 349,
     },
     {
       id: "spik-tak",
@@ -60,6 +64,8 @@ export function generateRoofCatalog(opts: RoofOptions): MaterialItem[] {
       naiveBrand: "",
       smartBrand: "",
       domain: "building",
+      qty: spikSkruvAskar,
+      unitPriceSEK: 119,
     },
   ];
 
@@ -73,6 +79,8 @@ export function generateRoofCatalog(opts: RoofOptions): MaterialItem[] {
       naiveBrand: premium ? "Lindab" : "",
       smartBrand: "",
       domain: "building",
+      qty: 1,
+      unitPriceSEK: premium ? 2400 : 1600,
     });
   }
 

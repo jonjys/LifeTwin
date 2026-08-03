@@ -35,6 +35,8 @@ export function generateInsulationCatalog(opts: InsulationOptions): MaterialItem
       naiveBrand: premium ? "Paroc" : "Rockwool",
       smartBrand: "",
       domain: "building",
+      qty: areaM2,
+      unitPriceSEK: premium ? 69 : 49,
     },
   ];
 
@@ -49,6 +51,8 @@ export function generateInsulationCatalog(opts: InsulationOptions): MaterialItem
         naiveBrand: "",
         smartBrand: "",
         domain: "building",
+        qty: areaM2,
+        unitPriceSEK: 19,
       },
       {
         id: "tejp-isolering",
@@ -59,6 +63,8 @@ export function generateInsulationCatalog(opts: InsulationOptions): MaterialItem
         naiveBrand: "",
         smartBrand: "",
         domain: "building",
+        qty: tapeRullar,
+        unitPriceSEK: 99,
       }
     );
   }
