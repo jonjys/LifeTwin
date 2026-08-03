@@ -56,7 +56,7 @@ export const CATEGORIES: Category[] = [
       { id: "altan", label: "Altan", emoji: "🏡", query: "bygg altan" },
       { id: "innervagg", label: "Innervägg", emoji: "🧱", href: "/projects/wall" },
       { id: "yttervagg", label: "Yttervägg", emoji: "🏠", href: "/projects/exterior-wall" },
-      { id: "parkering", label: "Parkering", emoji: "🅿️", comingSoon: true },
+      { id: "parkering", label: "Parkering", emoji: "🅿️", href: "/projects/parking" },
       { id: "tak", label: "Tak", emoji: "🏘️", href: "/projects/roof" },
       { id: "golv", label: "Golv", emoji: "🪵", href: "/projects/floor" },
       { id: "kok", label: "Kök", emoji: "🍳", comingSoon: true },
@@ -65,7 +65,7 @@ export const CATEGORIES: Category[] = [
       { id: "tapet", label: "Tapet", emoji: "🖼️", comingSoon: true },
       { id: "forrad", label: "Förråd", emoji: "📦", comingSoon: true },
       { id: "trappa", label: "Trappa", emoji: "🪜", comingSoon: true },
-      { id: "isolering", label: "Isolering", emoji: "🧊", comingSoon: true },
+      { id: "isolering", label: "Isolering", emoji: "🧊", href: "/projects/insulation" },
     ],
   },
   {

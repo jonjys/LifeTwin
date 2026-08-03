@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   Bell,
+  Box,
   Car,
   Hammer,
   Heart,
@@ -18,6 +19,7 @@ import {
   Receipt,
   ShoppingCart,
   Sparkles,
+  SquareParking,
   Tv,
   type LucideIcon,
 } from "lucide-react";
@@ -41,6 +43,8 @@ const CATEGORY_META: Record<ProjectCategory, { label: string; icon: LucideIcon; 
   paint: { label: "Målning", icon: Paintbrush, href: "/projects/paint" },
   roof: { label: "Tak", icon: Home, href: "/projects/roof" },
   extwall: { label: "Yttervägg", icon: Hammer, href: "/projects/exterior-wall" },
+  insulation: { label: "Isolering", icon: Box, href: "/projects/insulation" },
+  parking: { label: "Parkering", icon: SquareParking, href: "/projects/parking" },
   pet: { label: "Husdjur", icon: PawPrint, href: "/projects/pet" },
   electronics: { label: "Elektronik", icon: Tv, href: "/projects/electronics" },
   pharmacy: { label: "Apotek", icon: Pill, href: "/projects/pharmacy" },

@@ -24,6 +24,13 @@ import {
 const TRAILER_RENTAL_SEK = 349;
 const TRAILER_EXTRA_MIN = 25;
 
+/** No grocery chain sends a driver out for a single bag of breakfast
+ *  items — real Swedish grocery delivery (Mathem, ICA, …) gates home
+ *  delivery behind a minimum order value for exactly this reason. A tiny
+ *  cart honestly can't get "Hemleverans" here either; it falls back to
+ *  Hämta själv/Promenera with a note explaining why. */
+const GROCERY_DELIVERY_MIN_ORDER_SEK = 400;
+
 /** Harsh weather doesn't change what walking actually costs in kr, but it
  *  very much changes whether you'd want to — priced here as extra
  *  "effective minutes" at the user's own hourly value, same currency the
@@ -171,7 +178,11 @@ export function computeFulfillmentOptions(
   // (motor oil, brake pads) aren't realistically carried home on foot —
   // "Promenera" only makes sense for groceries and small pharmacy items.
   const WALKABLE_DOMAINS: StoreDomain[] = ["grocery", "pharmacy"];
-  const options = WALKABLE_DOMAINS.includes(cart.domain) ? [pickup, delivery, walk] : [pickup, delivery];
+  // Real grocery delivery is gated behind a minimum order value; pharmacy
+  // and every other domain keep delivery unconditionally.
+  const deliveryIneligible = cart.domain === "grocery" && itemsOnlySEK < GROCERY_DELIVERY_MIN_ORDER_SEK;
+  const walkable = WALKABLE_DOMAINS.includes(cart.domain);
+  const options = [pickup, ...(deliveryIneligible ? [] : [delivery]), ...(walkable ? [walk] : [])];
   const netCost = (opt: FulfillmentOption) => {
     const weatherPenaltyMin = opt.id === "walk" && weather?.harsh ? WALK_WEATHER_PENALTY_MIN : 0;
     return opt.totalSEK + ((opt.timeMin + weatherPenaltyMin) / 60) * hourlyValue;
@@ -186,5 +197,8 @@ export function computeFulfillmentOptions(
     recommendedId: winner.id,
     recommendationText: buildRecommendationText(pickup, delivery, walk, winner.id, profile),
     weatherNote: weatherRelevant ? weatherNoteText(weather) : null,
+    deliveryNote: deliveryIneligible
+      ? `Hemleverans kräver minst ${GROCERY_DELIVERY_MIN_ORDER_SEK} kr i kundvagnen — ingen butik skickar ut en förare för en enstaka påse. Lägg till fler varor, eller välj Hämta själv eller Promenera.`
+      : null,
   };
 }

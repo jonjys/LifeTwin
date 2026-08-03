@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
+  Box,
   Brush,
   Car,
   Hammer,
@@ -14,6 +15,7 @@ import {
   Pill,
   Receipt,
   ShoppingCart,
+  SquareParking,
   Truck,
   Tv,
   type LucideIcon,
@@ -38,6 +40,8 @@ const CATEGORY_META: Record<ProjectCategory, { label: string; icon: LucideIcon }
   paint: { label: "Målning", icon: Paintbrush },
   roof: { label: "Tak", icon: Home },
   extwall: { label: "Yttervägg", icon: Hammer },
+  insulation: { label: "Isolering", icon: Box },
+  parking: { label: "Parkering", icon: SquareParking },
 };
 
 const FULFILLMENT_LABEL: Record<FulfillmentId, string> = {

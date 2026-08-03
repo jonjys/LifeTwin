@@ -12,10 +12,36 @@ const DAY = "2024-06-01";
 const profile: UserProfile = { ...DEFAULT_PROFILE, homeAddress: "Stockholm", transportMode: "car" };
 
 describe("computeFulfillmentOptions", () => {
-  it("offers pickup, delivery, and walk for groceries", () => {
+  it("excludes delivery for a grocery order too small to meet a real delivery minimum", () => {
     const cart = buildCart(["mjölk"], DAY, [], CATALOG);
     const decision = computeFulfillmentOptions(cart, profile);
+    expect(decision.options.map((o) => o.id).sort()).toEqual(["pickup", "walk"]);
+    expect(decision.deliveryNote).not.toBeNull();
+  });
+
+  it("offers pickup, delivery, and walk once a grocery order clears the delivery minimum", () => {
+    const cart = buildCart(
+      [
+        "mjölk",
+        "kaffe",
+        "kottfars",
+        "lax",
+        "ost",
+        "smor",
+        "kyckling",
+        "pasta",
+        "agg",
+        "brod",
+        "yoghurt",
+        "vattenmelon",
+      ],
+      DAY,
+      [],
+      CATALOG
+    );
+    const decision = computeFulfillmentOptions(cart, profile);
     expect(decision.options.map((o) => o.id).sort()).toEqual(["delivery", "pickup", "walk"]);
+    expect(decision.deliveryNote).toBeNull();
   });
 
   it("offers pickup, delivery, and walk for pharmacy — small enough to carry home", () => {

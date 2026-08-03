@@ -1,8 +1,10 @@
 import { tvItemId, type TvSizeInch } from "@/lib/cart-engine/electronics-catalog";
 import type { ExteriorWallOptions } from "@/lib/cart-engine/exterior-wall-catalog";
 import type { FloorOptions } from "@/lib/cart-engine/floor-catalog";
+import type { InsulationOptions } from "@/lib/cart-engine/insulation-catalog";
 import { DECK_ITEM_IDS } from "@/lib/cart-engine/materials-catalog";
 import type { PaintOptions } from "@/lib/cart-engine/paint-catalog";
+import type { ParkingOptions } from "@/lib/cart-engine/parking-catalog";
 import {
   ALL_PET_ITEM_IDS,
   CAT_ITEM_IDS,
@@ -35,6 +37,8 @@ export function loadState(): SmartCartState | null {
     if (parsed.paintOptions === undefined) parsed.paintOptions = null;
     if (parsed.roofOptions === undefined) parsed.roofOptions = null;
     if (parsed.extWallOptions === undefined) parsed.extWallOptions = null;
+    if (parsed.insulationOptions === undefined) parsed.insulationOptions = null;
+    if (parsed.parkingOptions === undefined) parsed.parkingOptions = null;
     return parsed;
   } catch {
     return null;
@@ -63,6 +67,8 @@ export function ensureState(): SmartCartState {
     paintOptions: null,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(fresh);
   return fresh;
@@ -102,6 +108,8 @@ export function recordList(items: string[]): SmartCartState {
     paintOptions: null,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
@@ -122,6 +130,8 @@ export function startDeckProject(widthM: number, depthM: number): SmartCartState
     paintOptions: null,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
@@ -152,6 +162,8 @@ export function startWallProject(opts: WallOptions): SmartCartState {
     paintOptions: null,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
@@ -179,6 +191,8 @@ export function startFloorProject(opts: FloorOptions): SmartCartState {
     paintOptions: null,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
@@ -205,6 +219,8 @@ export function startPaintProject(opts: PaintOptions): SmartCartState {
     paintOptions: opts,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
@@ -226,6 +242,8 @@ export function startRoofProject(opts: RoofOptions): SmartCartState {
     paintOptions: null,
     roofOptions: opts,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
@@ -254,6 +272,57 @@ export function startExteriorWallProject(opts: ExteriorWallOptions): SmartCartSt
     paintOptions: null,
     roofOptions: null,
     extWallOptions: opts,
+    insulationOptions: null,
+    parkingOptions: null,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts an "Isolering" project — one dimension (yta) plus follow-up
+ *  answers are persisted so a reload can regenerate the exact same
+ *  insulation catalog (see lib/cart-engine/insulation-catalog.ts). */
+export function startInsulationProject(opts: InsulationOptions): SmartCartState {
+  const state = ensureState();
+  const items = [
+    "isolering-isolering",
+    ...(opts.angsparr ? ["angsparr-isolering", "tejp-isolering"] : []),
+  ];
+  const next: SmartCartState = {
+    ...state,
+    currentItems: items,
+    currentCategory: "insulation",
+    deckDimensions: null,
+    wallOptions: null,
+    floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
+    insulationOptions: opts,
+    parkingOptions: null,
+  };
+  saveState(next);
+  return next;
+}
+
+/** Starts a "Parkering" project — one dimension (yta) plus follow-up
+ *  answers are persisted so a reload can regenerate the exact same
+ *  parking catalog (see lib/cart-engine/parking-catalog.ts). */
+export function startParkingProject(opts: ParkingOptions): SmartCartState {
+  const state = ensureState();
+  const items = ["underlag-parkering", "markduk-parkering", ...(opts.kantsten ? ["kantsten-parkering"] : [])];
+  const next: SmartCartState = {
+    ...state,
+    currentItems: items,
+    currentCategory: "parking",
+    deckDimensions: null,
+    wallOptions: null,
+    floorOptions: null,
+    paintOptions: null,
+    roofOptions: null,
+    extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: opts,
   };
   saveState(next);
   return next;
@@ -288,6 +357,8 @@ export function startPetProject(
     paintOptions: null,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
@@ -320,6 +391,8 @@ export function startElectronicsProject(
     paintOptions: null,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
@@ -339,6 +412,8 @@ export function startApotekProject(selectedIds: string[]): SmartCartState {
     paintOptions: null,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
@@ -358,6 +433,8 @@ export function startAutoProject(selectedIds: string[]): SmartCartState {
     paintOptions: null,
     roofOptions: null,
     extWallOptions: null,
+    insulationOptions: null,
+    parkingOptions: null,
   };
   saveState(next);
   return next;
