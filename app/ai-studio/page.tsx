@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, Copy, MessageSquareText, Percent, Send, Sparkles, TrendingUp, Wallet } from "lucide-react";
+import { AlertTriangle, Check, Copy, MessageSquareText, Percent, Send, Sparkles, TrendingUp, Wallet } from "lucide-react";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -15,10 +15,21 @@ type MarginSummary = {
   pipelineValueSEK: number;
 };
 
-type SentQuote = { id: string; number: string; jobTitle: string; customer: { name: string } };
+type SentQuote = { id: string; number: string; jobTitle: string; customer: { name: string; phone: string } };
 
 function fmt(n: number): string {
   return `${Math.round(n).toLocaleString("sv-SE")} kr`;
+}
+
+/** Customer.phone is free-text ("070-123 45 67", "+46701234567", ...) —
+ *  Twilio needs strict E.164. Best-effort normalize the common Swedish
+ *  shapes; returns null (rather than guessing) for anything else. */
+function toE164(phone: string): string | null {
+  const digits = phone.replace(/[\s\-()]/g, "");
+  if (/^\+[1-9]\d{6,14}$/.test(digits)) return digits;
+  if (/^00[1-9]\d{6,14}$/.test(digits)) return `+${digits.slice(2)}`;
+  if (/^0\d{6,12}$/.test(digits)) return `+46${digits.slice(1)}`;
+  return null;
 }
 
 export default function AiStudioPage() {
@@ -29,6 +40,9 @@ export default function AiStudioPage() {
   const [draftText, setDraftText] = useState<Record<string, string>>({});
   const [draftError, setDraftError] = useState<Record<string, string>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [sendError, setSendError] = useState<Record<string, string>>({});
+  const [sentIds, setSentIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     (async () => {
@@ -86,6 +100,33 @@ export default function AiStudioPage() {
       setTimeout(() => setCopiedId(null), 1500);
     } catch {
       // Clipboard access denied — the textarea below is still selectable/copyable manually.
+    }
+  }
+
+  async function sendSms(quote: SentQuote) {
+    const to = toE164(quote.customer.phone);
+    if (!to) {
+      setSendError((prev) => ({ ...prev, [quote.id]: "Kundens telefonnummer saknar giltigt format." }));
+      return;
+    }
+    setSendingId(quote.id);
+    setSendError((prev) => ({ ...prev, [quote.id]: "" }));
+    try {
+      const res = await fetch("/api/sms/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to, message: draftText[quote.id] }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSendError((prev) => ({ ...prev, [quote.id]: data.error ?? "Något gick fel." }));
+        return;
+      }
+      setSentIds((prev) => new Set(prev).add(quote.id));
+    } catch {
+      setSendError((prev) => ({ ...prev, [quote.id]: "Något gick fel — kontrollera anslutningen." }));
+    } finally {
+      setSendingId(null);
     }
   }
 
@@ -198,17 +239,33 @@ export default function AiStudioPage() {
                   </div>
                   {draftError[q.id] && <p className="text-sm text-danger">{draftError[q.id]}</p>}
                   {draftText[q.id] && (
-                    <div className="flex items-start gap-2 rounded-lg border border-border bg-surface/60 p-3">
-                      <p className="flex-1 text-sm text-ink-secondary">{draftText[q.id]}</p>
-                      <button
-                        onClick={() => copy(q.id)}
-                        className="flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-muted hover:bg-white/5 hover:text-ink"
-                        aria-label="Kopiera"
-                      >
-                        <Copy className="size-3.5" />
-                      </button>
-                      {copiedId === q.id && <span className="text-xs text-success">Kopierat!</span>}
-                    </div>
+                    <>
+                      <div className="flex items-start gap-2 rounded-lg border border-border bg-surface/60 p-3">
+                        <p className="flex-1 text-sm text-ink-secondary">{draftText[q.id]}</p>
+                        <button
+                          onClick={() => copy(q.id)}
+                          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-ink-muted hover:bg-white/5 hover:text-ink"
+                          aria-label="Kopiera"
+                        >
+                          <Copy className="size-3.5" />
+                        </button>
+                        {copiedId === q.id && <span className="text-xs text-success">Kopierat!</span>}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {sentIds.has(q.id) ? (
+                          <span className="flex items-center gap-1 text-xs text-success">
+                            <Check className="size-3.5" />
+                            SMS skickat
+                          </span>
+                        ) : (
+                          <Button size="default" variant="outline" onClick={() => sendSms(q)} disabled={sendingId === q.id}>
+                            <Send className="size-3.5" />
+                            {sendingId === q.id ? "Skickar…" : "Skicka SMS"}
+                          </Button>
+                        )}
+                        {sendError[q.id] && <p className="text-xs text-danger">{sendError[q.id]}</p>}
+                      </div>
+                    </>
                   )}
                 </div>
               ))}

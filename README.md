@@ -63,9 +63,10 @@ behövs igen.
    startvärden från.
 9. **AI Studio** (`/ai-studio`) — marginalanalys (vinstprocent,
    snittpåslag, snittvärde, pipeline — riktiga Postgres-aggregeringar)
-   och en uppföljnings-SMS-generator (Claude skriver ett kort,
+   och en uppföljnings-SMS-generator: Claude skriver ett kort,
    professionellt textutkast för varje offert som väntar på svar, med
-   kopiera-knapp).
+   en kopiera-knapp och en "Skicka SMS"-knapp som skickar det riktigt
+   via Twilio till kundens telefonnummer.
 
 ## Tech
 
@@ -75,8 +76,10 @@ behövs igen.
   degraderar Dashboarden ärligt till nollställda KPI:er + en synlig
   banner istället för att krascha
 - Claude (`@anthropic-ai/sdk`, `claude-opus-5`) för Command Bar-
-  konversationen — kräver `ANTHROPIC_API_KEY`, samma ärliga
-  fallback-mönster
+  konversationen, kvittoavläsningen och SMS-utkasten — kräver
+  `ANTHROPIC_API_KEY`, samma ärliga fallback-mönster
+- Twilio (`twilio`) för att faktiskt skicka uppföljnings-SMS — kräver
+  `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`
 - Vitest (`npm test`) för de rena, deterministiska kalkylatorfunktionerna
 
 ## Kom igång
@@ -89,7 +92,9 @@ npm run dev
 Öppna http://localhost:3000. Lägg till `DATABASE_URL` och kör
 `npm run db:push` (eller `npm run db:migrate` för en riktig migrationshistorik)
 för att slå på Dashboardens riktiga data. Lägg till `ANTHROPIC_API_KEY`
-för att slå på AI Command Bar.
+för att slå på AI Command Bar, kvittoavläsning och SMS-utkast. Lägg
+till `TWILIO_ACCOUNT_SID`/`TWILIO_AUTH_TOKEN`/`TWILIO_FROM_NUMBER`
+(ett eget Twilio-konto) för att faktiskt kunna skicka de SMS:en.
 
 ## Arkitektur
 
@@ -107,6 +112,7 @@ app/
   api/ai/chat/route.ts     Claude-integrationen bakom Command Bar
   api/ai/scan-receipt/     Claude vision — läser av kvitto/faktura-bilder
   api/ai/followup-sms/     Claude — uppföljnings-SMS-utkast
+  api/sms/send/            Twilio — skickar uppföljnings-SMS:et på riktigt
   api/ai-studio/margin-summary/  Prisma-aggregering — vinstprocent, marginal
   api/{customers,quotes,materials,company}/  REST-routes mot Prisma
 components/
@@ -166,17 +172,20 @@ ROT-avdrag.
 Dashboard, Command Bar, AI-Kalkylator (nu med riktiga materialbank-
 priser där en match finns), Offert-wizard, kundregister, materialbank
 (CRUD + versionerad prishistorik + kvittoavläsning), offert-PDF,
-företagsinställningar och AI Studio (marginalanalys + uppföljnings-SMS)
-är alla riktiga skrivvägar mot Postgres/Claude via Prisma — inga
-stubbar kvar i huvudnavigeringen.
+företagsinställningar och AI Studio (marginalanalys + uppföljnings-SMS,
+inklusive riktig utskickning via Twilio) är alla riktiga skrivvägar mot
+Postgres/Claude/Twilio — inga stubbar kvar i huvudnavigeringen, och
+inget kodmässigt ofärdigt kvar av det ursprungliga uppdraget. Det som
+återstår kräver antingen ett tredjepartskonto bara företaget själv kan
+skaffa (`DATABASE_URL`, `ANTHROPIC_API_KEY`, Twilio-kontot bakom
+`TWILIO_*`) eller är en medveten avgränsning, inte en lucka.
 
 ### Medvetet inte byggt än
 
-- **Faktisk SMS-/e-post-utskick** — AI Studio skriver ett
-  uppföljnings-SMS-utkast och offerter kan skrivas ut som PDF, men
-  inget skickas automatiskt till kunden än (ingen SMS-gateway/
-  e-posttjänst kopplad in — kräver ett tredjepartskonto, samma kategori
-  begränsning som `DATABASE_URL`/`ANTHROPIC_API_KEY`).
+- **E-post-utskick** — SMS skickas nu på riktigt (Twilio), men
+  e-postutskick av offerter/uppföljning är inte byggt (samma
+  tredjepartskonto-begränsning skulle gälla där också, t.ex. Resend
+  eller SendGrid).
 - **Kvittobilder sparas inte** — varje skanning är en engångskörning;
   ingen historik över själva bilderna, bara de pris-uppdateringar
   användaren väljer att bekräfta.
