@@ -70,6 +70,17 @@ export default function NewOfferPage() {
         setConnected(false);
       }
     })();
+    (async () => {
+      try {
+        const res = await fetch("/api/company");
+        if (!res.ok) return;
+        const data = await res.json();
+        setHourlyRateSEK(data.company.defaultHourlyRateSEK);
+        setMarkupPct(data.company.defaultMarkupPct);
+      } catch {
+        // Keep the built-in defaults (650 kr, 15%) if the company profile isn't reachable.
+      }
+    })();
   }, []);
 
   const { materials, laborHours, toggleALabel, toggleBLabel, usesArea, usesToggleB } = useMemo(
