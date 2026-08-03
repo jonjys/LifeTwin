@@ -1,0 +1,117 @@
+// OffertPro's Postgres schema. Requires DATABASE_URL in the environment
+// (Supabase, Neon, or Vercel Postgres all work) — `npx prisma migrate dev`
+// creates the tables once that's set. Mirrors lib/types.ts's Customer,
+// Quote, QuoteLineItem, and CompanyProfile shapes exactly, so the API
+// layer can map 1:1 between the two without a translation layer.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+}
+
+model Company {
+  id                   String     @id @default(cuid())
+  name                 String
+  orgNumber            String     @default("")
+  vatNumber            String     @default("")
+  bankgiro             String     @default("")
+  email                String     @default("")
+  phone                String     @default("")
+  address              String     @default("")
+  defaultHourlyRateSEK Int        @default(650)
+  defaultMarkupPct     Int        @default(15)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  customers            Customer[]
+  quotes               Quote[]
+  materialBankItems    MaterialBankItem[]
+}
+
+model Customer {
+  id         String   @id @default(cuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name       String
+  address    String   @default("")
+  phone      String   @default("")
+  email      String   @default("")
+  ssn        String   @default("")
+  propertyId String   @default("")
+  createdAt  DateTime @default(now())
+  quotes     Quote[]
+
+  @@index([companyId])
+}
+
+model Quote {
+  id                String          @id @default(cuid())
+  companyId         String
+  company           Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customerId        String
+  customer          Customer        @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  number            String
+  jobTitle          String
+  laborHours        Float           @default(0)
+  hourlyRateSEK     Int
+  materialMarkupPct Int
+  includeRot        Boolean         @default(true)
+  status            QuoteStatus     @default(DRAFT)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  lineItems         QuoteLineItem[]
+
+  @@index([companyId])
+  @@index([customerId])
+}
+
+model QuoteLineItem {
+  id           String @id @default(cuid())
+  quoteId      String
+  quote        Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  description  String
+  qty          Float
+  unitLabel    String
+  unitPriceSEK Int
+
+  @@index([quoteId])
+}
+
+// The "dynamisk prisindexering" feature: a company's own remembered
+// material prices, versioned over time so a receipt scan can detect and
+// flag a price increase against the last known price.
+model MaterialBankItem {
+  id        String                 @id @default(cuid())
+  companyId String
+  company   Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name      String
+  category  String
+  unit      String
+  priceSEK  Int
+  supplier  String                 @default("")
+  updatedAt DateTime               @updatedAt
+  history   MaterialPriceHistory[]
+
+  @@index([companyId])
+}
+
+model MaterialPriceHistory {
+  id                 String           @id @default(cuid())
+  materialBankItemId String
+  materialBankItem   MaterialBankItem @relation(fields: [materialBankItemId], references: [id], onDelete: Cascade)
+  priceSEK           Int
+  supplier           String
+  recordedAt         DateTime         @default(now())
+
+  @@index([materialBankItemId])
+}

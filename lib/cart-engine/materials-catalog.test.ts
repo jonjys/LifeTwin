@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchCatalogItem } from "@/lib/cart-engine/catalog";
+import { matchMaterialItem } from "@/lib/quote-engine/material";
 import { DECK_ITEM_IDS, generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
 
 describe("generateDeckMaterialsCatalog", () => {
@@ -31,7 +31,7 @@ describe("generateDeckMaterialsCatalog", () => {
   it("every item id resolves back to itself", () => {
     const catalog = generateDeckMaterialsCatalog(4, 3);
     for (const item of catalog) {
-      expect(matchCatalogItem(item.id, catalog)?.id).toBe(item.id);
+      expect(matchMaterialItem(item.id, catalog)?.id).toBe(item.id);
     }
   });
 });

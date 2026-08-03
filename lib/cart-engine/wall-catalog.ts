@@ -1,4 +1,4 @@
-import type { CatalogItem } from "@/lib/cart-engine/catalog";
+import type { MaterialItem } from "@/lib/quote-engine/material";
 
 export type WallTier = "budget" | "premium";
 
@@ -54,12 +54,12 @@ export const WALL_ITEM_IDS = [
  * needing its own, proving a project category can piggyback on an
  * existing domain instead of always minting a new one.
  */
-export function generateWallCatalog(opts: WallOptions): CatalogItem[] {
+export function generateWallCatalog(opts: WallOptions): MaterialItem[] {
   const { height, wallAreaM2, gipsAreaM2, studCount, sheetsNeeded, screwBoxes, paintLiters, skirtingM } =
     deriveWallQuantities(opts);
   const premium = opts.tier === "premium";
 
-  const items: CatalogItem[] = [
+  const items: MaterialItem[] = [
     {
       id: "regel-innervagg",
       keywords: ["regel-innervagg"],

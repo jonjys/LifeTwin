@@ -1,185 +1,56 @@
-# Karma
+# OffertPro
 
-**Vi jämför inte priser. Vi fattar köpbeslut.**
+**Det här är den AI-drivna medgrundaren som sköter hela ditt hantverksföretag.**
 
-Allt börjar med ett projekt — storhandla, bygga altan, vad som helst
-härnäst. Samma AI bryter ner det i vad det faktiskt kräver, väger butik
-mot butik, bensin mot leverans, tid mot pengar — och fattar sedan ett
-beslut åt dig. Inte tolv alternativ. Ett smartast val, och varför.
+Inte ännu en formulärbaserad offertgenerator. Beskriv jobbet — text eller
+röst — och AI:t bygger material, arbetstid, ROT-avdrag och pris. En
+digital tvilling av företaget: samma timpris, samma marginaler, samma
+favoritmaterial, varje gång.
 
-Det avgörande: det är inte olika appar per projekt. Det är samma
-beslutsmotor — bara katalogen och butikerna den jämför mot byter ut sig
-beroende på vilket projekt du startar.
+## Var kommer det ifrån?
+
+OffertPro föddes ur Karma, en konsument-app för köpbeslut (matkasse,
+byggmaterial, m.m.). Bygg-domänens AI-kalkylatorer — riktig matematik som
+räknar ut material och arbetstid från mått och några följdfrågor — visade
+sig vara exakt den motor ett hantverkar-OS behöver, bara omramad från
+"vad ska jag köpa" till "vad ska jag offerera kunden". Allt konsument-
+e-handel (matkasse, apotek, husdjur, elektronik, bilservice, live-karta,
+butiksjämförelse) är borttaget — se git-historiken om det någonsin
+behövs igen.
 
 ## Upplevelsen
 
-1. **Start** (`/`) — inte en landningssida, ett beslutsverktyg: en
-   hälsning, ett stort fritextfält ("Vad behöver du idag?"), en
-   **kategoriaccordion** (sju huvudkategorier — Mat, Bygg, Bil, Hem,
-   Resor, Husdjur, Apotek — varje kategori fäller ut sina
-   underkategorier, `lib/categories.ts` är den enda källan till sanning
-   för hela trädet) och en knapp: "Planera åt mig". Skriv fritt, eller
-   tryck en byggd underkategori — `lib/home-intent.ts` tolkar det till en
-   matkasse, en veckoplan, ett altan- eller innerväggsprojekt, ett
-   husdjursinköp, en ny TV, ett apoteksinköp eller ett bilserviceköp (allt
-   annat är ärligt "Kommer snart", inte gissat — varje obyggd
-   underkategori visas synligt inaktiverad med en "Snart"-tagg istället
-   för att tyst felmatchas). Vet du inte riktigt vad du behöver: "Fråga
-   Karma AI" öppnar en riktig konversation (Claude, `/api/ai/chat`) som
-   ställer 1–3 följdfrågor och sedan lämnar över en konkret produktlista
-   till exakt samma `submit()`-flöde — AI:t hittar aldrig på priser eller
-   butiker själv, det gör motorn efteråt (se "Karma AI" nedan). En kort,
-   animerad scanning-sekvens (samma
-   motor, bara pausad för effekt) mynnar ut i **ett** AI-rekommendationskort —
-   rekommenderade butiker, totalpris, en kompakt rad (spara/tid/butiker/
-   metod), tre konkreta skäl — med "Visa fullständig plan" till `/cart`
-   eller "Visa alternativ" inline. Har du sparat pengar sedan start visas
-   det som en riktig, klickbar rad direkt under hälsningen (länkar till
-   `/dashboard`) — riktig data, inte en placeholder-siffra som alltid
-   visar 0.
-2. **Projekt** (`/projects`) — Flik 1 för den som vill välja mer
-   medvetet istället för att skriva fritt: Storhandla, Bygga altan,
-   Husdjur, Elektronik, Apotek och Bilservice är byggda; Renovera badrum,
-   Flytta, Jul, Bröllop, Semester och IKEA är "Kommer snart" — samma
-   ärliga mönster som AI Pantry.
-3. **Min Profil** (`/profile`) — hemadress, skriven manuellt eller hämtad
-   på riktigt via "Använd min plats" (webbläsarens Geolocation-API +
-   omvänd geokodning mot Nominatim — godkänn en gång, adressen fylls i
-   automatiskt), med en live kartförhandsvisning som geokodar adressen på
-   riktigt. Appen provar dessutom samma sak automatiskt en gång, tyst, redan
-   vid första besöket på `/` om ingen adress är satt (`lib/geo/auto-locate.ts`)
-   — kartan, vädret och butiksavstånden utgår alltså från din riktiga plats
-   från start istället för Stockholm-standarden, utan att du behöver hitta
-   till Profil först. Nekas eller misslyckas platsdelningen rör den ingenting
-   — ingen adress skrivs över, samma ärliga Stockholm-fallback som redan
-   fanns. Transport (bil/elbil/cykel/går/…),
-   bränsle- och slitagekostnad, tidsvärde (kr/h eller "låt AI uppskatta"),
-   handlings- och matpreferenser, favoritbutiker, leveranspreferenser.
-   Driver Beslutsmotorn för varje projekt — sätts en gång, förfinas när
-   som helst.
-4. **AI Plan** — Flik 2, projektspecifik:
-   - **Storhandla** (`/build`) — lägg till varor en i taget (röst eller
-     text — en mikrofonknapp använder webbläsarens Web Speech API, sv-SE,
-     och visas bara där webbläsaren stödjer det), chips, snabbval, "Dina
-     vanliga varor", eller bläddra i sju kategorier (Kylvaror, Frys,
-     Skafferi, Frukt & Grönt, Kött & Fisk, Bröd & Bageri, Dryck & Snacks)
-     via en egen animerad kategoriväljare.
-   - **AI Veckoplanering** (`/build/week`) — AI scannar hela
-     matkatalogen mot alla åtta butiker för dagens kampanjer och bygger en
-     hel veckas matkasse (minst en vara per kategori, resten de hårdaste
-     rabatterna) i ett klick.
-   - **AI Meal Planner** (`/build/meals`) — välj vilka måltider du vill
-     äta i veckan (Tacos, Pasta Bolognese, Kycklinggryta, …); samma
-     motor som expanderar "tacos" till konkreta varor på `/build`
-     expanderar alla valda måltider på en gång till en aggregerad,
-     redan optimerad inköpslista.
-   - **Bygga altan** (`/projects/deck`) — ange bredd och djup; AI räknar
-     ut Trall, Reglar, Plintar, Skruv, Betong och Verktyg i rätt mängd,
-     scannar sedan synligt (Byggmax, Hornbach, Bauhaus, Beijer, XL-BYGG,
-     en efter en) och visar redan här vilken butik som är billigast per
-     vara idag — samma automatiska cross-store-scan som Veckoplanering,
-     bara för byggvaror.
-   - **Innervägg** (`/projects/wall`) — flaggskeppets AI-kalkylator: ange
-     bredd × höjd, svara Ja/Nej på isolering/dörr/målning/verktyg och
-     välj budget eller premium; AI räknar ut Reglar, Gipsskivor, Skruv,
-     Isolering, Spackel, Färg, Lister (och Dörrsats/Verktygssats om
-     valt), en uppskattad arbetstid i timmar, och scannar samma fem
-     byggbutiker som Bygga altan — delar samma `"building"`-domän istället
-     för att behöva egna butiker, ett bevis på att ett nytt projekt inte
-     alltid ens behöver nya butiker, bara en ny katalog.
-   - **Husdjur** (`/projects/pet`) — svara Ja/Nej på hund och katt; AI
-     väljer rätt foder/kattsand/godis och scannar synligt över Arken Zoo,
-     Granngården, Vetzoo och Zooplus — samma cross-store-scan igen, bara
-     för djurartiklar.
-   - **Elektronik** (`/projects/electronics`) — välj skärmstorlek (43-75
-     tum) och om du vill ha soundbar/väggfäste; AI scannar Elgiganten,
-     Media Markt, NetOnNet och Webhallen — samma cross-store-scan, bara
-     för elektronik.
-   - **Apotek** (`/projects/pharmacy`) — kryssa i vilka vardagsbasics du
-     behöver (smärtstillande, vitaminer, plåster, …); AI scannar Apoteket,
-     Apotek Hjärtat, Kronans Apotek och Apotea — samma cross-store-scan,
-     bara för apoteksvaror.
-   - **Bilservice** (`/projects/auto`) — kryssa i vad bilen behöver
-     (motorolja, oljefilter, bromsklossar, …); AI scannar Mekonomen,
-     Euromaster, Bilia och OKQ8 — samma cross-store-scan, bara för
-     bildelar.
-5. **Inköp & beslut** (`/cart`) — Flik 3 + 4, samma sida för varje projekt:
-   - **Ditt inköp** — en kompakt inköpslista grupperad per butik, en rad
-     per vara (namn, ev. bytesförklaring, pris, sparat) — inte ett kort
-     per vara, så hela kassen läses på en skärm istället för en lång
-     scroll.
-   - **Smartaste beslutet** — inte billigast, smartast, i en mening: "Köp
-     Trall på XL-BYGG. Reglar på Byggmax. Betongen från Bauhaus. Hämta
-     själv. Du sparar totalt: 3686 kr." Genererad ur samma cart- och
-     beslutsdata varje annat kort på sidan redan visar.
-   - **AI Beslutsmotor** — inte tre priser, tre (eller två, för skrymmande
-     byggvaror, foder, TV-köp och bildelar) fullt kostade beslut: Hämta själv
-     (bensin + slitage + tid + hyrsläp om profilen saknar eget släp och
-     lasten är skrymmande), Hemleverans (leveransavgift), Promenera (steg
-     + kalorier, bara för matkassen och apoteksvaror — små nog att bära
-     hem — och väger tyngre i regn, kyla eller stark värme, enligt riktig
-     live-väderdata vid din adress). Hemleverans för matkassen kräver
-     dessutom minst 400 kr i kundvagnen (`lib/decision-engine/fulfillment.ts`)
-     — ingen mataffär skickar ut en förare för en enstaka påse frukost i
-     verkligheten, så en för liten matkasse tappar Hemleverans helt istället
-     för att låtsas att den är billig, med en tydlig förklaring i motorns
-     eget kort. AI väljer vinnaren mot ditt eget tidsvärde och säger varför
-     i klartext.
-   - **Live karta** — en riktig, interaktiv karta (OpenStreetMap) centrerad
-     på ditt geokodade hem. Varje butik placeras i första hand på sin
-     riktiga, namngivna adress (sökt live via OpenStreetMap/Overpass) —
-     hittas ingen bekräftad butik nära dig faller den tillbaka till en
-     uppskattad plats, tydligt markerad med en streckad ring. En rutt
-     (riktiga vägar via OSRM, med en rak linje som reserv) byter färg och
-     mönster direkt när du växlar mellan Hämta själv / Hemleverans /
-     Promenera — ingen ny hämtning, bara en omedelbar omstil.
-   - **AI Shopping Route** — när "hämta själv" spänner över flera butiker:
-     en kompakt numrerad lista (samma radformat som inköpslistan), avstånd,
-     och en tydlig rekommendation att hoppa över ett stopp när besparingen
-     inte är värd omvägen.
-   - **Pengar sparade** — denna månad / i år / sedan installation, plus
-     sparad tid, undvikna bilresor, kalorier promenerade och CO₂ sparad.
-   - **Verkliga ICA-erbjudanden** — inte simulerat: en live hämtad lista
-     från ica.se:s publika "veckans erbjudanden"-sida, tydligt märkt som
-     äkta till skillnad från resten av appens kampanjmärkningar.
-   - Grocery-specifikt (döljs för andra projekt): **Automatiska inköp**
-     (AI Memory-baserad återköp), **Matsmart fynd**, **Bevakning**-feeden
-     (kan speglas som riktiga OS-notiser via webbläsarens Notification API
-     — ett klick på "Aktivera riktiga notiser" frågar om lov, riktigt),
-     samt **AI Pantry** ("Kommer snart").
-6. **Mina inköp** (`/orders`) — hela orderhistoriken, senaste först, en
-   rad per köp med projektikon (Storhandla/Bygga altan/Innervägg/Husdjur/
-   Elektronik/Apotek/Bilservice), datum, hämtningssätt, totalpris och
-   besparing. Nås från `/profile`, inte från huvudflödet på startsidan.
-7. **Dashboard** (`/dashboard`) — allt samlat på ett ställe, samma
-   riktiga data som resten av appen redan beräknar, inget nytt fejkat:
-   **Pågående projekt** (`currentItems`, om något är redo för inköp),
-   **Sparade pengar** (samma månad/år/totalt-siffror som `/cart`),
-   **Mina projekt** (orderhistoriken grupperad per projektkategori, antal
-   köp + besparing), **Historik** (de tre senaste köpen + länk till hela
-   `/orders`), **Mina inköpslistor** (AI Memory — samma `usualItems` som
-   Automatiska inköp), **Favoriter** (profilens favoritbutiker, samma
-   fält Beslutsmotorn redan väger in), **Prisbevakningar** (samma
-   `generateNotifications`-feed som `/cart`s Bevakning), och
-   **Rekommendationer** (samma Matsmart-fynd som `/cart`). Nås från
-   `/profile`.
+1. **Dashboard** (`/`) — aldrig ett formulär. En AI Command Bar
+   (Raycast/Linear-stil, text eller röst) överst, KPI-widgets (månadens
+   omsättning, offerter, väntar på svar, snittmarginal) och kommande jobb
+   — allt riktiga Postgres-frågor, aldrig fejkad data. Ingen databas
+   ansluten än? En tydlig banner säger exakt det istället för att krascha
+   eller visa påhittade siffror.
+2. **AI Command Bar** (`components/dashboard/command-bar.tsx`) — pratar
+   med Claude (`/api/ai/chat`, `claude-opus-5`) för att förstå jobbet,
+   med riktig röstinmatning (`lib/use-speech-input.ts`, Web Speech API,
+   sv-SE) för händer i handskar eller bakom ratten. Hittar aldrig på
+   material eller pris själv — det gör kalkylatorn efteråt.
+3. **AI-Kalkylator** (`/calculator`) — åtta projekttyper (Altan,
+   Innervägg, Yttervägg, Golv, Tak, Målning, Isolering, Parkering), samma
+   mönster för alla: mått + några följdfrågor in, en fullt kvantifierad
+   materiallista, arbetstid, moms och ROT-avdrag ut. Timpris och
+   materialpåslag justerbara direkt i kalkylen.
+4. **Offerter, Kunder, Materialbank, AI Studio, Inställningar** — ärligt
+   "kommer snart": informationsarkitekturen och datamodellen (Prisma-
+   schemat) finns redan, UI:t byggs i nästa fas.
 
 ## Tech
 
-- Next.js 15 (App Router) + TypeScript
-- TailwindCSS med shadcn-liknande UI-primitiver
-- Framer Motion, Lucide Icons
-- Allt state i `localStorage` — ingen inloggning, ingen databas. En enda
-  server-endpoint finns (`app/api/ai/chat`, se "Karma AI" nedan) och den är
-  stateless: den sparar ingenting, den vidarebefordrar bara konversationen
-  till Claude och svarar
-- Installerbar PWA: manifest, genererade ikoner (`next/og`, inga binära
-  assets att underhålla), offline app-shell via en enkel service worker
-- Deploy-klar för Vercel
-- Vitest (`npm test`) för motorns rena, deterministiska funktioner —
-  `lib/cart-engine`, `lib/decision-engine`, `lib/home-intent` — inklusive
-  regressionstester för den typ av bugg som redan hittats en gång
-  (substrings i `matchCatalogItem` som får fel vara att matcha)
+- Next.js 15 (App Router) + TypeScript, Tailwind, Framer Motion
+- Postgres via Prisma (`prisma/schema.prisma`) — kräver `DATABASE_URL`
+  (Supabase, Neon eller Vercel Postgres) i miljövariablerna; utan den
+  degraderar Dashboarden ärligt till nollställda KPI:er + en synlig
+  banner istället för att krascha
+- Claude (`@anthropic-ai/sdk`, `claude-opus-5`) för Command Bar-
+  konversationen — kräver `ANTHROPIC_API_KEY`, samma ärliga
+  fallback-mönster
+- Vitest (`npm test`) för de rena, deterministiska kalkylatorfunktionerna
 
 ## Kom igång
 
@@ -188,239 +59,57 @@ npm install
 npm run dev
 ```
 
-Öppna http://localhost:3000.
+Öppna http://localhost:3000. Lägg till `DATABASE_URL` och kör
+`npm run db:push` (eller `npm run db:migrate` för en riktig migrationshistorik)
+för att slå på Dashboardens riktiga data. Lägg till `ANTHROPIC_API_KEY`
+för att slå på AI Command Bar.
 
 ## Arkitektur
 
 ```
 app/
-  page.tsx                 Landing: fritextfält + kategoriaccordion
-  projects/                Flik 1: projekthubb + /projects/deck, /projects/wall, /projects/pet, /projects/electronics, /projects/pharmacy, /projects/auto (Flik 2 för respektive projekt)
-  build/                   Flik 2 för storhandla: bygg listan
-  cart/                    Flik 3 + 4: inköp + Smartaste beslutet, för alla projekt
-  profile/                 Personlig profil — driver Beslutsmotorn
-  orders/                  Mina inköp: hela orderhistoriken
-  dashboard/               Allt samlat: pågående projekt, sparande, historik, bevakningar — samma data som redan finns
-  error.tsx, not-found.tsx Märkta fel- och 404-sidor
+  page.tsx                 Dashboard — KPI:er (Prisma) + AI Command Bar
+  calculator/page.tsx      AI-Kalkylatorn — 8 projekttyper, en sida
+  offers/ customers/       "Kommer snart" — datamodellen finns, UI:t inte än
+  materials/ ai-studio/
+  settings/
+  api/ai/chat/route.ts     Claude-integrationen bakom Command Bar
 components/
-  cart/                    Inköps-UI (swap-kort, smartaste beslutet, beslutsmotor, live karta, rutt, sparande, Matsmart, bevakning)
-  home/category-accordion.tsx  Startsidans kategoriträd — läser lib/categories.ts, ingen egen logik
-  map/live-map.tsx         Leaflet-kartan (dark tiles, markörer, rutter) — dynamiskt laddad, klient-only
-  profile/                 Delade formulärkomponenter (chip-grupper, fält, adress-kartförhandsvisning)
-  shared/                  Återanvändbara visuella delar (animated number, confetti, ambient bg)
-  ui/                      shadcn-liknande primitiver (button, card)
-hooks/use-smart-cart.ts    Allt state: bygg cart (rätt katalog per projekt), beslutsmotor, rutt, checkout, sparande
+  nav/app-shell.tsx        Sidebar (desktop) + bottom nav (mobil)
+  dashboard/command-bar.tsx  AI Command Bar — text + röst
+  profile/fields.tsx       Delade formulärkomponenter (chip-grupper, toggles)
+  shared/                  Ambient bg, animated number, confetti, coming-soon
+  ui/                      Button, Card
 lib/
-  categories.ts            Enda källan till sanning för startsidans kategoriträd (7 kategorier, ~48 underkategorier, byggd/obyggd/länk per rad)
-  cart-engine/             Motorn: butiker (29, taggade grocery/building/pet/electronics/pharmacy/auto), katalog(er), prisoptimering, checkout, Matsmart, notiser
-  decision-engine/         Hämta själv / hemleverans / promenera + AI Shopping Route + Smartaste beslutet-narrativet
-  geo/                     Geokodning (Nominatim), ruttning (OSRM), koordinat-offset — riktiga tjänster, tidsgränsade
-  notifications/           Riktiga OS-notiser via Notification API — permission, dedupe per dag, foreground-only
-  seeded.ts                Deterministisk pseudo-slump (samma indata + dag = samma resultat)
-  storage.ts               localStorage-persistens: profil, projekt/kategori, AI Memory, sparande + impact-historik
-  types.ts                 Delade domäntyper (CartResult, DecisionResult, UserProfile, ProjectCategory, …)
+  cart-engine/*-catalog.ts  De 8 AI-kalkylatorerna — ren matematik, mått in,
+                             material + arbetstid ut, ingen butik inblandad
+  quote-engine/material.ts  MaterialItem — den gemensamma prisrads-typen
+                             kalkylatorerna producerar
+  use-speech-input.ts      Web Speech API-wrapper (sv-SE) för Command Bar
+  db.ts                    Prisma-singleton
+  types.ts                 Customer, Quote, QuoteLineItem, CompanyProfile,
+                            ROT/moms-konstanter
+  seeded.ts                Deterministisk pseudo-slump (kalkylatorernas
+                            priser är simulerade tills materialbanken finns)
+prisma/schema.prisma       Company, Customer, Quote, QuoteLineItem,
+                            MaterialBankItem, MaterialPriceHistory
 ```
 
-### Samma motor, olika projekt — hur det faktiskt fungerar i kod
+### Samma matematik, nya kläder
 
-`buildCart(rawItems, dateKey, usualItems, catalog?)` och
-`computeFulfillmentOptions(cart, profile)` är oförändrade funktioner
-oavsett projekt. Det som byter ut sig är enbart:
-
-- **Katalogen** — `lib/cart-engine/catalog.ts` (grocery),
-  `lib/cart-engine/materials-catalog.ts` (`generateDeckMaterialsCatalog`,
-  som räknar Trall/Reglar/Plintar/Skruv/Betong/Verktyg utifrån altanens
-  mått), `lib/cart-engine/pet-catalog.ts` (`generatePetCatalog`,
-  hund-/kattartiklar utifrån vilka djur profilen har),
-  `lib/cart-engine/electronics-catalog.ts` (`generateElectronicsCatalog`,
-  en fast superset av alla TV-storlekar + tillbehör — vilka som faktiskt
-  hamnar i kassen avgörs helt av intagssidans val, inte av katalogen) eller
-  `lib/cart-engine/apotek-catalog.ts` (`generateApotekCatalog`, en fast
-  lista vardagsbasics) eller `lib/cart-engine/auto-catalog.ts`
-  (`generateAutoCatalog`, en fast lista bildelar) eller
-  `lib/cart-engine/wall-catalog.ts` (`generateWallCatalog`, som räknar
-  Reglar/Gipsskivor/Skruv/Isolering/Spackel/Färg/Lister utifrån
-  väggens mått och fem följdfrågor — samma idé som altanens katalog,
-  fast med fler variabler) eller `lib/cart-engine/floor-catalog.ts`
-  (`generateFloorCatalog`, samma mönster för Golv: Laminatgolv/
-  Underlagspapp/Golvlister utifrån rummets mått, plus golvvärme och
-  trösklar som valbara tillägg). Varje `CatalogItem` har en
-  `domain: "grocery" | "building" | "pet" | "electronics" | "pharmacy" | "auto"`.
-- **Butikerna** som jämförs — `lib/cart-engine/stores.ts` har alla 29
-  butiker taggade med samma `domain`; `optimizeItem`/`buildCheckoutOptions`
-  filtrerar alltid på katalogens domän, så en byggvara aldrig jämförs mot
-  ICA och en matvara aldrig mot Byggmax eller Arken Zoo.
-- **Om "Promenera" är rimligt** — `computeFulfillmentOptions` läser
-  `cart.domain` och utesluter promenad-alternativet för skrymmande
-  byggvaror, tunga foderpåsar, TV-köp och bildelar; matkassen och
-  apoteksköp (litet nog att bära hem) får fortfarande alla tre.
-- **"Stora Köp"** — samma funktion lägger på en hyrsläp-kostnad (349 kr +
-  25 minuter) på Hämta själv när projektet är skrymmande (`domain ===
-  "building"`) och profilens `hasTrailer` är `false`; äger man släp
-  försvinner kostnaden helt. Ett nytt profilfält (`Har du släp?`), synligt
-  bara för bil/elbil under Transport.
-
-Ett nytt projekt (t.ex. semester) kräver oftast bara en ny
-katalog-genererande funktion och nya butiker taggade med rätt `domain` —
-inte en ny motor, precis som Husdjur, Elektronik, Apotek och Bilservice
-bevisade om och om igen. Innervägg (`lib/cart-engine/wall-catalog.ts`)
-går ett steg längre: den delar `"building"`-domänen med Bygga altan
-istället för att behöva egna butiker alls — ett nytt projekt kräver
-alltså inte alltid nya butiker, bara en ny katalog. Golv, Målning, Tak,
-Yttervägg, Isolering och Parkering (`floor-catalog.ts`, `paint-catalog.ts`,
-`roof-catalog.ts`, `exterior-wall-catalog.ts`, `insulation-catalog.ts`,
-`parking-catalog.ts`) bevisar samma sak sex gånger till i samma
-`"building"`-domän — åtta Bygg-projekt, fem butiker, noll dubbletter.
-Husdjur gick samma väg utan att lämna sin egen domän: Smådjur
-och Fisk (`SMADJUR_ITEM_IDS`/`FISK_ITEM_IDS` i `lib/cart-engine/pet-catalog.ts`)
-är bara två fler artikelgrupper i samma `generatePetCatalog`, och
-`/projects/pet` bara två fler `YesNoToggle`-frågor — ingen ny sida, ingen
-ny motor. Bils Däck (`vinterdack`/`sommardack`/`hjulskifte` i
-`lib/cart-engine/auto-catalog.ts`) är samma insikt igen: `/projects/auto`s
-intagssida var redan generisk över hela `AUTO_ITEM_OPTIONS`, så nya
-artiklar i katalogen blev valbara utan att röra sidan alls.
-`lib/cart-engine/deal-scanner.ts`
-(`scanCatalogForDeals`) är samma sak för prisscanning: Veckoplanering
-(grocery), Bygga altan och Innervägg (building), Husdjur (pet),
-Elektronik, Apotek och Bilservice delar exakt samma scan-funktion, bara
-katalogen skiljer.
-
-### Kategoriträdet är datadrivet
-
-Startsidans hela kategoriaccordion (7 kategorier, ~48 underkategorier)
-kommer från en enda fil, `lib/categories.ts` — inte hårdkodad JSX. Varje
-underkategori är exakt en av tre saker:
-
-- `query: string` — matas rakt in i samma `submit()`/`interpretHomeQuery`
-  -flöde de gamla platta cheapsen redan använde; att lägga till en byggd
-  underkategori kräver aldrig att man rör scanning-UI:t.
-- `href: string` — länkar till en egen intagssida (används bara när
-  flödet behöver egna följdfrågor, som Innervägg).
-- `comingSoon: true` — ärligt inaktiverad med en "Snart"-tagg, exakt
-  samma mönster som `/projects`-hubbens kort.
-
-`components/home/category-accordion.tsx` innehåller ingen egen
-kategorilogik alls — den bara renderar vad `lib/categories.ts` säger.
-Ett nytt ämne (t.ex. en åttonde underkategori under Bygg) är en rad i en
-array, inte en ny komponent. `lib/categories.test.ts` håller konfigen
-ärlig: unika id:n, exakt en av de tre formerna per underkategori, och att
-varje `query` faktiskt löser till ett riktigt intent istället för att
-tyst hamna i det generiska matkasse-fallet.
-
-### Karma AI — den riktiga konversationen
-
-"Fråga Karma AI" på startsidan är den enda delen av appen som pratar med
-en riktig LLM. `app/api/ai/chat/route.ts` är en stateless Next.js-route:
-klienten skickar hela konversationshistoriken, routen anropar Claude
-(`claude-opus-5`, adaptiv extended thinking) via det officiella
-`@anthropic-ai/sdk`, och tvingar fram strukturerat svar med ett enda
-tool-use-schema (`respond`) — `type: "question"` (med `quickReplies`),
-`type: "ready"` (med en färdig, konkret `itemsQuery`) eller `type:
-"decline"` för sådant Karma uppenbarligen inte kan hjälpa till att köpa.
-Systemprompten läser `lib/categories.ts` direkt, så AI:t alltid känner
-till exakt samma kategoriträd som accordionen visar.
-
-Det avgörande gränssnittet: AI:t hittar **aldrig** på priser, butiker
-eller leveranstider — dess enda jobb är konversationen och den
-slutgiltiga produktlistan. När den är klar (`type: "ready"`) stänger
-chatten och `itemsQuery` går rakt in i samma `submit()` →
-`interpretHomeQuery` → `buildCart` → `computeFulfillmentOptions`-kedja som
-alla andra sökningar redan använder — kostnad, prisjämförelse,
-billigaste/bästa/snabbaste alternativ och leverans/hämta-själv beräknas
-alltså av exakt samma deterministiska motor som resten av appen, aldrig
-av AI:t själv.
-
-Detta kräver en `ANTHROPIC_API_KEY` i miljövariablerna (Vercel eller
-`.env.local`) — utan den svarar routen ärligt med 503 och ett klartext-
-meddelande i chatten ("AI-chatten är inte aktiverad än…") istället för
-att krascha eller låtsas fungera.
-
-### Viktigt att veta
-
-Det finns ingen riktig prisdata-API och ingen ruttplanerings-backend av
-vårt eget — `lib/cart-engine` och `lib/decision-engine` genererar
-troliga, deterministiska priser, avstånd och restider per butik och dag,
-seedade av användarens profil så att samma indata alltid ger samma
-resultat. Tre exakta grocery-scenarier (ketchup → ICA Basic, 2 mjölk → 1
-stor, avokadokampanj) är hårdkodade för att alltid visa produktens
-"wow"-exempel exakt; övriga varor och beslut optimeras generiskt — inklusive
-byggmaterialen, som prisas och swapas av precis samma logik.
-
-Kartan (`lib/geo/`) är däremot riktig: Nominatim geokodar adressen, OSRM
-ritar riktiga vägar, och `lib/geo/places.ts` söker upp en riktig, namngiven
-butik nära dig via Overpass API (samma öppna OpenStreetMap-data, gratis,
-ingen nyckel) för varje kedja som faktiskt har fysiska butiker (ICA,
-Willys, Coop, Hemköp, Lidl, City Gross, Byggmax, Hornbach, Bauhaus, Beijer,
-XL-BYGG, Arken Zoo, Granngården, Elgiganten, Media Markt, Apoteket, Apotek
-Hjärtat, Kronans Apotek, Mekonomen, Euromaster, Bilia, OKQ8 — Mathem,
-Matsmart, Vetzoo, Zooplus, NetOnNet, Webhallen och Apotea är renodlade
-nätbutiker utan fysiska butiker att hitta och använder alltid det
-uppskattade läget). Hittas ingen bekräftad
-butik faller platsen tillbaka
-till samma seedade avstånd och riktning som Beslutsmotorns kostnadsberäkning
-redan använder — en riktig karta med en ärlig, tydligt markerad uppskattning
-när det verkliga inte finns, aldrig en tyst gissning som ser exakt ut.
-Alla tre tjänster (Nominatim, OSRM, Overpass) är delade publika API:er utan
-nyckel (rimlig användning, ingen SLA, och Overpass kan vara märkbart
-långsammare eller tillfälligt överbelastat) — varje anrop har en tidsgräns
-och faller tillbaka till Stockholm/en rak linje/en uppskattad butiksplats
-om tjänsten är långsam eller nere, så kartan aldrig fastnar i "laddar".
-
-Väder (`lib/geo/weather.ts`) är av samma sort: riktig, live data från
-Open-Meteo (gratis, ingen nyckel) vid din geokodade adress. Regn, sträng
-kyla eller stark värme gör "Promenera" mätbart mindre attraktivt i
-Beslutsmotorns egen kostnadsräkning (inte bara en kommentar i texten) —
-motorn är fortfarande en ren, synkron funktion; vädret hämtas asynkront i
-hooken och skickas sedan in som vanlig data, precis som profilen.
-
-Priserna i övrigt är fortfarande simulerade, med ett uttryckligt undantag:
-`app/api/ica-offers/route.ts` hämtar live, på riktigt, ICA:s egen publika
-"veckans erbjudanden"-sida (samma sida vem som helst ser på ica.se) — inte
-en privat butiks-API, inte inloggade Stammis-priser, inte hela
-produktkatalogen. Servern cachar svaret i 24 timmar (Next.js `revalidate`
-+ ett dagligt Vercel Cron-jobb som håller cachen varm, se `vercel.json` —
-Vercels gratis Hobby-plan tillåter bara schemalagda jobb en gång per dag),
-så riktiga besökare aldrig utlöser en ny hämtning själva. De andra sju
-butikernas erbjudandesidor är byggda som JavaScript-appar där priserna
-laddas via anrop efter sidladdningen — ett enkelt, respektfullt sidhämtande
-skript ser dem inte, och att gå vidare (deras interna API, eller en
-huvudlös webbläsare som kringgår det) är en annan och juridiskt osäkrare
-avvägning som medvetet inte gjorts här. Verkliga ICA-priser blandas heller
-inte in i motorns egna, simulerade priser/kampanjer — de visas i ett eget,
-tydligt märkt kort, så det aldrig är oklart vad som är äkta.
-
-"Köp"-knappen simulerar en order (uppdaterar sparande- och impact-dashboarden)
-— den skickar ingen riktig beställning till någon butik.
+De åtta AI-kalkylatorerna (`lib/cart-engine/{wall,floor,paint,roof,
+exterior-wall,insulation,parking,materials}-catalog.ts`) är oförändrade
+sedan Karma-eran — samma tester, samma pure functions. Det enda som
+ändrats är typen de returnerar: `MaterialItem` (`lib/quote-engine/
+material.ts`) istället för det gamla `CatalogItem` — identisk form, bara
+utan butiksdomän. `/calculator` anropar dem direkt och lägger på
+offert-specifik logik ovanpå: materialpåslag, timpris × arbetstid, moms,
+ROT-avdrag.
 
 ### Medvetet inte byggt än
 
-Renovera badrum, Flytta, Jul, Bröllop, Semester och IKEA är
-"Kommer snart"-kort på
-`/projects` — arkitektoniskt förberedda (lägg till en katalog + butiker
-taggade med rätt domän) men inte implementerade; explicit
-framtidsvision, inte MVP. AI Pantry är samma sak: "fotografera
-kylskåpet" kräver riktig bild-AI, som medvetet inte är kopplad på. AI
-Meal Planner och Bevakningens riktiga notiser är däremot båda byggda på
-riktigt, se ovan.
-
-Av kategoriträdets ~48 underkategorier (`lib/categories.ts`) är hela Mat
-(10/10), Apotek (5/5) och Husdjur (4/4) klara, plus 8/13 Bygg (Altan,
-Innervägg, Golv, Målning, Tak, Yttervägg, Isolering, Parkering) och 3/5
-Bil — resten är ärligt "Snart". Kök och Badrum är inte dimensionsbaserade
-på samma sätt (skåp, vitvaror och kakel skalar inte linjärt med en yta)
-och byggs som ett eget, fast urval istället, samma mönster som
-Apotek/Bilservice. Förråd och Trappa väntar fortfarande. Hems
-Möbler/Vitvaror/Smart Home/Förvaring behöver en helt ny domän (ingen
-befintlig butikslista passar). Resor passar inte alls i
-inköpskorgs-motorn — att boka flyg/hotell är inte samma problem som att
-optimera ett köp, och skulle kräva en egen motor, inte bara en ny katalog;
-det lämnas permanent som "Snart". Bils Tvätt/Besiktning är tjänster, inte
-produkter — de byggs som ett bokningsflöde istället för att tvingas in i
-en varukorg.
-
-### Koppla på riktig data
-
-`lib/cart-engine/index.ts` (`buildCart`) och `lib/decision-engine/index.ts`
-(`computeFulfillmentOptions`, `buildShoppingRoute`) är de enda ingångarna —
-byt ut deras interna anrop mot riktiga pris-, karta- och trafik-API:er och
-resten av appen är opåverkad, eftersom UI:t bara renderar deras typade output.
+Offert-wizarden (kund → jobb → kalkyl → skicka), CRM:et, materialbanken
+med kvittoavläsning och dynamisk prisindexering, AI Studio (uppföljnings-
+SMS, marginalanalys) och företagsinställningar är alla "kommer snart" —
+navigationen och datamodellen finns, men skrivvägarna (API-routes som
+faktiskt sparar till Postgres) är nästa fas, inte den här.

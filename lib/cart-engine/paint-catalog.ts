@@ -1,4 +1,4 @@
-import type { CatalogItem } from "@/lib/cart-engine/catalog";
+import type { MaterialItem } from "@/lib/quote-engine/material";
 
 export type PaintTier = "budget" | "premium";
 
@@ -27,11 +27,11 @@ export const PAINT_ITEM_IDS = ["farg-malning", "spackel-malning", "skydd-malning
  * (yta) plus follow-up answers in, a fully quantified materials list out.
  * Shares the "building" domain with Bygga altan, Innervägg and Golv.
  */
-export function generatePaintCatalog(opts: PaintOptions): CatalogItem[] {
+export function generatePaintCatalog(opts: PaintOptions): MaterialItem[] {
   const { paintLiters, spackelHinkar, skyddRullar } = derivePaintQuantities(opts);
   const premium = opts.tier === "premium";
 
-  const items: CatalogItem[] = [
+  const items: MaterialItem[] = [
     {
       id: "farg-malning",
       keywords: ["farg-malning"],

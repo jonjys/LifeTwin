@@ -1,4 +1,4 @@
-import type { CatalogItem } from "@/lib/cart-engine/catalog";
+import type { MaterialItem } from "@/lib/quote-engine/material";
 
 export type RoofTier = "budget" | "premium"; // budget = plåt, premium = tegel
 
@@ -26,11 +26,11 @@ export const ROOF_ITEM_IDS = ["takmaterial-tak", "underlag-tak", "spik-tak", "ha
  * Shares the "building" domain with Bygga altan, Innervägg, Golv and
  * Målning.
  */
-export function generateRoofCatalog(opts: RoofOptions): CatalogItem[] {
+export function generateRoofCatalog(opts: RoofOptions): MaterialItem[] {
   const { areaM2, underlagRullar, spikSkruvAskar } = deriveRoofQuantities(opts);
   const premium = opts.tier === "premium";
 
-  const items: CatalogItem[] = [
+  const items: MaterialItem[] = [
     {
       id: "takmaterial-tak",
       keywords: ["takmaterial-tak"],

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchCatalogItem } from "@/lib/cart-engine/catalog";
+import { matchMaterialItem } from "@/lib/quote-engine/material";
 import { estimateFloorLaborHours, generateFloorCatalog, type FloorOptions } from "@/lib/cart-engine/floor-catalog";
 
 const BASE: FloorOptions = {
@@ -56,7 +56,7 @@ describe("generateFloorCatalog", () => {
   it("every item id resolves back to itself", () => {
     const catalog = generateFloorCatalog({ ...BASE, golvvarme: true, troskel: true });
     for (const item of catalog) {
-      expect(matchCatalogItem(item.id, catalog)?.id).toBe(item.id);
+      expect(matchMaterialItem(item.id, catalog)?.id).toBe(item.id);
     }
   });
 });
