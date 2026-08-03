@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AlertTriangle, ArrowDown, ArrowUp, Package, Pencil, Plus, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AlertTriangle, ArrowDown, ArrowUp, Check, Package, Pencil, Plus, ScanLine, Trash2, X } from "lucide-react";
 import { TextField } from "@/components/profile/fields";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,21 @@ type FormState = { name: string; category: string; unit: string; priceSEK: strin
 
 const EMPTY_FORM: FormState = { name: "", category: "", unit: "st", priceSEK: "", supplier: "" };
 
+type ScannedItem = { name: string; priceSEK: number };
+
+function readFileAsBase64(file: File): Promise<{ data: string; mediaType: string }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Kunde inte läsa filen."));
+    reader.onload = () => {
+      const result = reader.result as string;
+      const [, base64] = result.split(",", 2);
+      resolve({ data: base64 ?? "", mediaType: file.type });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function toForm(m: Material): FormState {
   return { name: m.name, category: m.category, unit: m.unit, priceSEK: String(m.priceSEK), supplier: m.supplier };
 }
@@ -39,6 +54,13 @@ export default function MaterialsPage() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [scanning, setScanning] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const [scannedItems, setScannedItems] = useState<ScannedItem[] | null>(null);
+  const [applyingIndex, setApplyingIndex] = useState<number | null>(null);
+  const [appliedIndexes, setAppliedIndexes] = useState<Set<number>>(new Set());
 
   async function load() {
     setLoading(true);
@@ -122,6 +144,68 @@ export default function MaterialsPage() {
     }
   }
 
+  /** Best-effort match against the materialbank by substring, either
+   *  direction — a scanned "Gipsskiva 12mm 3-pack" should find a bank
+   *  item named "Gipsskiva" and vice versa. Not exact-match by design:
+   *  receipt wording rarely matches the bank entry word-for-word. */
+  function findMatch(scannedName: string): Material | undefined {
+    const needle = scannedName.trim().toLowerCase();
+    if (!needle) return undefined;
+    return materials.find((m) => {
+      const hay = m.name.trim().toLowerCase();
+      return hay.length > 0 && (needle.includes(hay) || hay.includes(needle));
+    });
+  }
+
+  async function scanReceipt(file: File) {
+    setScanning(true);
+    setScanError(null);
+    setScannedItems(null);
+    setAppliedIndexes(new Set());
+    try {
+      const { data, mediaType } = await readFileAsBase64(file);
+      const res = await fetch("/api/ai/scan-receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageBase64: data, mediaType }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        setScanError(result.error ?? "Något gick fel vid avläsningen.");
+        return;
+      }
+      setScannedItems(result.items ?? []);
+    } catch {
+      setScanError("Något gick fel — kontrollera anslutningen.");
+    } finally {
+      setScanning(false);
+    }
+  }
+
+  async function applyScannedItem(item: ScannedItem, index: number) {
+    setApplyingIndex(index);
+    try {
+      const match = findMatch(item.name);
+      if (match) {
+        await fetch(`/api/materials/${match.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ priceSEK: item.priceSEK }),
+        });
+      } else {
+        await fetch("/api/materials", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: item.name, category: "", unit: "st", priceSEK: item.priceSEK, supplier: "" }),
+        });
+      }
+      setAppliedIndexes((prev) => new Set(prev).add(index));
+      await load();
+    } finally {
+      setApplyingIndex(null);
+    }
+  }
+
   return (
     <main className="relative min-h-screen px-5 pb-10 pt-6 sm:px-8 sm:pt-8">
       <AmbientBackground />
@@ -133,10 +217,27 @@ export default function MaterialsPage() {
             <p className="text-sm text-ink-muted">Företagets egna priser, versionerade över tid.</p>
           </div>
           {connected && editingId === null && (
-            <Button onClick={startCreate}>
-              <Plus className="size-4" />
-              Nytt material
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={scanning}>
+                <ScanLine className="size-4" />
+                {scanning ? "Läser av…" : "Skanna kvitto"}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) scanReceipt(file);
+                  e.target.value = "";
+                }}
+              />
+              <Button onClick={startCreate}>
+                <Plus className="size-4" />
+                Nytt material
+              </Button>
+            </div>
           )}
         </div>
 
@@ -150,6 +251,71 @@ export default function MaterialsPage() {
                 <code className="rounded bg-white/5 px-1 py-0.5">npm run db:push</code> för att kunna spara material.
               </p>
             </div>
+          </Card>
+        )}
+
+        {scanError && (
+          <Card className="flex items-start gap-3 border-danger/30 bg-danger/[0.05]">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-danger" />
+            <p className="text-sm text-ink-muted">{scanError}</p>
+          </Card>
+        )}
+
+        {scannedItems !== null && (
+          <Card className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <CardTitle>Avläst från kvitto</CardTitle>
+              <button onClick={() => setScannedItems(null)} className="text-ink-muted hover:text-ink" aria-label="Stäng">
+                <X className="size-4" />
+              </button>
+            </div>
+            {scannedItems.length === 0 ? (
+              <p className="text-sm text-ink-muted">Kunde inte hitta några produktrader på bilden.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {scannedItems.map((item, index) => {
+                  const match = findMatch(item.name);
+                  const deltaPct =
+                    match && match.priceSEK > 0 ? Math.round(((item.priceSEK - match.priceSEK) / match.priceSEK) * 100) : 0;
+                  const applied = appliedIndexes.has(index);
+                  return (
+                    <div
+                      key={`${item.name}-${index}`}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-2/40 p-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-ink">{item.name}</p>
+                        {match ? (
+                          <p className="truncate text-xs text-ink-muted">
+                            {match.name}: {fmt(match.priceSEK)} → kvitto {fmt(item.priceSEK)}
+                            {deltaPct !== 0 && (
+                              <span className={deltaPct > 0 ? "text-danger" : "text-success"}> ({deltaPct > 0 ? "+" : ""}{deltaPct}%)</span>
+                            )}
+                          </p>
+                        ) : (
+                          <p className="truncate text-xs text-ink-muted">Nytt material — {fmt(item.priceSEK)}</p>
+                        )}
+                      </div>
+                      {applied ? (
+                        <span className="flex shrink-0 items-center gap-1 text-xs text-success">
+                          <Check className="size-3.5" />
+                          Klart
+                        </span>
+                      ) : (
+                        <Button
+                          size="default"
+                          variant="outline"
+                          disabled={applyingIndex === index}
+                          onClick={() => applyScannedItem(item, index)}
+                        >
+                          {match ? "Uppdatera pris" : "Lägg till"}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </Card>
         )}
 
