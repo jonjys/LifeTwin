@@ -46,11 +46,23 @@ behövs igen.
    CRUD-sidor mot Postgres: kundregister, och företagets egna
    materialpriser versionerade över tid (varje prisändring arkiverar
    det gamla priset i `MaterialPriceHistory`).
-6. **Inställningar** (`/settings`) — företagsprofil (org.nr, moms,
+6. **Kvittoavläsning** (`/materials`, "Skanna kvitto") — fota eller ladda
+   upp ett kvitto/faktura, Claude (vision) läser av produktrader, varje
+   rad matchas mot materialbanken och visas som en diff (nuvarande pris
+   → avläst pris, ±%) med ett bekräftelseklick per rad — antingen
+   "Uppdatera pris" (arkiverar automatiskt det gamla priset) eller
+   "Lägg till" för ett nytt material. Ingen automatisk massuppdatering.
+7. **Offert-PDF** (`/offers/[id]`, "Skriv ut / Spara som PDF") — en
+   riktig offertblankett (företagsbrevhuvud, kund, prisrader, prisbild)
+   via webbläsarens print-till-PDF, ingen extra PDF-motor.
+8. **Inställningar** (`/settings`) — företagsprofil (org.nr, moms,
    bankgiro, standardtimpris/påslag), som Offert-wizarden hämtar sina
    startvärden från.
-7. **AI Studio** — fortfarande ärligt "kommer snart": uppföljnings-SMS
-   och marginalanalys är inte byggda än.
+9. **AI Studio** (`/ai-studio`) — marginalanalys (vinstprocent,
+   snittpåslag, snittvärde, pipeline — riktiga Postgres-aggregeringar)
+   och en uppföljnings-SMS-generator (Claude skriver ett kort,
+   professionellt textutkast för varje offert som väntar på svar, med
+   kopiera-knapp).
 
 ## Tech
 
@@ -84,16 +96,20 @@ app/
   calculator/page.tsx      AI-Kalkylatorn — 8 projekttyper, en sida
   offers/page.tsx          Offertlista — status, totalsumma
   offers/new/page.tsx      Offert-wizarden — kund → jobb → kalkyl → spara
-  offers/[id]/page.tsx     Offertdetalj — prisbild + statusändring
+  offers/[id]/page.tsx     Offertdetalj — prisbild, statusändring, PDF-utskrift
   customers/page.tsx       Kundregister — CRUD
-  materials/page.tsx       Materialbank — CRUD + prishistorik
+  materials/page.tsx       Materialbank — CRUD, prishistorik, kvittoavläsning
   settings/page.tsx        Företagsprofil
-  ai-studio/               "Kommer snart" — inte byggd än
+  ai-studio/page.tsx       Marginalanalys + uppföljnings-SMS
   api/ai/chat/route.ts     Claude-integrationen bakom Command Bar
+  api/ai/scan-receipt/     Claude vision — läser av kvitto/faktura-bilder
+  api/ai/followup-sms/     Claude — uppföljnings-SMS-utkast
+  api/ai-studio/margin-summary/  Prisma-aggregering — vinstprocent, marginal
   api/{customers,quotes,materials,company}/  REST-routes mot Prisma
 components/
   nav/app-shell.tsx        Sidebar (desktop) + bottom nav (mobil)
   dashboard/command-bar.tsx  AI Command Bar — text + röst
+  offers/offer-print-view.tsx  Offertblanketten som visas vid utskrift
   profile/fields.tsx       Delade formulärkomponenter (chip-grupper, toggles)
   shared/                  Ambient bg, animated number, confetti, coming-soon
   ui/                      Button, Card
@@ -112,7 +128,7 @@ lib/
                             ROT/moms-konstanter
   seeded.ts                Deterministisk pseudo-slump (kalkylatorernas
                             priser är simulerade tills materialbanken
-                            faktiskt kopplas in i kalkylen)
+                            faktiskt kopplas in i kalkylen — se nedan)
 prisma/schema.prisma       Company, Customer, Quote, QuoteLineItem,
                             MaterialBankItem, MaterialPriceHistory
 ```
@@ -128,21 +144,30 @@ utan butiksdomän. Both `/calculator` och Offert-wizarden anropar samma
 `lib/quote-engine/estimate.ts`-funktioner och lägger på offert-specifik
 logik ovanpå: materialpåslag, timpris × arbetstid, moms, ROT-avdrag.
 
-### Byggt hittills (Fas 1 + 2)
+### Byggt hittills (Fas 1, 2 + delar av 3)
 
-Dashboard, Command Bar, AI-Kalkylator, Offert-wizard (kund → jobb →
-kalkyl → spara), kundregister, materialbank (CRUD + versionerad
-prishistorik) och företagsinställningar är alla riktiga skrivvägar mot
-Postgres via Prisma — inga stubbar.
+Dashboard, Command Bar, AI-Kalkylator, Offert-wizard, kundregister,
+materialbank (CRUD + versionerad prishistorik + kvittoavläsning),
+offert-PDF, företagsinställningar och AI Studio (marginalanalys +
+uppföljnings-SMS) är alla riktiga skrivvägar mot Postgres/Claude via
+Prisma — inga stubbar kvar i huvudnavigeringen.
 
 ### Medvetet inte byggt än
 
-- **AI Studio** — uppföljnings-SMS, marginalanalys.
-- **Kvittoavläsning / OCR** — materialbankens prishistorik finns och
-  versioneras redan vid manuell prisändring, men att automatiskt läsa
-  av ett kvitto och föreslå en prisuppdatering ("priset har ökat 8%
-  hos Bauhaus") är inte byggt.
-- **PDF/SMS-utskick av offerter** — offerter sparas och visas, men
-  skickas inte ut som PDF eller SMS än.
-- **Kalkylatorns priser** är fortfarande simulerade (`lib/seeded.ts`)
-  — de läser inte från materialbanken än, trots att båda nu finns.
+- **Faktisk SMS-/e-post-utskick** — AI Studio skriver ett
+  uppföljnings-SMS-utkast och offerter kan skrivas ut som PDF, men
+  inget skickas automatiskt till kunden än (ingen SMS-gateway/
+  e-posttjänst kopplad in — kräver ett tredjepartskonto, samma kategori
+  begränsning som `DATABASE_URL`/`ANTHROPIC_API_KEY`).
+- **Kalkylatorns priser läser fortfarande inte från materialbanken.**
+  Detta är medvetet, inte glömt: de flesta kalkylatorrader är ett rent
+  `antal × á-pris`, men några (t.ex. reglar i `wall-catalog.ts` och
+  `exterior-wall-catalog.ts`) beräknas som `antal × höjd × pris` — en
+  sammansatt formel där det inte finns en entydig "á-pris" att ersätta
+  med materialbankens lagrade pris utan att räkna fel på höjdberoendet.
+  Att koppla ihop det korrekt kräver att varje kalkylator delar upp
+  `qty` och `unitPriceSEK` separat (inte bara en `basePriceSEK`-summa)
+  — en genomgång av alla 8 filer som är värd att göra rätt, inte snabbt.
+- **Kvittobilder sparas inte** — varje skanning är en engångskörning;
+  ingen historik över själva bilderna, bara de pris-uppdateringar
+  användaren väljer att bekräfta.
