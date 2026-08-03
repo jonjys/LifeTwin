@@ -64,6 +64,8 @@ export const PROJECT_CATEGORIES = [
   "paint",
   "roof",
   "extwall",
+  "insulation",
+  "parking",
 ] as const;
 export type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
 
@@ -294,6 +296,9 @@ export type DecisionResult = {
   recommendationText: string;
   /** Set when real weather made walking measurably less attractive today. */
   weatherNote: string | null;
+  /** Set when a grocery order is too small to qualify for real-world
+   *  home delivery minimums, so "Hemleverans" was left out of `options`. */
+  deliveryNote: string | null;
 };
 
 /** Live conditions at the user's home, from lib/geo/weather.ts — a real
@@ -394,6 +399,20 @@ export type SmartCartState = {
     heightM: number;
     isolera: boolean;
     malas: boolean;
+    tier: "budget" | "premium";
+  } | null;
+  /** Set when currentCategory is "insulation" — the area + follow-up
+   *  answers the AI Plan was generated from. */
+  insulationOptions: {
+    areaM2: number;
+    angsparr: boolean;
+    tier: "budget" | "premium";
+  } | null;
+  /** Set when currentCategory is "parking" — the area + follow-up
+   *  answers the AI Plan was generated from. */
+  parkingOptions: {
+    areaM2: number;
+    kantsten: boolean;
     tier: "budget" | "premium";
   } | null;
 };

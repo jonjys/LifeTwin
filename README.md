@@ -46,7 +46,13 @@ beroende på vilket projekt du startar.
    på riktigt via "Använd min plats" (webbläsarens Geolocation-API +
    omvänd geokodning mot Nominatim — godkänn en gång, adressen fylls i
    automatiskt), med en live kartförhandsvisning som geokodar adressen på
-   riktigt. Transport (bil/elbil/cykel/går/…),
+   riktigt. Appen provar dessutom samma sak automatiskt en gång, tyst, redan
+   vid första besöket på `/` om ingen adress är satt (`lib/geo/auto-locate.ts`)
+   — kartan, vädret och butiksavstånden utgår alltså från din riktiga plats
+   från start istället för Stockholm-standarden, utan att du behöver hitta
+   till Profil först. Nekas eller misslyckas platsdelningen rör den ingenting
+   — ingen adress skrivs över, samma ärliga Stockholm-fallback som redan
+   fanns. Transport (bil/elbil/cykel/går/…),
    bränsle- och slitagekostnad, tidsvärde (kr/h eller "låt AI uppskatta"),
    handlings- och matpreferenser, favoritbutiker, leveranspreferenser.
    Driver Beslutsmotorn för varje projekt — sätts en gång, förfinas när
@@ -112,8 +118,13 @@ beroende på vilket projekt du startar.
      lasten är skrymmande), Hemleverans (leveransavgift), Promenera (steg
      + kalorier, bara för matkassen och apoteksvaror — små nog att bära
      hem — och väger tyngre i regn, kyla eller stark värme, enligt riktig
-     live-väderdata vid din adress). AI väljer vinnaren mot ditt eget
-     tidsvärde och säger varför i klartext.
+     live-väderdata vid din adress). Hemleverans för matkassen kräver
+     dessutom minst 400 kr i kundvagnen (`lib/decision-engine/fulfillment.ts`)
+     — ingen mataffär skickar ut en förare för en enstaka påse frukost i
+     verkligheten, så en för liten matkasse tappar Hemleverans helt istället
+     för att låtsas att den är billig, med en tydlig förklaring i motorns
+     eget kort. AI väljer vinnaren mot ditt eget tidsvärde och säger varför
+     i klartext.
    - **Live karta** — en riktig, interaktiv karta (OpenStreetMap) centrerad
      på ditt geokodade hem. Varje butik placeras i första hand på sin
      riktiga, namngivna adress (sökt live via OpenStreetMap/Overpass) —
@@ -255,10 +266,11 @@ inte en ny motor, precis som Husdjur, Elektronik, Apotek och Bilservice
 bevisade om och om igen. Innervägg (`lib/cart-engine/wall-catalog.ts`)
 går ett steg längre: den delar `"building"`-domänen med Bygga altan
 istället för att behöva egna butiker alls — ett nytt projekt kräver
-alltså inte alltid nya butiker, bara en ny katalog. Golv, Målning, Tak och
-Yttervägg (`floor-catalog.ts`, `paint-catalog.ts`, `roof-catalog.ts`,
-`exterior-wall-catalog.ts`) bevisar samma sak fyra gånger till i samma
-`"building"`-domän — sex Bygg-projekt, fem butiker, noll dubbletter.
+alltså inte alltid nya butiker, bara en ny katalog. Golv, Målning, Tak,
+Yttervägg, Isolering och Parkering (`floor-catalog.ts`, `paint-catalog.ts`,
+`roof-catalog.ts`, `exterior-wall-catalog.ts`, `insulation-catalog.ts`,
+`parking-catalog.ts`) bevisar samma sak sex gånger till i samma
+`"building"`-domän — åtta Bygg-projekt, fem butiker, noll dubbletter.
 Husdjur gick samma väg utan att lämna sin egen domän: Smådjur
 och Fisk (`SMADJUR_ITEM_IDS`/`FISK_ITEM_IDS` i `lib/cart-engine/pet-catalog.ts`)
 är bara två fler artikelgrupper i samma `generatePetCatalog`, och
@@ -392,18 +404,19 @@ Meal Planner och Bevakningens riktiga notiser är däremot båda byggda på
 riktigt, se ovan.
 
 Av kategoriträdets ~48 underkategorier (`lib/categories.ts`) är hela Mat
-(10/10), Apotek (5/5) och Husdjur (4/4) klara, plus 6/13 Bygg (Altan,
-Innervägg, Golv, Målning, Tak, Yttervägg) och 3/5 Bil — resten är ärligt
-"Snart". Kök och Badrum är inte dimensionsbaserade på samma sätt (skåp,
-vitvaror och kakel skalar inte linjärt med en yta) och byggs som ett eget,
-fast urval istället, samma mönster som Apotek/Bilservice. Parkering,
-Förråd, Trappa och Isolering väntar fortfarande. Hems Möbler/Vitvaror/
-Smart Home/Förvaring behöver en helt ny domän (ingen befintlig butikslista
-passar). Resor passar inte alls i inköpskorgs-motorn — att boka
-flyg/hotell är inte samma problem som att optimera ett köp, och skulle
-kräva en egen motor, inte bara en ny katalog; det lämnas permanent som
-"Snart". Bils Tvätt/Besiktning är tjänster, inte produkter — de byggs som
-ett bokningsflöde istället för att tvingas in i en varukorg.
+(10/10), Apotek (5/5) och Husdjur (4/4) klara, plus 8/13 Bygg (Altan,
+Innervägg, Golv, Målning, Tak, Yttervägg, Isolering, Parkering) och 3/5
+Bil — resten är ärligt "Snart". Kök och Badrum är inte dimensionsbaserade
+på samma sätt (skåp, vitvaror och kakel skalar inte linjärt med en yta)
+och byggs som ett eget, fast urval istället, samma mönster som
+Apotek/Bilservice. Förråd och Trappa väntar fortfarande. Hems
+Möbler/Vitvaror/Smart Home/Förvaring behöver en helt ny domän (ingen
+befintlig butikslista passar). Resor passar inte alls i
+inköpskorgs-motorn — att boka flyg/hotell är inte samma problem som att
+optimera ett köp, och skulle kräva en egen motor, inte bara en ny katalog;
+det lämnas permanent som "Snart". Bils Tvätt/Besiktning är tjänster, inte
+produkter — de byggs som ett bokningsflöde istället för att tvingas in i
+en varukorg.
 
 ### Koppla på riktig data
 

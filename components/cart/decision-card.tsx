@@ -172,6 +172,13 @@ export const DecisionCard = memo(function DecisionCard({
         </div>
       </div>
 
+      {decision.deliveryNote && (
+        <p className="flex items-start gap-1.5 text-xs text-ink-muted">
+          <Truck className="mt-0.5 size-3 shrink-0" />
+          {decision.deliveryNote}
+        </p>
+      )}
+
       <div className="flex flex-col gap-4 sm:flex-row">
         {decision.options.map((option) => (
           <OptionCard

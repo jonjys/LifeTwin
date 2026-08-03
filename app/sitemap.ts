@@ -16,6 +16,8 @@ const ROUTES = [
   "/projects/paint",
   "/projects/roof",
   "/projects/exterior-wall",
+  "/projects/insulation",
+  "/projects/parking",
   "/projects/pet",
   "/projects/electronics",
   "/projects/pharmacy",

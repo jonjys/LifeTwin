@@ -9,8 +9,10 @@ import { generateElectronicsCatalog } from "@/lib/cart-engine/electronics-catalo
 import { generateExteriorWallCatalog } from "@/lib/cart-engine/exterior-wall-catalog";
 import { findMatsmartDeals } from "@/lib/cart-engine/matsmart";
 import { generateFloorCatalog } from "@/lib/cart-engine/floor-catalog";
+import { generateInsulationCatalog } from "@/lib/cart-engine/insulation-catalog";
 import { generateDeckMaterialsCatalog } from "@/lib/cart-engine/materials-catalog";
 import { generatePaintCatalog } from "@/lib/cart-engine/paint-catalog";
+import { generateParkingCatalog } from "@/lib/cart-engine/parking-catalog";
 import {
   CAT_ITEM_IDS,
   DOG_ITEM_IDS,
@@ -119,7 +121,11 @@ export function useSmartCart(): UseSmartCart {
                           ? generateRoofCatalog(loaded.roofOptions)
                           : loaded.currentCategory === "extwall" && loaded.extWallOptions
                             ? generateExteriorWallCatalog(loaded.extWallOptions)
-                            : CATALOG;
+                            : loaded.currentCategory === "insulation" && loaded.insulationOptions
+                              ? generateInsulationCatalog(loaded.insulationOptions)
+                              : loaded.currentCategory === "parking" && loaded.parkingOptions
+                                ? generateParkingCatalog(loaded.parkingOptions)
+                                : CATALOG;
       setCart(buildCart(loaded.currentItems, todayKey(), loaded.usualItems, catalog));
     }
     setLoading(false);

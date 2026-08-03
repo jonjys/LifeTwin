@@ -38,11 +38,13 @@ import {
   computeFulfillmentOptions,
   type RecommendationSummary,
 } from "@/lib/decision-engine";
+import { autoDetectHomeAddress } from "@/lib/geo/auto-locate";
 import { interpretHomeQuery, type HomeIntent } from "@/lib/home-intent";
 import { EASE } from "@/lib/motion";
 import {
   ensureState,
   recordList,
+  saveProfile,
   savingsSinceInstall,
   startApotekProject,
   startAutoProject,
@@ -154,6 +156,19 @@ export default function HomePage() {
     setProfile(state.profile);
     setUsualItems(state.usualItems);
     setTotalSavedSEK(savingsSinceInstall(state));
+
+    // Never set manually yet? Try the browser's real location once, so the
+    // live map, weather, and store distances all work from day one instead
+    // of defaulting to a Stockholm placeholder — never overwrites an
+    // address the user actually chose, and fails silently (same honest
+    // Stockholm fallback as always) if location is denied or unavailable.
+    if (!state.profile.homeAddress) {
+      autoDetectHomeAddress().then((address) => {
+        if (!address) return;
+        const next = saveProfile({ ...state.profile, homeAddress: address });
+        setProfile(next.profile);
+      });
+    }
   }, []);
 
   const greeting = useMemo(() => buildGreeting(profile.name ?? ""), [profile.name]);
