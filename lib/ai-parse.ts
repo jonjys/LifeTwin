@@ -15,6 +15,7 @@ export type RawQuoteExtraction = {
   heightM: number | null;
   areaM2: number | null;
   tier: string | null;
+  workHours: number | null;
   hourlyRateSEK: number | null;
   markupPct: number | null;
   includeRot: boolean | null;
@@ -44,6 +45,11 @@ export type ExtractedQuoteDraft = {
   toggleA: boolean | null;
   toggleB: boolean | null;
   tier: "budget" | "premium" | null;
+  /** An explicitly spoken hour count (e.g. "45 timmar") — overrides the
+   *  wizard's normally engine-computed laborHours when set. Stays null for
+   *  the far more common case where hours aren't stated, so the dimension-
+   *  based estimate remains authoritative. */
+  workHoursOverride: number | null;
   hourlyRateSEK: number | null;
   markupPct: number | null;
   includeRot: boolean | null;
@@ -97,6 +103,7 @@ export function mapRawExtractionToDraft(raw: RawQuoteExtraction, fallbackJobTitl
     toggleA,
     toggleB,
     tier: raw.tier === "premium" ? "premium" : raw.tier === "budget" ? "budget" : null,
+    workHoursOverride: clamp(raw.workHours, 0.25, 500),
     hourlyRateSEK: clamp(raw.hourlyRateSEK, 0, 3000),
     markupPct: clamp(raw.markupPct, 0, 200),
     includeRot: raw.includeRot,

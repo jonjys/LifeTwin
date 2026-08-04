@@ -43,6 +43,11 @@ const EXTRACT_TOOL: Anthropic.Tool = {
         enum: ["budget", "premium", null],
         description: "\"premium\" om lyx/premiummaterial nämns, \"budget\" om budget uttryckligen nämns, annars null.",
       },
+      workHours: {
+        type: ["number", "null"],
+        description:
+          "Antal arbetstimmar — ENDAST om ett konkret timantal uttryckligen nämns i texten, t.ex. \"45 timmar\" → 45. Annars null; normalfallet är att timmarna räknas fram från måtten istället.",
+      },
       hourlyRateSEK: {
         type: ["number", "null"],
         description: "Timpris i kronor — ENDAST om ett konkret timpris uttryckligen nämns i texten.",
@@ -73,7 +78,7 @@ const SYSTEM_PROMPT = `Du är en extraheringsmotor för OffertPro. Du får en ko
 
 Regler:
 - Extrahera ENDAST det som uttryckligen nämns eller otvetydigt går att härleda ur texten (t.ex. "måla" → projectType "malning"). Sätt null för allt annat.
-- Hitta ALDRIG på mått, timpris, påslag eller andra siffror som inte står i texten — det är appens kalkylator som räknar ut pris och arbetstid, inte du.
+- Hitta ALDRIG på mått, timpris, påslag eller andra siffror som inte står i texten — det är appens kalkylator som räknar ut pris och arbetstid, inte du. Undantaget är workHours: om ett konkret timantal uttryckligen sägs (t.ex. "45 timmar") ska det extraheras rakt av — det är fortfarande inte en uppfinning, bara en transkribering av vad som redan sades.
 - Ange bara de mått som passar vald projectType: bredd/höjd för altan/innervägg/yttervägg/golv, yta för tak/målning/isolering/parkering.
 - Anropa alltid verktyget "extract_quote" — svara aldrig med vanlig text.`;
 

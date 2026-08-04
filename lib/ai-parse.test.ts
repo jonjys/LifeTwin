@@ -12,6 +12,7 @@ function raw(overrides: Partial<RawQuoteExtraction> = {}): RawQuoteExtraction {
     heightM: null,
     areaM2: null,
     tier: null,
+    workHours: null,
     hourlyRateSEK: null,
     markupPct: null,
     includeRot: null,
@@ -50,6 +51,21 @@ describe("mapRawExtractionToDraft", () => {
     expect(draft.markupPct).toBe(20);
     expect(draft.hourlyRateSEK).toBeNull();
     expect(draft.includeRot).toBeNull();
+  });
+
+  it("extracts an explicitly spoken hour count as workHoursOverride", () => {
+    const draft = mapRawExtractionToDraft(raw({ workHours: 45 }), "x");
+    expect(draft.workHoursOverride).toBe(45);
+  });
+
+  it("leaves workHoursOverride null when no hour count is spoken", () => {
+    const draft = mapRawExtractionToDraft(raw(), "x");
+    expect(draft.workHoursOverride).toBeNull();
+  });
+
+  it("clamps an implausible spoken hour count to sane bounds", () => {
+    expect(mapRawExtractionToDraft(raw({ workHours: 0 }), "x").workHoursOverride).toBe(0.25);
+    expect(mapRawExtractionToDraft(raw({ workHours: 10000 }), "x").workHoursOverride).toBe(500);
   });
 
   it("routes semantic booleans to toggleA/toggleB per projectType", () => {

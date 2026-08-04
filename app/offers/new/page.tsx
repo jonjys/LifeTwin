@@ -55,6 +55,7 @@ function NewOfferForm() {
   const [toggleA, setToggleA] = useState(true);
   const [toggleB, setToggleB] = useState(false);
   const [tier, setTier] = useState<"budget" | "premium">("budget");
+  const [laborHoursOverride, setLaborHoursOverride] = useState<number | null>(null);
   const [hourlyRateSEK, setHourlyRateSEK] = useState(650);
   const [markupPct, setMarkupPct] = useState(15);
   const [includeRot, setIncludeRot] = useState(true);
@@ -110,6 +111,7 @@ function NewOfferForm() {
       if (draft.toggleA != null) setToggleA(draft.toggleA);
       if (draft.toggleB != null) setToggleB(draft.toggleB);
       if (draft.tier) setTier(draft.tier);
+      if (draft.workHoursOverride != null) setLaborHoursOverride(draft.workHoursOverride);
       if (draft.hourlyRateSEK != null) setHourlyRateSEK(draft.hourlyRateSEK);
       if (draft.markupPct != null) setMarkupPct(draft.markupPct);
       if (draft.includeRot != null) setIncludeRot(draft.includeRot);
@@ -142,10 +144,13 @@ function NewOfferForm() {
     })();
   }, []);
 
-  const { materials: simulatedMaterials, laborHours, toggleALabel, toggleBLabel, usesArea, usesToggleB } = useMemo(
+  const { materials: simulatedMaterials, laborHours: engineLaborHours, toggleALabel, toggleBLabel, usesArea, usesToggleB } = useMemo(
     () => estimateProject({ type, widthM, heightM, areaM2, toggleA, toggleB, tier }),
     [type, widthM, heightM, areaM2, toggleA, toggleB, tier]
   );
+  // A manually-entered or voice-stated hour count wins over the dimension-based
+  // estimate; otherwise the calculator engine stays authoritative, as before.
+  const laborHours = laborHoursOverride ?? engineLaborHours;
 
   const bankPrices = useMaterialBankPrices();
   const materials = useMemo(
@@ -395,6 +400,28 @@ function NewOfferForm() {
         <motion.div {...fadeUp(0.15)}>
           <Card className="flex flex-col gap-4">
             <FieldLabel>3. Justera</FieldLabel>
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
+                  Arbetstid (h)
+                </label>
+                {laborHoursOverride != null && (
+                  <button
+                    type="button"
+                    onClick={() => setLaborHoursOverride(null)}
+                    className="text-xs text-primary underline underline-offset-2"
+                  >
+                    Auto ({engineLaborHours.toFixed(1)} h från mått)
+                  </button>
+                )}
+              </div>
+              <NumericInput
+                value={laborHours}
+                onChange={setLaborHoursOverride}
+                min={0.25}
+                step={0.5}
+              />
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
