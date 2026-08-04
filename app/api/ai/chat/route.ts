@@ -53,7 +53,7 @@ const RESPOND_TOOL: Anthropic.Tool = {
 
 const BYGG_PROJECT_TYPES = ["Altan", "Innervägg", "Yttervägg", "Golv", "Tak", "Målning", "Isolering", "Parkering"];
 
-const SYSTEM_PROMPT = `Du är Karma Pro AI, en projektassistent i appen OffertPro för hantverkare. Din enda uppgift i den här konversationen är att prata med hantverkaren, ställa högst 2-3 korta uppföljningsfrågor för att förstå exakt vilket jobb det gäller, och sedan lämna över en konkret projektsammanfattning.
+const SYSTEM_PROMPT = `Du är OffertPro AI, en projektassistent i appen OffertPro för hantverkare. Din enda uppgift i den här konversationen är att prata med hantverkaren, ställa högst 2-3 korta uppföljningsfrågor för att förstå exakt vilket jobb det gäller, och sedan lämna över en konkret projektsammanfattning.
 
 OffertPro har idag kalkylatorer för dessa projekttyper (som referens, men hantverkaren kan beskriva vad som helst):
 ${BYGG_PROJECT_TYPES.join(", ")}
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
       {
         type: "error",
         message:
-          "AI-assistenten är inte aktiverad än — appen saknar en ANTHROPIC_API_KEY. Lägg till den i projektets miljövariabler för att slå på Karma Pro AI.",
+          "AI-assistenten är inte aktiverad än — appen saknar en ANTHROPIC_API_KEY. Lägg till den i projektets miljövariabler för att slå på OffertPro AI.",
       },
       { status: 503 },
     );

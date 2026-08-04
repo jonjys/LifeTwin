@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { LandingContent } from "@/components/landing/landing-content";
 
-const TITLE = "Karma — Skapa vinnande offerter på 30 sekunder";
+const TITLE = "OffertPro — Skapa vinnande offerter på 30 sekunder";
 const DESCRIPTION =
-  "AI-driven kalkylering för svenska hantverkare. Beskriv jobbet — Karma räknar ut material, arbetstid, ROT-avdrag och pris. Inget kreditkort krävs.";
+  "AI-driven kalkylering för svenska hantverkare. Beskriv jobbet — OffertPro räknar ut material, arbetstid, ROT-avdrag och pris. Inget kreditkort krävs.";
 
 export const metadata: Metadata = {
   title: TITLE,

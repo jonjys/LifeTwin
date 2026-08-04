@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertTriangle, Database, Mic, Plus, Save } from "lucide-react";
+import { UpgradeModal } from "@/components/freemium/upgrade-modal";
 import { FieldLabel, NumericInput, SingleChipGroup, TextField, YesNoToggle } from "@/components/profile/fields";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { useFreemium } from "@/lib/use-freemium";
 import { useSpeechInput } from "@/lib/use-speech-input";
 import { computeQuoteTotals, estimateProject, PROJECT_TYPES, type ProjectType } from "@/lib/quote-engine/estimate";
 import { applyMaterialBankPricing } from "@/lib/quote-engine/materialbank-pricing";
@@ -28,17 +30,23 @@ function fmt(n: number): string {
  * The 1-3-click Offert-wizard: pick a customer, describe the jobb (text or
  * voice), let the same AI-kalkylator engine that powers /calculator quantify
  * material + arbetstid, adjust timpris/påslag/ROT, then save as a real Quote.
+ *
+ * useSearchParams() requires a Suspense boundary in the App Router, hence
+ * the wrapper default export below.
  */
-export default function NewOfferPage() {
+function NewOfferForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const freemium = useFreemium();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [connected, setConnected] = useState(true);
   const [customerId, setCustomerId] = useState<string>("");
   const [quickCustomerName, setQuickCustomerName] = useState("");
   const [addingCustomer, setAddingCustomer] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  const [jobTitle, setJobTitle] = useState("");
+  const [jobTitle, setJobTitle] = useState(() => searchParams.get("prompt") ?? "");
   const [type, setType] = useState<ProjectType>("innervagg");
   const [widthM, setWidthM] = useState(3.6);
   const [heightM, setHeightM] = useState(2.3);
@@ -124,6 +132,10 @@ export default function NewOfferPage() {
 
   async function save() {
     setError(null);
+    if (freemium.limitReached) {
+      setShowUpgradeModal(true);
+      return;
+    }
     if (!customerId) {
       setError("Välj eller lägg till en kund först.");
       return;
@@ -157,6 +169,7 @@ export default function NewOfferPage() {
         setError(data.error ?? "Något gick fel.");
         return;
       }
+      freemium.recordQuote();
       router.push(`/offers/${data.quote.id}`);
     } catch {
       setError("Något gick fel — kontrollera anslutningen.");
@@ -174,6 +187,16 @@ export default function NewOfferPage() {
           <p className="text-lg font-semibold tracking-tight sm:text-xl">Ny offert</p>
           <p className="text-sm text-ink-muted">Kund → jobb → AI räknar → justera → spara.</p>
         </motion.div>
+
+        {!freemium.isPro && (
+          <p className="text-xs text-ink-muted">
+            {freemium.quotesThisMonth} av {freemium.quotesRemaining + freemium.quotesThisMonth} gratis offerter använda
+            denna månad ·{" "}
+            <button onClick={() => setShowUpgradeModal(true)} className="text-primary underline underline-offset-2">
+              Uppgradera till Pro
+            </button>
+          </p>
+        )}
 
         {!connected && (
           <Card className="flex items-start gap-3 border-warning/30 bg-warning/[0.05]">
@@ -396,6 +419,16 @@ export default function NewOfferPage() {
           </Card>
         </motion.div>
       </div>
+
+      <UpgradeModal open={showUpgradeModal} onClose={() => setShowUpgradeModal(false)} reason="limit" />
     </main>
+  );
+}
+
+export default function NewOfferPage() {
+  return (
+    <Suspense fallback={null}>
+      <NewOfferForm />
+    </Suspense>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Loader2, Mic, Sparkles } from "lucide-react";
 import { EASE } from "@/lib/motion";
@@ -20,11 +21,14 @@ const GREETING = "Vad ska vi göra idag? Skriv eller tala in ett jobb, t.ex. \"M
 /**
  * The Raycast/Linear-style AI Command Bar — the dashboard's real entry
  * point, not a search box. Talks to /api/ai/chat, asks follow-ups, and
- * once it has enough (type="ready") surfaces a concrete projectSummary.
- * Turning that into a saved Quote is the Offert-wizard's job (next
- * phase) — this bar's job is only the conversation.
+ * once it has enough (type="ready") surfaces a concrete projectSummary
+ * with a "Skapa offert av det här" button that hands it straight to the
+ * Offert-wizard (/offers/new?prompt=...), which prefills the jobbrubrik.
+ * This bar's own job stays scoped to the conversation — the wizard still
+ * owns turning that into quantified material + pris.
  */
 export function CommandBar() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -170,9 +174,14 @@ export function CommandBar() {
               <div className="flex flex-col gap-2 rounded-xl border border-primary/25 bg-primary/[0.06] p-3">
                 <p className="text-xs font-semibold uppercase tracking-wide text-primary">Projekt klart</p>
                 <p className="text-sm text-ink">{projectSummary}</p>
-                <p className="text-xs text-ink-muted">
-                  Offert-wizarden som bygger material + pris av det här kommer i nästa fas.
-                </p>
+                <button
+                  type="button"
+                  onClick={() => router.push(`/offers/new?prompt=${encodeURIComponent(projectSummary)}`)}
+                  className="mt-1 flex items-center justify-center gap-1.5 self-start rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-all hover:brightness-110"
+                >
+                  Skapa offert av det här
+                  <ArrowRight className="size-3.5" />
+                </button>
               </div>
             )}
 
