@@ -39,6 +39,12 @@ function isActive(pathname: string, href: string): boolean {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
+  // The marketing landing page is a standalone full-bleed page (its own
+  // nav/footer) — it shouldn't sit inside the app's sidebar/bottom-nav.
+  if (pathname.startsWith("/landing")) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="flex min-h-screen">
       <nav className="fixed inset-y-0 left-0 z-40 hidden w-60 shrink-0 flex-col border-r border-border bg-surface/60 px-3 py-6 backdrop-blur-xl lg:flex print:hidden">
