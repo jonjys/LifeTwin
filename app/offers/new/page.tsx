@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { AlertTriangle, Database, Mic, Plus, Save } from "lucide-react";
+import { AlertTriangle, Database, Mic, Plus, Save, Sparkles } from "lucide-react";
+import { consumeDraftQuote } from "@/lib/ai-parse";
 import { UpgradeModal } from "@/components/freemium/upgrade-modal";
 import { FieldLabel, NumericInput, SingleChipGroup, TextField, YesNoToggle } from "@/components/profile/fields";
 import { AmbientBackground } from "@/components/shared/ambient-background";
@@ -60,6 +61,7 @@ function NewOfferForm() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [prefilledFromVoice, setPrefilledFromVoice] = useState(false);
 
   const { supported: speechSupported, listening, start: startListening } = useSpeechInput((text) => {
     setJobTitle((prev) => (prev ? `${prev} ${text}` : text));
@@ -67,29 +69,76 @@ function NewOfferForm() {
 
   useEffect(() => {
     (async () => {
+      let liveCustomers: Customer[] = [];
+      let isConnected = true;
       try {
         const res = await fetch("/api/customers");
         if (!res.ok) {
-          setConnected(false);
-          return;
+          isConnected = false;
+        } else {
+          const data = await res.json();
+          liveCustomers = data.customers ?? [];
         }
-        const data = await res.json();
-        setConnected(true);
-        setCustomers(data.customers ?? []);
       } catch {
-        setConnected(false);
+        isConnected = false;
       }
-    })();
-    (async () => {
+      setConnected(isConnected);
+      setCustomers(liveCustomers);
+
       try {
         const res = await fetch("/api/company");
-        if (!res.ok) return;
-        const data = await res.json();
-        setHourlyRateSEK(data.company.defaultHourlyRateSEK);
-        setMarkupPct(data.company.defaultMarkupPct);
+        if (res.ok) {
+          const data = await res.json();
+          setHourlyRateSEK(data.company.defaultHourlyRateSEK);
+          setMarkupPct(data.company.defaultMarkupPct);
+        }
       } catch {
         // Keep the built-in defaults (650 kr, 15%) if the company profile isn't reachable.
       }
+
+      // Only present when the CommandBar's second AI pass ran successfully
+      // (?draft=1) — the plain ?prompt= handoff already prefilled jobTitle
+      // above via useState's initializer and needs nothing further here.
+      const draft = consumeDraftQuote();
+      if (!draft) return;
+
+      setJobTitle(draft.jobTitle);
+      setType(draft.type);
+      if (draft.areaM2 != null) setAreaM2(draft.areaM2);
+      if (draft.widthM != null) setWidthM(draft.widthM);
+      if (draft.heightM != null) setHeightM(draft.heightM);
+      if (draft.toggleA != null) setToggleA(draft.toggleA);
+      if (draft.toggleB != null) setToggleB(draft.toggleB);
+      if (draft.tier) setTier(draft.tier);
+      if (draft.hourlyRateSEK != null) setHourlyRateSEK(draft.hourlyRateSEK);
+      if (draft.markupPct != null) setMarkupPct(draft.markupPct);
+      if (draft.includeRot != null) setIncludeRot(draft.includeRot);
+
+      if (draft.customerName) {
+        const existing = liveCustomers.find(
+          (c) => c.name.trim().toLowerCase() === draft.customerName!.trim().toLowerCase()
+        );
+        if (existing) {
+          setCustomerId(existing.id);
+        } else if (isConnected) {
+          try {
+            const res = await fetch("/api/customers", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: draft.customerName, address: draft.customerAddress ?? "" }),
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setCustomers((prev) => [data.customer, ...prev]);
+              setCustomerId(data.customer.id);
+            }
+          } catch {
+            // Auto-create failed — the customer card below still lets the user pick/add manually.
+          }
+        }
+      }
+
+      setPrefilledFromVoice(true);
     })();
   }, []);
 
@@ -204,6 +253,15 @@ function NewOfferForm() {
             <p className="text-sm text-ink-muted">
               Databasen är inte ansluten — lägg till <code className="rounded bg-white/5 px-1 py-0.5">DATABASE_URL</code>{" "}
               för att kunna spara offerter.
+            </p>
+          </Card>
+        )}
+
+        {prefilledFromVoice && (
+          <Card className="flex items-start gap-3 border-primary/30 bg-primary/[0.05]">
+            <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+            <p className="text-sm text-ink-secondary">
+              Ifyllt automatiskt från din röstbeskrivning — kontrollera fälten nedan och spara.
             </p>
           </Card>
         )}
