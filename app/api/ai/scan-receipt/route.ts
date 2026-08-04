@@ -35,7 +35,7 @@ const EXTRACT_TOOL: Anthropic.Tool = {
   },
 };
 
-const SYSTEM_PROMPT = `Du är Karma Pro AI och läser av ett svenskt byggvaru- eller materialkvitto/faktura från en bild. Extrahera varje produktrad (namn + pris i kr) — hoppa över rader för delsumma, moms, kortbetalning, kvittonummer osv.
+const SYSTEM_PROMPT = `Du är OffertPro AI och läser av ett svenskt byggvaru- eller materialkvitto/faktura från en bild. Extrahera varje produktrad (namn + pris i kr) — hoppa över rader för delsumma, moms, kortbetalning, kvittonummer osv.
 
 Hitta ALDRIG på rader som inte syns på bilden. Om bilden inte är ett kvitto/faktura, eller om texten är för otydlig för att läsa, returnera en tom lista.
 

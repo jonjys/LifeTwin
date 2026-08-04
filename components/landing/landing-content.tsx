@@ -33,7 +33,7 @@ function TopNav() {
         <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
           <Sparkles className="size-4" />
         </div>
-        <span className="text-sm font-semibold tracking-tight text-white">Karma</span>
+        <span className="text-sm font-semibold tracking-tight text-white">OffertPro</span>
       </div>
       <Link
         href="/"
@@ -69,7 +69,7 @@ function Hero() {
       </motion.h1>
 
       <motion.p {...fadeUp(0.16)} className="mt-6 max-w-2xl text-balance text-lg text-slate-400">
-        Beskriv jobbet — text eller röst — och Karma räknar ut material, arbetstid, ROT-avdrag och pris. Spara
+        Beskriv jobbet — text eller röst — och OffertPro räknar ut material, arbetstid, ROT-avdrag och pris. Spara
         timmarna du annars lägger på offerter i bilen efter jobbet, med alla materialpriser, kunder och offerter
         samlade på ett ställe.
       </motion.p>
@@ -79,11 +79,11 @@ function Hero() {
           href="/"
           className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-amber-500 px-8 text-base font-semibold text-slate-950 shadow-[0_0_40px_-8px_rgba(245,158,11,0.5)] transition-all hover:brightness-110 active:scale-[0.98]"
         >
-          Testa Karma gratis
+          Testa OffertPro gratis
           <ArrowRight className="size-4" />
         </Link>
         <a
-          href="mailto:hej@offertpro.se?subject=Boka%20demo%20av%20Karma"
+          href="mailto:hej@offertpro.se?subject=Boka%20demo%20av%20OffertPro"
           className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-8 text-base font-semibold text-white transition-colors hover:border-white/25 hover:bg-white/10"
         >
           Boka demo
@@ -116,7 +116,7 @@ function AppPreview() {
           <span className="size-2.5 rounded-full bg-white/15" />
           <span className="size-2.5 rounded-full bg-white/15" />
           <span className="size-2.5 rounded-full bg-white/15" />
-          <span className="ml-3 text-xs text-slate-500">karma.app/dashboard</span>
+          <span className="ml-3 text-xs text-slate-500">offertpro.se/dashboard</span>
         </div>
         <div className="flex flex-col gap-4 p-6 sm:p-8">
           <div>
@@ -166,7 +166,7 @@ function QuoteBanner() {
         <Quote className="mb-6 size-8 text-amber-500/60" />
         {/* Placeholder testimonial — swap for a real customer quote once one exists. */}
         <p className="text-balance text-xl font-medium leading-relaxed text-white sm:text-2xl">
-          &quot;Karma känns som en digital arbetsledare i fickan — den räknar ut offerten medan jag fortfarande
+          &quot;OffertPro känns som en digital arbetsledare i fickan — den räknar ut offerten medan jag fortfarande
           står uppe på taket.&quot;
         </p>
         <p className="mt-6 text-sm text-slate-500">Hantverkare, bygg &amp; renovering</p>
@@ -178,7 +178,7 @@ function QuoteBanner() {
 function Footer() {
   return (
     <footer className="relative z-10 px-6 py-10 text-center text-xs text-slate-600 sm:px-8">
-      © {new Date().getFullYear()} Karma — AI Operating System för hantverkare.
+      © {new Date().getFullYear()} OffertPro — AI Operating System för hantverkare.
     </footer>
   );
 }

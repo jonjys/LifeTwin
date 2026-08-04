@@ -23,6 +23,8 @@ type OfferPrintViewProps = {
   rotDeductionSEK: number;
   includeRot: boolean;
   totalAfterRotSEK: number;
+  /** Free-tier offerter bär en diskret vattenstämpel — se lib/freemium.ts. */
+  isPro: boolean;
 };
 
 function fmt(n: number): string {
@@ -119,6 +121,12 @@ export function OfferPrintView(props: OfferPrintViewProps) {
 
       {company.bankgiro && (
         <p style={{ fontSize: "11px", color: "#555", marginTop: "32px" }}>Betalas till bankgiro {company.bankgiro}.</p>
+      )}
+
+      {!props.isPro && (
+        <p style={{ fontSize: "10px", color: "#999", marginTop: "24px", textAlign: "center" }}>
+          Skapad med OffertPro – Sveriges snabbaste offertkalkylator
+        </p>
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 import { AlertTriangle, Briefcase, Percent, Send, TrendingUp, Wallet } from "lucide-react";
 import { CommandBar } from "@/components/dashboard/command-bar";
+import { FreemiumBadge } from "@/components/dashboard/freemium-badge";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Card, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
@@ -82,9 +83,17 @@ export default async function DashboardPage() {
       <AmbientBackground />
 
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
-        <div>
-          <p className="text-lg font-semibold tracking-tight sm:text-xl">Dashboard</p>
-          <p className="text-sm text-ink-muted">Din digitala tvilling — allt om företaget, på ett ställe.</p>
+        <div className="flex flex-col gap-3">
+          <FreemiumBadge />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+              Skapa vinnande offerter på 30 sekunder — med röst
+            </h1>
+            <p className="mt-1.5 text-sm text-ink-muted sm:text-base">
+              Sluta lägga kvällarna på kalkylark. Samla materialpriser, kunder och offerter i ett blixtsnabbt
+              arbetsflöde direkt i mobilen.
+            </p>
+          </div>
         </div>
 
         <CommandBar />

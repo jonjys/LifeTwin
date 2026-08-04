@@ -7,6 +7,7 @@ import { AmbientBackground } from "@/components/shared/ambient-background";
 import { OfferPrintView } from "@/components/offers/offer-print-view";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { useFreemium } from "@/lib/use-freemium";
 import { DEFAULT_COMPANY_PROFILE, ROT_DEDUCTION_RATE, VAT_RATE, type CompanyProfile } from "@/lib/types";
 
 type QuoteStatus = "DRAFT" | "SENT" | "ACCEPTED" | "DECLINED";
@@ -39,6 +40,7 @@ function fmt(n: number): string {
 export default function OfferDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const freemium = useFreemium();
   const [quote, setQuote] = useState<QuoteDetail | null>(null);
   const [company, setCompany] = useState<CompanyProfile>(DEFAULT_COMPANY_PROFILE);
   const [notFound, setNotFound] = useState(false);
@@ -253,6 +255,7 @@ export default function OfferDetailPage() {
         rotDeductionSEK={rotDeductionSEK}
         includeRot={quote.includeRot}
         totalAfterRotSEK={totalAfterRotSEK}
+        isPro={freemium.isPro}
       />
     </main>
   );
