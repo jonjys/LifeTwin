@@ -120,6 +120,41 @@ export function TextField({
   );
 }
 
+/**
+ * The full-width numeric input style used by the calculator and
+ * Offert-wizard (measurements, timpris, påslag) — distinct from
+ * NumberField's compact suffix layout. Selects its current value on
+ * focus so tapping a "0" field lets the first keystroke overwrite it
+ * instead of requiring a manual delete first, on desktop and mobile.
+ */
+export function NumericInput({
+  value,
+  onChange,
+  min,
+  step,
+  placeholder,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  step?: number;
+  placeholder?: string;
+}) {
+  return (
+    <input
+      type="number"
+      inputMode="decimal"
+      min={min}
+      step={step}
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(Number(e.target.value) || 0)}
+      onFocus={(e) => e.target.select()}
+      className="w-full rounded-xl border border-border bg-surface-2/50 px-4 py-3 text-base text-ink focus:border-primary/40 focus:outline-none"
+    />
+  );
+}
+
 export function NumberField({
   value,
   onChange,
@@ -135,9 +170,11 @@ export function NumberField({
     <div className="flex items-center gap-2 rounded-xl border border-border bg-surface-2/50 px-4 py-3">
       <input
         type="number"
+        inputMode="decimal"
         min={min}
         value={value}
         onChange={(e) => onChange(Number(e.target.value) || 0)}
+        onFocus={(e) => e.target.select()}
         className="w-full bg-transparent text-sm text-ink focus:outline-none"
       />
       {suffix && <span className="shrink-0 text-xs text-ink-muted">{suffix}</span>}
