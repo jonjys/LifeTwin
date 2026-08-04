@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Loader2, Mic, Sparkles } from "lucide-react";
+import { saveDraftQuote, type ExtractedQuoteDraft } from "@/lib/ai-parse";
 import { EASE } from "@/lib/motion";
 import { useSpeechInput } from "@/lib/use-speech-input";
 import { cn } from "@/lib/utils";
@@ -21,11 +22,14 @@ const GREETING = "Vad ska vi göra idag? Skriv eller tala in ett jobb, t.ex. \"M
 /**
  * The Raycast/Linear-style AI Command Bar — the dashboard's real entry
  * point, not a search box. Talks to /api/ai/chat, asks follow-ups, and
- * once it has enough (type="ready") surfaces a concrete projectSummary
- * with a "Skapa offert av det här" button that hands it straight to the
- * Offert-wizard (/offers/new?prompt=...), which prefills the jobbrubrik.
- * This bar's own job stays scoped to the conversation — the wizard still
- * owns turning that into quantified material + pris.
+ * once it has enough (type="ready") surfaces a concrete projectSummary.
+ * The "Skapa offert av det här" button then runs a second AI pass
+ * (/api/ai/extract-quote) that pulls structured fields — kund, mått,
+ * timpris, påslag, ROT — out of that summary, hands the result to the
+ * Offert-wizard via sessionStorage, and lands on a fully prefilled
+ * förhandsgranskning. If that second pass fails, it falls back to the
+ * old plain-text handoff (/offers/new?prompt=...) so the flow still
+ * works, just with only the jobbrubrik prefilled.
  */
 export function CommandBar() {
   const router = useRouter();
@@ -35,6 +39,7 @@ export function CommandBar() {
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [projectSummary, setProjectSummary] = useState<string | null>(null);
+  const [creatingOffer, setCreatingOffer] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const speech = useSpeechInput((transcript) => {
@@ -86,6 +91,29 @@ export function CommandBar() {
     setQuickReplies([]);
     setProjectSummary(null);
     setOpen(false);
+  };
+
+  const createOffer = async () => {
+    if (!projectSummary || creatingOffer) return;
+    setCreatingOffer(true);
+    try {
+      const res = await fetch("/api/ai/extract-quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript: projectSummary }),
+      });
+      if (res.ok) {
+        const data: { draft: ExtractedQuoteDraft } = await res.json();
+        saveDraftQuote(data.draft);
+        router.push("/offers/new?draft=1");
+        return;
+      }
+    } catch {
+      // Network hiccup — fall through to the plain-text handoff below.
+    } finally {
+      setCreatingOffer(false);
+    }
+    router.push(`/offers/new?prompt=${encodeURIComponent(projectSummary)}`);
   };
 
   return (
@@ -176,11 +204,21 @@ export function CommandBar() {
                 <p className="text-sm text-ink">{projectSummary}</p>
                 <button
                   type="button"
-                  onClick={() => router.push(`/offers/new?prompt=${encodeURIComponent(projectSummary)}`)}
-                  className="mt-1 flex items-center justify-center gap-1.5 self-start rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-all hover:brightness-110"
+                  onClick={createOffer}
+                  disabled={creatingOffer}
+                  className="mt-1 flex items-center justify-center gap-1.5 self-start rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-60"
                 >
-                  Skapa offert av det här
-                  <ArrowRight className="size-3.5" />
+                  {creatingOffer ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" />
+                      Fyller i offerten…
+                    </>
+                  ) : (
+                    <>
+                      Skapa offert av det här
+                      <ArrowRight className="size-3.5" />
+                    </>
+                  )}
                 </button>
               </div>
             )}
