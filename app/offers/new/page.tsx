@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertTriangle, Database, Mic, Plus, Save } from "lucide-react";
-import { FieldLabel, SingleChipGroup, TextField, YesNoToggle } from "@/components/profile/fields";
+import { FieldLabel, NumericInput, SingleChipGroup, TextField, YesNoToggle } from "@/components/profile/fields";
 import { AmbientBackground } from "@/components/shared/ambient-background";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -272,13 +272,7 @@ export default function NewOfferPage() {
                 <label className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
                   Yta (m²)
                 </label>
-                <input
-                  type="number"
-                  min={1}
-                  value={areaM2}
-                  onChange={(e) => setAreaM2(Number(e.target.value) || 0)}
-                  className="w-full rounded-xl border border-border bg-surface-2/50 px-4 py-3 text-base text-ink focus:border-primary/40 focus:outline-none"
-                />
+                <NumericInput value={areaM2} onChange={setAreaM2} min={1} />
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
@@ -286,27 +280,13 @@ export default function NewOfferPage() {
                   <label className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
                     Bredd (m)
                   </label>
-                  <input
-                    type="number"
-                    min={0.5}
-                    step={0.1}
-                    value={widthM}
-                    onChange={(e) => setWidthM(Number(e.target.value) || 0)}
-                    className="w-full rounded-xl border border-border bg-surface-2/50 px-4 py-3 text-base text-ink focus:border-primary/40 focus:outline-none"
-                  />
+                  <NumericInput value={widthM} onChange={setWidthM} min={0.5} step={0.1} />
                 </div>
                 <div>
                   <label className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
                     {type === "golv" ? "Längd (m)" : "Höjd (m)"}
                   </label>
-                  <input
-                    type="number"
-                    min={0.5}
-                    step={0.1}
-                    value={heightM}
-                    onChange={(e) => setHeightM(Number(e.target.value) || 0)}
-                    className="w-full rounded-xl border border-border bg-surface-2/50 px-4 py-3 text-base text-ink focus:border-primary/40 focus:outline-none"
-                  />
+                  <NumericInput value={heightM} onChange={setHeightM} min={0.5} step={0.1} />
                 </div>
               </div>
             )}
@@ -339,25 +319,13 @@ export default function NewOfferPage() {
                 <label className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
                   Timpris (kr)
                 </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={hourlyRateSEK}
-                  onChange={(e) => setHourlyRateSEK(Number(e.target.value) || 0)}
-                  className="w-full rounded-xl border border-border bg-surface-2/50 px-4 py-3 text-base text-ink focus:border-primary/40 focus:outline-none"
-                />
+                <NumericInput value={hourlyRateSEK} onChange={setHourlyRateSEK} min={0} />
               </div>
               <div>
                 <label className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.14em] text-ink-muted">
                   Materialpåslag (%)
                 </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={markupPct}
-                  onChange={(e) => setMarkupPct(Number(e.target.value) || 0)}
-                  className="w-full rounded-xl border border-border bg-surface-2/50 px-4 py-3 text-base text-ink focus:border-primary/40 focus:outline-none"
-                />
+                <NumericInput value={markupPct} onChange={setMarkupPct} min={0} />
               </div>
             </div>
             <div>
