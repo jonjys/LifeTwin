@@ -2,6 +2,7 @@
 
 import { Check, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 import { FREE_TIER_QUOTE_LIMIT } from "@/lib/freemium";
 
 const FREE_FEATURES = [
@@ -93,6 +94,7 @@ export function UpgradeModal({
           <a
             href="mailto:hej@offertpro.se?subject=Uppgradera%20till%20OffertPro%20Pro"
             className="flex-1"
+            onClick={() => track("upgrade_cta_clicked", { reason })}
           >
             <Button size="lg" className="w-full">
               <Sparkles className="size-4" />

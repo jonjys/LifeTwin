@@ -3,16 +3,26 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { AppShell } from "@/components/nav/app-shell";
 import { ServiceWorkerRegister } from "@/components/shared/service-worker-register";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
-const TITLE = "OffertPro — AI Operating System för hantverkare";
+const TITLE = "OffertPro | Sveriges snabbaste AI-offertkalkylator för hantverkare";
 const DESCRIPTION =
-  "OffertPro bryter ner jobbet du beskriver till en färdig offert — material, arbetstid, ROT-avdrag och marginal på 30 sekunder, med rösten eller texten. Inte ett formulär. En medgrundare.";
+  "Skapa professionella offerter med röst på 30 sekunder i skåpbilen. Automatisk material- & ROT-beräkning. Testa gratis!";
+const KEYWORDS = [
+  "offertkalkylator",
+  "hantverkare",
+  "offertmall snickare",
+  "ROT-avdrag",
+  "röstinmatning offert",
+  "VVS kalkylator",
+];
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: DESCRIPTION,
+  keywords: KEYWORDS,
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -22,6 +32,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "OffertPro",
     type: "website",
     locale: "sv_SE",
   },

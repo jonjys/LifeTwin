@@ -7,6 +7,7 @@ import { AmbientBackground } from "@/components/shared/ambient-background";
 import { OfferPrintView } from "@/components/offers/offer-print-view";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { track } from "@/lib/analytics";
 import { useFreemium } from "@/lib/use-freemium";
 import { DEFAULT_COMPANY_PROFILE, ROT_DEDUCTION_RATE, VAT_RATE, type CompanyProfile } from "@/lib/types";
 
@@ -98,6 +99,14 @@ export default function OfferDetailPage() {
     router.push("/offers");
   }
 
+  // window.print() has no "the user actually saved a PDF" callback — the
+  // browser print dialog can be cancelled — so this tracks export intent
+  // (the click), not a confirmed export.
+  function exportPdf() {
+    track("pdf_export_clicked");
+    window.print();
+  }
+
   if (notFound) {
     return (
       <main className="relative flex min-h-screen items-center justify-center px-5 py-16 sm:px-8">
@@ -155,7 +164,7 @@ export default function OfferDetailPage() {
             </div>
             <div className="flex gap-1">
               <button
-                onClick={() => window.print()}
+                onClick={exportPdf}
                 className="flex size-9 items-center justify-center rounded-xl text-ink-muted hover:bg-white/5 hover:text-ink"
                 aria-label="Skriv ut / Spara som PDF"
               >
@@ -233,7 +242,7 @@ export default function OfferDetailPage() {
           </div>
         </Card>
 
-        <Button variant="outline" onClick={() => window.print()}>
+        <Button variant="outline" onClick={exportPdf}>
           <Printer className="size-4" />
           Skriv ut / Spara som PDF
         </Button>

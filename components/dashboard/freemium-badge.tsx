@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { UpgradeModal } from "@/components/freemium/upgrade-modal";
+import { track } from "@/lib/analytics";
 import { useFreemium } from "@/lib/use-freemium";
 
 /** Small, unobtrusive usage pill for the Dashboard hero — the app/page.tsx
@@ -24,7 +25,10 @@ export function FreemiumBadge() {
   return (
     <>
       <button
-        onClick={() => setShowModal(true)}
+        onClick={() => {
+          track("upgrade_modal_opened", { source: "dashboard_badge" });
+          setShowModal(true);
+        }}
         className="flex items-center gap-1.5 self-start rounded-full border border-border bg-surface-2/50 px-3 py-1 text-xs font-medium text-ink-secondary transition-colors hover:border-primary/40 hover:text-ink"
       >
         {freemium.quotesThisMonth} av {freemium.quotesThisMonth + freemium.quotesRemaining} gratis offerter använda

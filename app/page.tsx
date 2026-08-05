@@ -2,6 +2,7 @@ import { AlertTriangle, Briefcase, Percent, Send, TrendingUp, Wallet } from "luc
 import { CommandBar } from "@/components/dashboard/command-bar";
 import { FreemiumBadge } from "@/components/dashboard/freemium-badge";
 import { AmbientBackground } from "@/components/shared/ambient-background";
+import { ShareButton } from "@/components/shared/share-button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
 import { QuoteStatus } from "@prisma/client";
@@ -84,7 +85,10 @@ export default async function DashboardPage() {
 
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
         <div className="flex flex-col gap-3">
-          <FreemiumBadge />
+          <div className="flex items-center justify-between gap-2">
+            <FreemiumBadge />
+            <ShareButton className="lg:hidden" />
+          </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               Skapa vinnande offerter på 30 sekunder — med röst

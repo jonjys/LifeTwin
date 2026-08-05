@@ -14,6 +14,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { UpgradeModal } from "@/components/freemium/upgrade-modal";
+import { ShareButton } from "@/components/shared/share-button";
+import { track } from "@/lib/analytics";
 import { useFreemium } from "@/lib/use-freemium";
 import { cn } from "@/lib/utils";
 
@@ -80,21 +82,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </div>
 
-        {!freemium.isPro && (
-          <button
-            onClick={() => setShowUpgradeModal(true)}
-            className="flex flex-col gap-1 rounded-xl border border-primary/30 bg-primary/[0.06] px-3 py-2.5 text-left transition-colors hover:bg-primary/[0.1]"
-          >
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-              <Sparkles className="size-3.5" />
-              Uppgradera till Pro
-            </span>
-            <span className="text-[11px] text-ink-muted">
-              {freemium.quotesThisMonth} av {freemium.quotesThisMonth + freemium.quotesRemaining} gratis offerter
-              använda
-            </span>
-          </button>
-        )}
+        <div className="flex flex-col gap-2">
+          <ShareButton />
+
+          {!freemium.isPro && (
+            <button
+              onClick={() => {
+                track("upgrade_modal_opened", { source: "sidebar" });
+                setShowUpgradeModal(true);
+              }}
+              className="flex flex-col gap-1 rounded-xl border border-primary/30 bg-primary/[0.06] px-3 py-2.5 text-left transition-colors hover:bg-primary/[0.1]"
+            >
+              <span className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                <Sparkles className="size-3.5" />
+                Uppgradera till Pro
+              </span>
+              <span className="text-[11px] text-ink-muted">
+                {freemium.quotesThisMonth} av {freemium.quotesThisMonth + freemium.quotesRemaining} gratis offerter
+                använda
+              </span>
+            </button>
+          )}
+        </div>
       </nav>
 
       <div className="flex min-h-screen w-full flex-1 flex-col pb-20 lg:pb-0 lg:pl-60">{children}</div>
