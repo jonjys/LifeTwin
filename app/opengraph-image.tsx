@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const runtime = "edge";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "OffertPro — AI Operating System för hantverkare";
+export const alt = "OffertPro — Sveriges snabbaste AI-offertkalkylator för hantverkare";
 
 /** The link-preview image for every share of the app — generated from
  *  the same brand mark and headline used on the landing page. */
@@ -51,8 +51,8 @@ export default async function OpengraphImage() {
             textAlign: "center",
           }}
         >
-          <span>AI Operating System&nbsp;</span>
-          <span style={{ color: "#00E8FF" }}>för hantverkare.</span>
+          <span>Skapa offerter med röst&nbsp;</span>
+          <span style={{ color: "#00E8FF" }}>på 30 sekunder.</span>
         </div>
       </div>
     ),

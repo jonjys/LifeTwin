@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Loader2, Mic, Sparkles } from "lucide-react";
 import { saveDraftQuote, type ExtractedQuoteDraft } from "@/lib/ai-parse";
+import { track } from "@/lib/analytics";
 import { EASE } from "@/lib/motion";
 import { useSpeechInput } from "@/lib/use-speech-input";
 import { cn } from "@/lib/utils";
@@ -133,7 +134,14 @@ export function CommandBar() {
         {speech.supported && (
           <button
             type="button"
-            onClick={() => (speech.listening ? speech.stop() : speech.start())}
+            onClick={() => {
+              if (speech.listening) {
+                speech.stop();
+              } else {
+                track("mic_click", { source: "dashboard" });
+                speech.start();
+              }
+            }}
             aria-label="Tala in"
             className={cn(
               "flex size-8 shrink-0 items-center justify-center rounded-full transition-colors",

@@ -5,6 +5,8 @@
  * background, black text), not a screenshot of the dark-theme app.
  */
 
+import { SHARE_TAGLINE, SITE_URL } from "@/lib/site";
+
 type PrintLineItem = { id: string; description: string; qty: number; unitLabel: string; unitPriceSEK: number };
 
 type OfferPrintViewProps = {
@@ -125,7 +127,10 @@ export function OfferPrintView(props: OfferPrintViewProps) {
 
       {!props.isPro && (
         <p style={{ fontSize: "10px", color: "#999", marginTop: "24px", textAlign: "center" }}>
-          Skapad med OffertPro – Sveriges snabbaste offertkalkylator
+          Skapad med{" "}
+          <a href={SITE_URL} style={{ color: "#666", textDecoration: "underline" }}>
+            OffertPro.se — {SHARE_TAGLINE}
+          </a>
         </p>
       )}
     </div>

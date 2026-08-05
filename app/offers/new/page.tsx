@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertTriangle, Database, Mic, Plus, Save, Sparkles } from "lucide-react";
 import { consumeDraftQuote } from "@/lib/ai-parse";
+import { track } from "@/lib/analytics";
 import { UpgradeModal } from "@/components/freemium/upgrade-modal";
 import { FieldLabel, NumericInput, SingleChipGroup, TextField, YesNoToggle } from "@/components/profile/fields";
 import { AmbientBackground } from "@/components/shared/ambient-background";
@@ -187,6 +188,7 @@ function NewOfferForm() {
   async function save() {
     setError(null);
     if (freemium.limitReached) {
+      track("upgrade_modal_opened", { source: "wizard_quota_blocked" });
       setShowUpgradeModal(true);
       return;
     }
@@ -246,7 +248,13 @@ function NewOfferForm() {
           <p className="text-xs text-ink-muted">
             {freemium.quotesThisMonth} av {freemium.quotesRemaining + freemium.quotesThisMonth} gratis offerter använda
             denna månad ·{" "}
-            <button onClick={() => setShowUpgradeModal(true)} className="text-primary underline underline-offset-2">
+            <button
+              onClick={() => {
+                track("upgrade_modal_opened", { source: "wizard_inline" });
+                setShowUpgradeModal(true);
+              }}
+              className="text-primary underline underline-offset-2"
+            >
               Uppgradera till Pro
             </button>
           </p>
@@ -319,7 +327,10 @@ function NewOfferForm() {
                 {speechSupported && (
                   <button
                     type="button"
-                    onClick={startListening}
+                    onClick={() => {
+                      track("mic_click", { source: "wizard" });
+                      startListening();
+                    }}
                     aria-label="Tala in jobbet"
                     className={`flex size-11 shrink-0 items-center justify-center rounded-xl border transition-colors ${
                       listening
